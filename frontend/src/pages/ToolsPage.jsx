@@ -65,8 +65,8 @@ const ToolsPage = () => {
     >
       <SectionHeader
         eyebrow="Tools and assets"
-        title="Internal tools and reusable asset systems that make production feel sharper."
-        description="This section mirrors the project showcase structure, but with lighter cards tailored to tooling, pipeline assets, and reusable studio resources."
+        title="Studio tooling built for faster delivery."
+        description="Reusable systems, production assets, and internal tools that improve build speed and quality."
         actions={
           isAdmin ? (
             <button
@@ -80,7 +80,7 @@ const ToolsPage = () => {
         }
       />
 
-      {error ? <p className="text-sm text-white/45">{error}</p> : null}
+      {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {tools.map((tool, index) => (

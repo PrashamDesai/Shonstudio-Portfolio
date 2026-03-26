@@ -52,7 +52,7 @@ const RouteFallback = () => (
           Bringing the next section in without dropping the layout.
         </p>
       </div>
-      <div className="h-2 w-24 overflow-hidden rounded-full bg-white/10">
+      <div className="h-2 w-24 overflow-hidden rounded-full bg-white/[0.06]">
         <div className="h-full w-14 animate-pulse rounded-full bg-theme-gradient" />
       </div>
     </div>
@@ -83,9 +83,9 @@ const App = () => {
           <AdminProvider>
             <SmoothScrollProvider>
               <LayoutGroup id="portfolio-layout">
-                <div className="relative min-h-screen overflow-x-hidden bg-base text-white">
+                <div className="relative min-h-screen overflow-x-hidden bg-base text-textPrimary">
                   <div className="pointer-events-none fixed inset-0 -z-10 bg-mesh-radial opacity-80" />
-                  <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgba(0,212,255,0.14),transparent_34%),radial-gradient(circle_at_78%_0%,rgba(122,92,255,0.12),transparent_26%)]" />
+                  <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgb(var(--accent-primary-rgb)_/_0.16),transparent_34%),radial-gradient(circle_at_78%_0%,rgb(var(--accent-secondary-rgb)_/_0.14),transparent_26%)]" />
                   <ScrollProgressBar />
                   <CustomCursor />
                   <Navbar />

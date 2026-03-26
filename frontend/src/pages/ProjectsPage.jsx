@@ -65,8 +65,8 @@ const ProjectsPage = () => {
     >
       <SectionHeader
         eyebrow="Projects"
-        title="A showcase grid designed to feel cinematic, structured, and client-ready."
-        description="Hover-led motion, slug-based detail routes, and premium layout framing make each project feel like a polished portfolio case study."
+        title="Case studies with visual impact and production clarity."
+        description="A visual-first grid of shipped work, with focused copy and confident interaction."
         actions={
           isAdmin ? (
             <button
@@ -80,7 +80,7 @@ const ProjectsPage = () => {
         }
       />
 
-      {error ? <p className="text-sm text-white/45">{error}</p> : null}
+      {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
 
       <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
         {projects.map((project, index) => (

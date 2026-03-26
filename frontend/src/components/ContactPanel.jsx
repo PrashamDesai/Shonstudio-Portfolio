@@ -29,11 +29,10 @@ const ContactPanel = () => {
       <div className="space-y-2">
         <p className="eyebrow">Contact</p>
         <h3 className="font-display text-3xl font-semibold tracking-tight text-white">
-          Let&apos;s shape the right version of the idea.
+          Start with a focused brief.
         </h3>
         <p className="text-sm leading-7 text-muted">
-          Send a concise brief and the form will open your default mail client with everything
-          prefilled.
+          Fill this in once and we will open your email app with a polished draft.
         </p>
       </div>
 
@@ -88,10 +87,10 @@ const ContactPanel = () => {
 
       <button
         type="submit"
-        className="theme-button-primary inline-flex rounded-full px-5 py-3 text-sm font-semibold"
+        className="theme-button-primary inline-flex rounded-full px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em]"
         data-cursor="link"
       >
-        Open drafted email
+        Send project brief
       </button>
     </form>
   );

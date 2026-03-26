@@ -87,14 +87,13 @@ const TeamPage = () => {
             <div className="space-y-5">
               <p className="eyebrow">Team</p>
               <h1 className="max-w-5xl font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-                A structured team showcase that separates development and design while keeping the
-                presentation premium and readable.
+                Cross-functional specialists behind every release.
               </h1>
               <p className="max-w-3xl text-sm leading-7 text-muted sm:text-base">
-                This page is designed to feel like a studio-grade roster rather than a basic staff
-                list, with rich cards, category grouping, and deep profile modals for each member.
+                Explore the team by discipline, then open profile modals for skills, stack, and
+                project contributions.
               </p>
-              {error ? <p className="text-sm text-white/45">{error}</p> : null}
+              {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
             </div>
 
             {isAdmin ? (
@@ -117,7 +116,7 @@ const TeamPage = () => {
                 className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${
                   activeFilter === option.value
                     ? "border-accent/28 bg-theme-gradient text-white shadow-glow"
-                    : "border-white/10 bg-white/[0.04] text-muted hover:border-accent/18 hover:text-white"
+                    : "border-white/10 bg-white/[0.04] text-muted hover:border-accent/20 hover:text-textPrimary"
                 }`}
               >
                 {option.label}
@@ -131,7 +130,7 @@ const TeamPage = () => {
         <TeamSection
           eyebrow="Developing"
           title="Developing team"
-          description="Engineers and technical builders focused on gameplay, systems, immersive interaction, and content infrastructure."
+          description="Engineers focused on gameplay systems, architecture, and immersive interaction."
           members={groupedMembers.developer}
           onOpenMember={setSelectedMember}
           isAdmin={isAdmin}
@@ -144,7 +143,7 @@ const TeamPage = () => {
         <TeamSection
           eyebrow="Designing"
           title="Designing team"
-          description="Visual and product designers shaping interface clarity, atmospheric direction, environments, and launch-facing presentation."
+          description="Designers shaping product experience, interface quality, and visual direction."
           members={groupedMembers.designer}
           onOpenMember={setSelectedMember}
           isAdmin={isAdmin}

@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
 import studioLogo from "./assets/ShonStudio Logo.svg";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 import "./index.css";
 
 const faviconLink =
@@ -22,7 +23,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         v7_relativeSplatPath: true,
       }}
     >
-      <App />
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );

@@ -71,11 +71,15 @@ const CustomCursor = () => {
           width: hovered ? 84 : 28,
           height: hovered ? 84 : 28,
           opacity: visible ? 1 : 0,
-          borderColor: hovered ? "rgba(0,212,255,0.6)" : "rgba(255,255,255,0.16)",
-          backgroundColor: hovered ? "rgba(10,10,15,0.88)" : "rgba(26,26,38,0.42)",
+          borderColor: hovered
+            ? "rgb(var(--accent-primary-rgb) / 0.58)"
+            : "rgb(var(--border-rgb) / 0.72)",
+          backgroundColor: hovered
+            ? "rgb(var(--surface-rgb) / 0.92)"
+            : "rgb(var(--surface-rgb) / 0.56)",
           boxShadow: hovered
-            ? "0 0 20px rgba(0,212,255,0.24), 0 0 24px rgba(122,92,255,0.18)"
-            : "0 0 10px rgba(0,212,255,0.08)",
+            ? "0 0 20px rgb(var(--accent-primary-rgb) / 0.24), 0 0 24px rgb(var(--accent-secondary-rgb) / 0.18)"
+            : "0 0 10px rgb(var(--accent-primary-rgb) / 0.12)",
         }}
         transition={{ type: "spring", stiffness: 190, damping: 24 }}
         style={{

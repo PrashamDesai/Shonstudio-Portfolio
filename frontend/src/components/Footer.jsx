@@ -1,14 +1,16 @@
 import { Link } from "react-router-dom";
 
 const Footer = () => (
-  <footer className="border-t border-white/8 bg-surface/70 backdrop-blur-xl">
+  <footer className="border-t border-white/8 bg-surface/75 backdrop-blur-xl">
     <div className="mx-auto grid max-w-[1600px] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-10">
       <div className="space-y-4">
         <p className="text-xs uppercase tracking-[0.28em] text-mutedDeep">ShonStudio</p>
         <h2 className="max-w-xl font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-          Premium-feeling game production for studios, founders, and learning teams.
+          Minimal design. Strong execution. Immersive digital products.
         </h2>
-        
+        <p className="max-w-lg text-sm text-muted">
+          We build game and XR experiences with a product mindset and studio-level craft.
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -39,10 +41,10 @@ const Footer = () => (
             href="mailto:hello@shonstudio.dev"
             className="theme-link block text-sm text-muted"
           >
-            shonstudio@indianic.com
+            hello@shonstudio.dev
           </a>
           <p className="text-sm text-muted">+91 9876543210</p>
-          <p className="text-sm text-muted">Building interactive experiences that go beyond play.</p>
+          <p className="text-sm text-muted">From ideas to immersion.</p>
         </div>
       </div>
     </div>

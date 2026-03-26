@@ -65,8 +65,8 @@ const ServicesPage = () => {
     >
       <SectionHeader
         eyebrow="Services"
-        title="Eight service lanes covering game production, teaching support, and launch-facing polish."
-        description="The service system is built as reusable cards so it can expand easily as the studio adds more offerings through the API."
+        title="Services designed for product momentum."
+        description="Clear service lanes across game development, immersive systems, and launch-ready design."
         actions={
           isAdmin ? (
             <button
@@ -80,7 +80,7 @@ const ServicesPage = () => {
         }
       />
 
-      {error ? <p className="text-sm text-white/45">{error}</p> : null}
+      {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {services.map((service, index) => (

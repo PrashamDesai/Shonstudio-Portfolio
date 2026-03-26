@@ -5,7 +5,7 @@ const AdminToolbar = () => {
 
   return (
     <div className="fixed bottom-5 right-5 z-[150]">
-      <div className="flex items-center gap-3 rounded-full border border-white/10 bg-base/85 px-4 py-3 shadow-soft backdrop-blur-xl">
+      <div className="flex items-center gap-3 rounded-full border border-white/10 bg-surface/85 px-4 py-3 shadow-soft backdrop-blur-xl">
         <span className={`text-[11px] uppercase tracking-[0.28em] ${isAdmin ? "text-accentSoft" : "text-muted"}`}>
           {isAdmin ? "Admin mode" : "Admin locked"}
         </span>
@@ -13,7 +13,7 @@ const AdminToolbar = () => {
           <button
             type="button"
             onClick={logout}
-            className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-xs font-semibold text-white transition hover:border-accent/20 hover:bg-white/[0.08]"
+            className="theme-button-secondary rounded-full px-4 py-2 text-xs font-semibold"
           >
             Log out
           </button>

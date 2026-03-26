@@ -65,8 +65,8 @@ const TrainingPage = () => {
     >
       <SectionHeader
         eyebrow="Training"
-        title="Structured modules designed for students, teams, and learning-led interactive programs."
-        description="Each module previews scope, duration, and outcomes so the page feels useful to training clients instead of reading like a vague service list."
+        title="Practical training modules for teams and students."
+        description="Structured learning blocks with clear duration, scope, and measurable outcomes."
         actions={
           isAdmin ? (
             <button
@@ -80,7 +80,7 @@ const TrainingPage = () => {
         }
       />
 
-      {error ? <p className="text-sm text-white/45">{error}</p> : null}
+      {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
 
       <div className="grid gap-6 md:grid-cols-2">
         {courses.map((module, index) => (

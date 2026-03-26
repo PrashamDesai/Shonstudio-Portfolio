@@ -52,8 +52,8 @@ const CompanyPage = () => {
           <div className="space-y-6">
             <SectionHeader
               eyebrow="About the studio"
-              title="A company profile built to explain where ShonStudio comes from, what it values, and how the studio has matured."
-              description="This page turns the studio story into a premium narrative surface, giving clients and collaborators a clearer view of the team behind the work."
+              title="The story behind ShonStudio."
+              description="A concise narrative of our network, studio focus, and growth milestones."
               fullWidth
               actions={
                 isAdmin ? (
@@ -67,7 +67,7 @@ const CompanyPage = () => {
                 ) : null
               }
             />
-            {error ? <p className="text-sm text-white/45">{error}</p> : null}
+            {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
           </div>
 
           <motion.div
@@ -97,8 +97,8 @@ const CompanyPage = () => {
       >
         <SectionHeader
           eyebrow="Studio overview"
-          title="The parent network and the game-focused division are presented as one aligned system."
-          description="Instead of a flat about page, this section makes the relationship between the broader company and the ShonStudio division feel deliberate and premium."
+          title="A connected company structure."
+          description="The parent organization and ShonStudio division move as one aligned system."
           fullWidth
         />
 
@@ -133,8 +133,8 @@ const CompanyPage = () => {
       >
         <SectionHeader
           eyebrow="Timeline"
-          title="A milestone sequence that gives the company story momentum instead of reading like a static paragraph."
-          description="Each moment is designed to feel like a signal of growth, with glow accents and layered presentation that fit the existing portfolio language."
+          title="Milestones that shaped the studio."
+          description="A clean timeline of major steps in our evolution."
           fullWidth
         />
 
@@ -155,7 +155,7 @@ const CompanyPage = () => {
           <div className="space-y-5">
             <p className="eyebrow">Vision / values</p>
             <h2 className="font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl lg:text-5xl">
-              The studio values are presented as cinematic guidance, not generic corporate filler.
+              Values that drive how we ship.
             </h2>
             <p className="text-sm leading-7 text-muted sm:text-base">{company.vision}</p>
           </div>

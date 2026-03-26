@@ -14,11 +14,10 @@ const NotFoundPage = () => (
     <div className="section-shell panel-glow max-w-2xl space-y-5 p-10 text-center">
       <p className="eyebrow mx-auto">404</p>
       <h1 className="font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-        The page drifted out of range.
+        This page is off the route map.
       </h1>
       <p className="text-sm leading-7 text-muted">
-        This route is not part of the current portfolio build. Head back to the homepage or jump
-        into the showcase pages.
+        The URL is invalid or outdated. Jump back to the homepage and continue browsing.
       </p>
       <Link
         to="/"

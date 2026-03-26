@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 
 import studioLogo from "../assets/ShonStudio Logo.svg";
+import { useTheme } from "../context/ThemeContext.jsx";
 import MagneticButton from "./MagneticButton";
 
 const primaryNavItems = [
@@ -74,6 +75,46 @@ const menuItemVariants = {
     },
   },
 };
+
+const ThemeToggleButton = ({ theme, onToggle, className = "" }) => (
+  <motion.button
+    type="button"
+    whileTap={{ scale: 0.95 }}
+    onClick={onToggle}
+    className={`theme-toggle ${className}`}
+    data-cursor="link"
+    data-cursor-label={theme === "dark" ? "Light mode" : "Dark mode"}
+    aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+  >
+    <motion.svg
+      viewBox="0 0 24 24"
+      className="h-5 w-5"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      animate={{ rotate: theme === "dark" ? 0 : 28, scale: theme === "dark" ? 1 : 0.92 }}
+      transition={{ duration: 0.25 }}
+    >
+      {theme === "dark" ? (
+        <>
+          <path d="M12 3v2.4" />
+          <path d="M12 18.6V21" />
+          <path d="M3 12h2.4" />
+          <path d="M18.6 12H21" />
+          <path d="m5.64 5.64 1.7 1.7" />
+          <path d="m16.66 16.66 1.7 1.7" />
+          <path d="m16.66 7.34 1.7-1.7" />
+          <path d="m5.64 18.36 1.7-1.7" />
+          <circle cx="12" cy="12" r="3.6" />
+        </>
+      ) : (
+        <path d="M21 12.7A9 9 0 1 1 11.3 3a7 7 0 0 0 9.7 9.7Z" />
+      )}
+    </motion.svg>
+  </motion.button>
+);
 
 const DesktopNavItem = ({ item }) => (
   <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.25 }}>
@@ -158,7 +199,7 @@ const DesktopAboutItem = ({ isActive, isOpen, onOpen, onClose }) => (
           transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
           className="absolute left-0 top-full z-20 w-[18rem] pt-3"
         >
-          <div className="overflow-hidden rounded-[1.6rem] border border-white/10 bg-[linear-gradient(180deg,rgba(17,17,26,0.96),rgba(10,10,15,0.94))] shadow-[0_24px_70px_rgba(1,4,14,0.46)] backdrop-blur-2xl">
+          <div className="overflow-hidden rounded-[1.6rem] border border-white/10 bg-surface/95 shadow-soft backdrop-blur-2xl">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,212,255,0.14),transparent_28%),radial-gradient(circle_at_80%_10%,rgba(122,92,255,0.14),transparent_26%)]" />
             <div className="relative z-10 p-2">
               {aboutItems.map((item) => (
@@ -259,6 +300,7 @@ const MobileAboutGroup = ({ isActive, isOpen, onToggle }) => (
 );
 
 const Navbar = () => {
+  const { theme, toggleTheme } = useTheme();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
@@ -313,11 +355,15 @@ const Navbar = () => {
             y: isScrolled ? -2 : 0,
             paddingTop: isScrolled ? 10 : 14,
             paddingBottom: isScrolled ? 10 : 14,
-            backgroundColor: isScrolled ? "rgba(17,17,26,0.84)" : "rgba(17,17,26,0.42)",
-            borderColor: isScrolled ? "rgba(0,212,255,0.18)" : "rgba(255,255,255,0.08)",
+            backgroundColor: isScrolled
+              ? "rgb(var(--surface-rgb) / 0.9)"
+              : "rgb(var(--surface-rgb) / 0.62)",
+            borderColor: isScrolled
+              ? "rgb(var(--accent-primary-rgb) / 0.26)"
+              : "rgb(var(--border-rgb) / 0.74)",
             boxShadow: isScrolled
-              ? "0 24px 70px rgba(1,4,14,0.44), 0 0 0 1px rgba(0,212,255,0.08), 0 0 38px rgba(122,92,255,0.18)"
-              : "0 18px 42px rgba(1,4,14,0.28), 0 0 24px rgba(0,212,255,0.10)",
+              ? "0 24px 70px rgb(6 12 27 / 0.36), 0 0 0 1px rgb(var(--accent-primary-rgb) / 0.12), 0 0 34px rgb(var(--accent-secondary-rgb) / 0.2)"
+              : "0 18px 42px rgb(6 12 27 / 0.24), 0 0 20px rgb(var(--accent-primary-rgb) / 0.12)",
           }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           className="pointer-events-auto relative overflow-visible rounded-[1.9rem] border px-4 sm:px-6"
@@ -382,6 +428,8 @@ const Navbar = () => {
             </nav>
 
             <div className="flex items-center gap-3">
+              <ThemeToggleButton theme={theme} onToggle={toggleTheme} className="hidden xl:grid" />
+
               <MagneticButton
                 to="/counselling"
                 cursorLabel="Open"
@@ -389,6 +437,8 @@ const Navbar = () => {
               >
                 Start project
               </MagneticButton>
+
+              <ThemeToggleButton theme={theme} onToggle={toggleTheme} className="xl:hidden" />
 
               <motion.button
                 type="button"
@@ -435,7 +485,7 @@ const Navbar = () => {
                 initial="hidden"
                 animate="show"
                 exit="exit"
-                className="relative flex h-full w-full flex-col overflow-hidden rounded-[2.5rem] border border-accent/16 bg-[linear-gradient(180deg,rgba(17,17,26,0.98),rgba(10,10,15,0.96))] p-6 shadow-[0_0_48px_rgba(0,212,255,0.14)]"
+                className="relative flex h-full w-full flex-col overflow-hidden rounded-[2.5rem] border border-accent/16 bg-surface/95 p-6 shadow-soft"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,212,255,0.14),transparent_28%),radial-gradient(circle_at_80%_0%,rgba(122,92,255,0.14),transparent_24%),radial-gradient(circle_at_50%_100%,rgba(0,255,198,0.08),transparent_22%)]" />
                 <div className="relative z-10 flex items-center justify-between">
@@ -447,15 +497,18 @@ const Navbar = () => {
                       System panel
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsOpen(false)}
-                    className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-elevated/80 text-white"
-                    data-cursor="link"
-                    data-cursor-label="Close"
-                  >
-                    <span className="text-lg leading-none">+</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <ThemeToggleButton theme={theme} onToggle={toggleTheme} />
+                    <button
+                      type="button"
+                      onClick={() => setIsOpen(false)}
+                      className="grid h-11 w-11 place-items-center rounded-2xl border border-white/10 bg-elevated/80 text-white"
+                      data-cursor="link"
+                      data-cursor-label="Close"
+                    >
+                      <span className="text-lg leading-none">+</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="relative z-10 mt-12 flex flex-1 flex-col justify-between">

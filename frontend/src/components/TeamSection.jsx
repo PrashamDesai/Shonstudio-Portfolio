@@ -26,7 +26,7 @@ const TeamSection = ({
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-muted sm:text-base">{description}</p>
           </div>
-          <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs uppercase tracking-[0.28em] text-mutedDeep">
+          <div className="theme-chip rounded-full px-4 py-2 text-xs uppercase tracking-[0.28em] text-mutedDeep">
             {members.length} members
           </div>
         </div>

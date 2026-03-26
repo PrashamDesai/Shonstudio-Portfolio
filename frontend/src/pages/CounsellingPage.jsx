@@ -16,8 +16,8 @@ const CounsellingPage = () => (
   >
     <SectionHeader
       eyebrow="Client counselling"
-      title="A guided path for founders and teams who need clarity before full production begins."
-      description="This page frames the studio as a practical creative partner: someone who can sharpen the idea, align scope, and reduce expensive uncertainty before a build accelerates."
+      title="Strategic sessions before full production begins."
+      description="We refine idea, scope, and priorities so your team moves forward with less risk."
     />
 
     <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
@@ -40,17 +40,16 @@ const CounsellingPage = () => (
           <p className="eyebrow">How it helps</p>
           <div className="mt-6 space-y-5 text-sm leading-7 text-muted">
             <p>
-              The counselling layer is for teams who know they want to build something but need a
-              sharper point of view before spending deeper production time and budget.
+              Counselling is built for teams that need a sharper direction before committing major
+              production budget.
             </p>
             <p>
-              That can mean validating whether the idea is appropriately scoped, defining the
-              minimal first version, or identifying where design, tech, UX, and testing risks will
-              likely show up.
+              We validate scope, identify early UX and technical risks, and shape a practical first
+              release path.
             </p>
             <p>
-              The result is a clearer roadmap, better expectations, and a project story that
-              clients or internal stakeholders can get behind faster.
+              The outcome is a roadmap your stakeholders can approve quickly and your team can
+              execute with confidence.
             </p>
           </div>
         </div>

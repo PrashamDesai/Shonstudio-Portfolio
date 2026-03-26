@@ -196,7 +196,7 @@ const HomePage = () => {
             Crafting Worlds Beyond Screens
           </h1>
           <p className="max-w-2xl text-base text-muted sm:text-lg">
-            Game development, XR experiences, and immersive systems.
+            Game development, XR products, and immersive systems for ambitious teams.
           </p>
           <div>
             <MagneticButton
@@ -226,7 +226,7 @@ const HomePage = () => {
             <div>
               <p className="eyebrow">What We Do</p>
               <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                Focused capabilities, built for impact.
+                Focused capabilities for real outcomes.
               </h2>
             </div>
             {isAdmin ? (
@@ -296,7 +296,7 @@ const HomePage = () => {
             <div>
               <p className="eyebrow">Featured Projects</p>
               <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                Designed to be seen. Built to ship.
+                Visual-first projects, built to launch.
               </h2>
             </div>
             {isAdmin ? (
@@ -377,7 +377,7 @@ const HomePage = () => {
         />
         <div className="relative z-10 mx-auto max-w-3xl space-y-6">
           <h2 className="font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-            Let&apos;s build something unreal.
+            Let&apos;s build your next digital flagship.
           </h2>
           <div>
             <MagneticButton
