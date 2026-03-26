@@ -20,17 +20,13 @@ const ProjectCard = ({ project, compact = false, adminActions = null }) => (
       data-cursor-label="Open"
       aria-label={`Open ${project.title}`}
     >
-      <motion.div
-        layoutId={`project-media-${project.slug}`}
-        className="relative overflow-hidden border-b border-white/8"
-      >
+      <div className="relative overflow-hidden border-b border-white/8">
         <motion.img
-          src={resolveMedia(project.coverImage)}
+          src={resolveMedia(project.cardImage || project.coverImage)}
           alt={project.title}
-          loading="lazy"
-          className={`w-full object-cover ${
-            compact ? "h-40" : "h-44 sm:h-48"
-          }`}
+          fetchpriority="high"
+          decoding="async"
+          className="aspect-video w-full object-cover"
           whileHover={{ scale: 1.08, y: -6 }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         />
@@ -38,7 +34,7 @@ const ProjectCard = ({ project, compact = false, adminActions = null }) => (
           className="absolute inset-0 bg-gradient-to-t from-base via-base/20 to-transparent opacity-0 transition duration-500 group-hover:opacity-100"
           aria-hidden="true"
         />
-      </motion.div>
+      </div>
 
       <div className="flex flex-1 flex-col space-y-5 p-6">
         <div className="space-y-3">
@@ -48,7 +44,9 @@ const ProjectCard = ({ project, compact = false, adminActions = null }) => (
           <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
             {project.title}
           </h3>
-          <p className="text-sm leading-7 text-muted">{project.tagline}</p>
+          <p className="text-sm leading-7 text-muted">
+            {project.shortDescription || project.tagline}
+          </p>
         </div>
 
         <div className="mt-auto flex flex-wrap gap-2">

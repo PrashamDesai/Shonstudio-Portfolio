@@ -1,11 +1,10 @@
 import { AnimatePresence, domAnimation, LazyMotion, LayoutGroup, MotionConfig } from "framer-motion";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import AdminToolbar from "./components/AdminToolbar";
 import CustomCursor from "./components/CustomCursor";
 import Footer from "./components/Footer";
-import LoadingScreen from "./components/LoadingScreen";
 import Navbar from "./components/Navbar";
 import ScrollProgressBar from "./components/ScrollProgressBar";
 import { AdminProvider } from "./context/AdminContext.jsx";
@@ -22,24 +21,32 @@ const CounsellingPage = lazyWithPreload(() => import("./pages/CounsellingPage"))
 const CompanyPage = lazyWithPreload(() => import("./pages/Company"));
 const HomePage = lazyWithPreload(() => import("./pages/HomePage"));
 const NotFoundPage = lazyWithPreload(() => import("./pages/NotFoundPage"));
-const ProjectDetailPage = lazyWithPreload(() => import("./pages/ProjectDetailPage"));
+const ProjectPage = lazyWithPreload(() => import("./pages/ProjectPage"));
 const ProjectsPage = lazyWithPreload(() => import("./pages/ProjectsPage"));
+const ServicePage = lazyWithPreload(() => import("./pages/ServicePage"));
 const ServicesPage = lazyWithPreload(() => import("./pages/ServicesPage"));
 const TeamPage = lazyWithPreload(() => import("./pages/Team"));
-const TrainingPage = lazyWithPreload(() => import("./pages/TeachingPage"));
+const TrainingCatalogPage = lazyWithPreload(() => import("./pages/TeachingPage"));
+const TrainingPage = lazyWithPreload(() => import("./pages/TrainingPage"));
+const ToolCategoryPage = lazyWithPreload(() => import("./pages/ToolCategoryPage"));
+const ToolPage = lazyWithPreload(() => import("./pages/ToolPage"));
 const ToolsPage = lazyWithPreload(() => import("./pages/ToolsPage"));
 
 const preloadRouteComponents = () =>
   Promise.allSettled([
     HomePage.preload(),
     ProjectsPage.preload(),
-    ProjectDetailPage.preload(),
+    ProjectPage.preload(),
     ServicesPage.preload(),
+    ServicePage.preload(),
     CounsellingPage.preload(),
     CompanyPage.preload(),
     TeamPage.preload(),
+    TrainingCatalogPage.preload(),
     TrainingPage.preload(),
     ToolsPage.preload(),
+    ToolCategoryPage.preload(),
+    ToolPage.preload(),
     NotFoundPage.preload(),
   ]);
 
@@ -61,60 +68,54 @@ const RouteFallback = () => (
 
 const App = () => {
   const location = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
 
   useScrollToTop();
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setIsLoading(false);
-    }, 1800);
     void preloadRouteComponents();
-
-    return () => window.clearTimeout(timeout);
   }, []);
 
   return (
     <MotionConfig reducedMotion="user">
       <LazyMotion features={domAnimation}>
-        <AnimatePresence>{isLoading ? <LoadingScreen key="loader" /> : null}</AnimatePresence>
-
-        {!isLoading ? (
-          <AdminProvider>
-            <SmoothScrollProvider>
-              <LayoutGroup id="portfolio-layout">
-                <div className="relative min-h-screen overflow-x-hidden bg-base text-textPrimary">
-                  <div className="pointer-events-none fixed inset-0 -z-10 bg-mesh-radial opacity-80" />
-                  <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgb(var(--accent-primary-rgb)_/_0.16),transparent_34%),radial-gradient(circle_at_78%_0%,rgb(var(--accent-secondary-rgb)_/_0.14),transparent_26%)]" />
-                  <ScrollProgressBar />
-                  <CustomCursor />
-                  <Navbar />
-                  <AdminToolbar />
-                  <div className="mx-auto min-h-screen max-w-[1600px] px-4 pt-6 sm:px-6 sm:pt-8 lg:px-10 lg:pt-10">
-                    <Suspense fallback={<RouteFallback />}>
-                      <AnimatePresence mode="wait">
-                        <Routes location={location} key={location.pathname}>
-                          <Route path="/" element={<HomePage />} />
-                          <Route path="/projects" element={<ProjectsPage />} />
-                          <Route path="/projects/:slug" element={<ProjectDetailPage />} />
-                          <Route path="/services" element={<ServicesPage />} />
-                          <Route path="/counselling" element={<CounsellingPage />} />
-                          <Route path="/company" element={<CompanyPage />} />
-                          <Route path="/team" element={<TeamPage />} />
-                          <Route path="/training" element={<TrainingPage />} />
-                          <Route path="/teaching" element={<Navigate to="/training" replace />} />
-                          <Route path="/tools" element={<ToolsPage />} />
-                          <Route path="*" element={<NotFoundPage />} />
-                        </Routes>
-                      </AnimatePresence>
-                    </Suspense>
-                  </div>
-                  <Footer />
+        <AdminProvider>
+          <SmoothScrollProvider>
+            <LayoutGroup id="portfolio-layout">
+              <div className="relative min-h-screen overflow-x-hidden bg-base text-textPrimary">
+                <div className="pointer-events-none fixed inset-0 -z-10 bg-mesh-radial opacity-80" />
+                <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgb(var(--accent-primary-rgb)_/_0.16),transparent_34%),radial-gradient(circle_at_78%_0%,rgb(var(--accent-secondary-rgb)_/_0.14),transparent_26%)]" />
+                <ScrollProgressBar />
+                <CustomCursor />
+                <Navbar />
+                <AdminToolbar />
+                <div className="mx-auto min-h-screen max-w-[1600px] px-4 pt-6 sm:px-6 sm:pt-8 lg:px-10 lg:pt-10">
+                  <Suspense fallback={<RouteFallback />}>
+                    <AnimatePresence initial={false} mode="sync">
+                      <Routes location={location} key={location.pathname}>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/projects" element={<ProjectsPage />} />
+                        <Route path="/projects/:slug" element={<ProjectPage />} />
+                        <Route path="/services" element={<ServicesPage />} />
+                        <Route path="/services/:slug" element={<ServicePage />} />
+                        <Route path="/counselling" element={<CounsellingPage />} />
+                        <Route path="/company" element={<CompanyPage />} />
+                        <Route path="/team" element={<TeamPage />} />
+                        <Route path="/training" element={<TrainingCatalogPage />} />
+                        <Route path="/training/:slug" element={<TrainingPage />} />
+                        <Route path="/teaching" element={<Navigate to="/training" replace />} />
+                        <Route path="/tools" element={<ToolsPage />} />
+                        <Route path="/tools/category/:categorySlug" element={<ToolCategoryPage />} />
+                        <Route path="/tools/:slug" element={<ToolPage />} />
+                        <Route path="*" element={<NotFoundPage />} />
+                      </Routes>
+                    </AnimatePresence>
+                  </Suspense>
                 </div>
-              </LayoutGroup>
-            </SmoothScrollProvider>
-          </AdminProvider>
-        ) : null}
+                <Footer />
+              </div>
+            </LayoutGroup>
+          </SmoothScrollProvider>
+        </AdminProvider>
       </LazyMotion>
     </MotionConfig>
   );

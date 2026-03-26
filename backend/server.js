@@ -45,7 +45,6 @@ app.use("/api/tools", toolRoutes);
 app.use("/api/company", companyRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/api/training", courseRoutes);
-app.use("/api/courses", courseRoutes);
 app.use("/api/vision-scenes", visionSceneRoutes);
 
 app.use(notFound);

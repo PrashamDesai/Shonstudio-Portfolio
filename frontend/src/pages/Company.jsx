@@ -2,8 +2,8 @@ import { motion, useReducedMotion, useTransform } from "framer-motion";
 import { useState } from "react";
 
 import { pageTransition } from "../animations/variants";
-import { companyProfile } from "../assets/mockData";
 import AdminCompanyModal from "../components/AdminCompanyModal";
+import { PageDataEmpty, PageDataLoader } from "../components/ApiState";
 import SceneSection from "../components/SceneSection";
 import SectionHeader from "../components/SectionHeader";
 import Timeline from "../components/Timeline";
@@ -13,7 +13,7 @@ import { useSmoothScroll } from "../hooks/useSmoothScroll.jsx";
 
 const CompanyPage = () => {
   const [isEditingCompany, setIsEditingCompany] = useState(false);
-  const { data: company, error } = useSingleton("/company", companyProfile);
+  const { data: company, loading, error } = useSingleton("/company");
   const { isAdmin, requestAdmin, signalRefresh } = useAdmin();
   const { smoothY } = useSmoothScroll();
   const prefersReducedMotion = useReducedMotion();
@@ -32,6 +32,22 @@ const CompanyPage = () => {
 
     signalRefresh();
   };
+
+  if (loading && !company) {
+    return (
+      <main className="space-y-8 pb-24">
+        <PageDataLoader label="Loading company profile..." />
+      </main>
+    );
+  }
+
+  if (!company) {
+    return (
+      <main className="space-y-8 pb-24">
+        <PageDataEmpty message={error || "No company profile available."} />
+      </main>
+    );
+  }
 
   return (
     <motion.main
@@ -138,7 +154,7 @@ const CompanyPage = () => {
           fullWidth
         />
 
-        <Timeline items={company.timeline} />
+        <Timeline items={company.timeline || []} />
       </SceneSection>
 
       <SceneSection

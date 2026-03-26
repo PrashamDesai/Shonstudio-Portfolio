@@ -3,8 +3,9 @@ import { useState } from "react";
 
 import { serviceTemplate } from "../admin/entityTemplates";
 import { pageTransition } from "../animations/variants";
-import { services as serviceFallback } from "../assets/mockData";
 import AdminEntityModal from "../components/AdminEntityModal";
+import AdminQuickEditModal from "../components/AdminQuickEditModal";
+import { CardGridSkeleton, PageDataEmpty } from "../components/ApiState";
 import Reveal from "../components/Reveal";
 import SectionHeader from "../components/SectionHeader";
 import ServiceCard from "../components/ServiceCard";
@@ -13,7 +14,8 @@ import { useCollection } from "../hooks/usePageData";
 
 const ServicesPage = () => {
   const [editingService, setEditingService] = useState(null);
-  const { data: services, error } = useCollection("/services", serviceFallback);
+  const [quickEditingService, setQuickEditingService] = useState(null);
+  const { data: services, loading, error, isEmpty } = useCollection("/services");
   const { isAdmin, requestAdmin, signalRefresh } = useAdmin();
 
   const saveService = async (payload) => {
@@ -35,6 +37,21 @@ const ServicesPage = () => {
       });
     }
 
+    signalRefresh();
+  };
+
+  const saveQuickService = async (payload) => {
+    if (!quickEditingService?._id) {
+      return;
+    }
+
+    await requestAdmin(`/services/${quickEditingService._id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
     signalRefresh();
   };
 
@@ -82,23 +99,29 @@ const ServicesPage = () => {
 
       {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {services.map((service, index) => (
-          <Reveal key={service.slug} delay={index * 0.04}>
-            <ServiceCard
-              service={service}
-              adminActions={
-                isAdmin && service._id
-                  ? {
-                      onEdit: () => setEditingService(service),
-                      onDelete: () => deleteService(service),
-                    }
-                  : null
-              }
-            />
-          </Reveal>
-        ))}
-      </div>
+      {loading && !services.length ? (
+        <CardGridSkeleton count={6} className="h-80" />
+      ) : isEmpty ? (
+        <PageDataEmpty message="No services available." />
+      ) : (
+        <div className="flex w-full flex-col gap-6">
+          {services.map((service, index) => (
+            <Reveal key={service.slug || service._id || index} delay={index * 0.04}>
+              <ServiceCard
+                service={service}
+                adminActions={
+                  isAdmin && service._id
+                    ? {
+                        onEdit: () => setQuickEditingService(service),
+                        onDelete: () => deleteService(service),
+                      }
+                    : null
+                }
+              />
+            </Reveal>
+          ))}
+        </div>
+      )}
 
       {editingService ? (
         <AdminEntityModal
@@ -107,6 +130,21 @@ const ServicesPage = () => {
           initialValue={editingService}
           onClose={() => setEditingService(null)}
           onSave={saveService}
+          onDelete={editingService._id ? () => deleteService(editingService) : undefined}
+        />
+      ) : null}
+
+      {quickEditingService ? (
+        <AdminQuickEditModal
+          title="Quick edit service card"
+          entityType="services"
+          initialValue={quickEditingService}
+          onClose={() => setQuickEditingService(null)}
+          onSave={saveQuickService}
+          onDelete={async () => {
+            await deleteService(quickEditingService);
+            setQuickEditingService(null);
+          }}
         />
       ) : null}
     </motion.main>

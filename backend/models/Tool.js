@@ -19,9 +19,27 @@ const toolSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    category: {
+      type: String,
+      default: "Dev Tools",
+      trim: true
+    },
     image: {
       type: String,
       default: ""
+    },
+    cardImage: {
+      type: String,
+      default: ""
+    },
+    carouselImage: {
+      type: String,
+      default: ""
+    },
+    shortDescription: {
+      type: String,
+      default: "",
+      trim: true
     },
     description: {
       type: String,
@@ -32,6 +50,32 @@ const toolSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true
+    },
+    features: {
+      type: [String],
+      default: []
+    },
+    techUsed: {
+      type: [String],
+      default: []
+    },
+    price: {
+      type: String,
+      default: ""
+    },
+    ctaLabel: {
+      type: String,
+      default: "Use Tool",
+      trim: true
+    },
+    ctaUrl: {
+      type: String,
+      default: "",
+      trim: true
+    },
+    gallery: {
+      type: [String],
+      default: []
     },
     tags: {
       type: [String],

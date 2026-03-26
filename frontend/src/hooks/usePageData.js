@@ -1,110 +1,150 @@
 import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAdmin } from "../context/AdminContext.jsx";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
-  timeout: 5000,
+  baseURL: import.meta.env.VITE_API_URL || "/api",
+  timeout: 10000,
 });
 
-const getMergeKey = (item) =>
-  item?.slug || item?._id || item?.id || item?.name || item?.title || "";
+const CACHE_TTL_MS = 30_000;
+const responseCache = new Map();
+const EMPTY_ARRAY = [];
 
-const mergeRecords = (incoming, fallback) => {
-  const fallbackMap = new Map(
-    fallback.map((item) => [getMergeKey(item), item]).filter(([key]) => Boolean(key)),
-  );
+const getCachedResponse = (key) => {
+  const cached = responseCache.get(key);
 
-  return incoming.map((item) => ({
-    ...fallbackMap.get(getMergeKey(item)),
-    ...item,
-  }));
+  if (!cached) {
+    return null;
+  }
+
+  const isFresh = Date.now() - cached.timestamp < CACHE_TTL_MS;
+
+  if (!isFresh) {
+    responseCache.delete(key);
+    return null;
+  }
+
+  return cached.data;
 };
 
-export const useCollection = (endpoint, fallback) => {
+const setCachedResponse = (key, data) => {
+  responseCache.set(key, {
+    timestamp: Date.now(),
+    data,
+  });
+};
+
+const extractRequestError = (requestError) => {
+  if (axios.isCancel(requestError)) {
+    return "";
+  }
+
+  const serverMessage = requestError?.response?.data?.message;
+  if (typeof serverMessage === "string" && serverMessage.trim()) {
+    return serverMessage;
+  }
+
+  if (requestError?.code === "ECONNABORTED") {
+    return "Request timed out. Please try again.";
+  }
+
+  if (requestError?.message) {
+    return requestError.message;
+  }
+
+  return "Unable to load content right now.";
+};
+
+const useApiRequest = (
+  endpoint,
+  {
+    enabled = true,
+    initialData,
+    transform = (payload) => payload,
+    suppressNotFoundError = false,
+  } = {},
+) => {
   const { refreshVersion } = useAdmin();
-  const [data, setData] = useState(fallback);
-  const [loading, setLoading] = useState(true);
+  const [requestVersion, setRequestVersion] = useState(0);
+  const [data, setData] = useState(initialData);
+  const [loading, setLoading] = useState(Boolean(enabled));
   const [error, setError] = useState("");
-  const fallbackKey = JSON.stringify(fallback);
+  const [notFound, setNotFound] = useState(false);
+  const [statusCode, setStatusCode] = useState(0);
 
   useEffect(() => {
+    if (!enabled || !endpoint) {
+      setData(initialData);
+      setLoading(false);
+      setError("");
+      setNotFound(false);
+      setStatusCode(0);
+      return undefined;
+    }
+
+    const cacheKey = endpoint;
+    const cachedData = getCachedResponse(cacheKey);
+    const controller = new AbortController();
     let active = true;
 
-    const fetchData = async () => {
+    if (cachedData !== null && cachedData !== undefined) {
+      setData(cachedData);
+      setLoading(false);
+      setError("");
+      setNotFound(false);
+      setStatusCode(200);
+    } else {
+      setData(initialData);
       setLoading(true);
       setError("");
-      setData(fallback);
+      setNotFound(false);
+      setStatusCode(0);
+    }
 
+    const fetchData = async () => {
       try {
-        const response = await api.get(endpoint);
+        const response = await api.get(endpoint, {
+          signal: controller.signal,
+        });
 
         if (!active) {
           return;
         }
 
-        const nextData =
-          Array.isArray(response.data) && response.data.length
-            ? mergeRecords(response.data, fallback)
-            : fallback;
+        const nextData = transform(response.data);
 
         setData(nextData);
         setError("");
+        setNotFound(false);
+        setStatusCode(response.status || 200);
+        setCachedResponse(cacheKey, nextData);
       } catch (requestError) {
-        if (active) {
-          setData(fallback);
-          setError("Using local showcase content while the API is unavailable.");
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      active = false;
-    };
-  }, [endpoint, fallbackKey, refreshVersion]);
-
-  return { data, loading, error };
-};
-
-export const useSingleton = (endpoint, fallback) => {
-  const { refreshVersion } = useAdmin();
-  const [data, setData] = useState(fallback);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const fallbackKey = JSON.stringify(fallback);
-
-  useEffect(() => {
-    let active = true;
-
-    const fetchData = async () => {
-      setLoading(true);
-      setError("");
-      setData(fallback);
-
-      try {
-        const response = await api.get(endpoint);
-
-        if (!active) {
+        if (!active || axios.isCancel(requestError)) {
           return;
         }
 
-        setData({
-          ...fallback,
-          ...(response.data || {}),
-        });
-        setError("");
-      } catch (requestError) {
-        if (active) {
-          setData(fallback);
-          setError("Using local showcase content while the API is unavailable.");
+        const responseStatus = Number(requestError?.response?.status || 0);
+        const isNotFound = responseStatus === 404;
+
+        setStatusCode(responseStatus);
+
+        if (isNotFound && suppressNotFoundError) {
+          setData(initialData);
+          setError("");
+          setNotFound(true);
+          return;
         }
+
+        const nextError = extractRequestError(requestError);
+        setError(nextError);
+        setNotFound(isNotFound);
+
+        console.error(`[API] GET ${endpoint} failed`, {
+          status: responseStatus || "network",
+          message: nextError,
+        });
       } finally {
         if (active) {
           setLoading(false);
@@ -116,61 +156,99 @@ export const useSingleton = (endpoint, fallback) => {
 
     return () => {
       active = false;
+      controller.abort();
     };
-  }, [endpoint, fallback, fallbackKey, refreshVersion]);
+  }, [
+    endpoint,
+    enabled,
+    initialData,
+    refreshVersion,
+    requestVersion,
+    suppressNotFoundError,
+    transform,
+  ]);
 
-  return { data, loading, error };
+  const refetch = useCallback(() => {
+    if (endpoint) {
+      responseCache.delete(endpoint);
+    }
+    setRequestVersion((value) => value + 1);
+  }, [endpoint]);
+
+  return {
+    data,
+    loading,
+    error,
+    notFound,
+    statusCode,
+    refetch,
+  };
 };
 
-export const useItem = (endpoint, fallback, slug) => {
-  const { refreshVersion } = useAdmin();
-  const fallbackItem = useMemo(
-    () => fallback.find((item) => item.slug === slug) || null,
-    [fallback, slug],
+export const useCollection = (endpoint, options = {}) => {
+  const {
+    initialData = EMPTY_ARRAY,
+    enabled = true,
+  } = options;
+
+  const result = useApiRequest(endpoint, {
+    enabled,
+    initialData,
+    transform: useCallback((payload) => (Array.isArray(payload) ? payload : []), []),
+  });
+
+  return useMemo(
+    () => ({
+      ...result,
+      isEmpty: !result.loading && !result.error && Array.isArray(result.data) && !result.data.length,
+    }),
+    [result],
   );
+};
 
-  const [data, setData] = useState(fallbackItem);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+export const useSingleton = (endpoint, options = {}) => {
+  const {
+    initialData = null,
+    enabled = true,
+  } = options;
 
-  useEffect(() => {
-    let active = true;
+  const result = useApiRequest(endpoint, {
+    enabled,
+    initialData,
+    transform: useCallback(
+      (payload) =>
+        payload && typeof payload === "object" && !Array.isArray(payload)
+          ? payload
+          : initialData,
+      [initialData],
+    ),
+  });
 
-    const fetchItem = async () => {
-      setLoading(true);
-      setError("");
-      setData(fallbackItem);
+  return useMemo(
+    () => ({
+      ...result,
+      isEmpty: !result.loading && !result.error && !result.data,
+    }),
+    [result],
+  );
+};
 
-      try {
-        const response = await api.get(endpoint);
+export const useItem = (endpoint, options = {}) => {
+  const {
+    enabled = true,
+    initialData = null,
+  } = options;
 
-        if (!active) {
-          return;
-        }
-
-        setData({
-          ...fallbackItem,
-          ...response.data,
-        });
-        setError("");
-      } catch (requestError) {
-        if (active) {
-          setData(fallbackItem);
-          setError("Showing local detail content while the API is unavailable.");
-        }
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
+  return useApiRequest(endpoint, {
+    enabled,
+    initialData,
+    suppressNotFoundError: true,
+    transform: useCallback((payload) => {
+      if (payload && typeof payload === "object" && !Array.isArray(payload)) {
+        return payload;
       }
-    };
 
-    fetchItem();
-
-    return () => {
-      active = false;
-    };
-  }, [endpoint, fallbackItem, refreshVersion]);
-
-  return { data, loading, error };
+      return initialData;
+    }, [initialData]),
+  });
 };

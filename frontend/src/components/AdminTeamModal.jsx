@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { resolveMedia } from "../assets/mediaMap";
+import Modal from "./ui/Modal";
 
 const splitLines = (value) =>
   String(value || "")
@@ -50,15 +51,6 @@ const AdminTeamModal = ({ title, initialValue, onClose, onSave }) => {
   const [form, setForm] = useState(() => createInitialForm(initialValue));
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, []);
 
   useEffect(() => {
     setForm(createInitialForm(initialValue));
@@ -118,8 +110,7 @@ const AdminTeamModal = ({ title, initialValue, onClose, onSave }) => {
   };
 
   return (
-    <div className="admin-modal-shell">
-      <div className="admin-modal-panel w-full max-w-4xl overflow-hidden">
+    <Modal open onClose={onClose} maxWidthClass="max-w-3xl" panelClassName="admin-modal-panel">
         <div className="flex items-center justify-between border-b border-white/8 px-6 py-5">
           <div>
             <h2 className="font-display text-2xl font-semibold text-white">{title}</h2>
@@ -272,7 +263,7 @@ const AdminTeamModal = ({ title, initialValue, onClose, onSave }) => {
 
           {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
 
-          <div className="mt-6 flex justify-end gap-3 border-t border-white/8 pt-5">
+          <div className="sticky bottom-0 mt-6 flex justify-end gap-3 border-t border-white/8 bg-surface/95 pt-5">
             <button type="button" onClick={onClose} className="admin-secondary-button px-5 py-3">
               Cancel
             </button>
@@ -285,8 +276,7 @@ const AdminTeamModal = ({ title, initialValue, onClose, onSave }) => {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 };
 

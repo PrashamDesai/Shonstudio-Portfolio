@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 import { resolveMedia } from "../assets/mediaMap";
 import AdminEntityActions from "./AdminEntityActions";
@@ -12,32 +13,43 @@ const ToolCard = ({ tool, adminActions = null }) => (
     data-cursor-label="Open"
   >
     {adminActions ? <AdminEntityActions onEdit={adminActions.onEdit} onDelete={adminActions.onDelete} /> : null}
-    <img
-      src={resolveMedia(tool.image)}
-      alt={tool.title}
-      loading="lazy"
-      className="h-56 w-full border-b border-white/8 object-cover transition duration-700 group-hover:scale-[1.03]"
-    />
-    <div className="space-y-4 p-6">
-      <div className="space-y-2">
-        <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">{tool.type}</p>
-        <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
-          {tool.title}
-        </h3>
+    <Link
+      to={`/tools/${tool.slug}`}
+      className="block h-full"
+      data-cursor="link"
+      data-cursor-label="Open"
+      aria-label={`Open ${tool.title}`}
+    >
+      <div className="overflow-hidden border-b border-white/8">
+        <img
+          src={resolveMedia(tool.cardImage || tool.image)}
+          alt={tool.title}
+          loading="lazy"
+          className="aspect-video w-full object-cover transition duration-700 group-hover:scale-[1.04]"
+        />
       </div>
-      <p className="text-sm leading-7 text-muted">{tool.description}</p>
-      <p className="text-sm leading-7 text-mutedDeep">{tool.useCase}</p>
-      <div className="flex flex-wrap gap-2">
-        {tool.tags?.map((tag) => (
-          <span
-            key={tag}
-            className="theme-chip rounded-full px-3 py-1 text-xs"
-          >
-            {tag}
-          </span>
-        ))}
+
+      <div className="space-y-4 p-6">
+        <div className="space-y-2">
+          <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">{tool.type}</p>
+          <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
+            {tool.title}
+          </h3>
+        </div>
+        <p className="text-sm leading-7 text-muted">{tool.shortDescription || tool.description}</p>
+        <p className="text-sm leading-7 text-mutedDeep">{tool.useCase}</p>
+        <div className="flex flex-wrap gap-2">
+          {(tool.tags || []).slice(0, 4).map((tag) => (
+            <span
+              key={tag}
+              className="theme-chip rounded-full px-3 py-1 text-xs"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
       </div>
-    </div>
+    </Link>
   </motion.article>
 );
 

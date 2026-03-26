@@ -9,6 +9,7 @@ import Service from "../models/Service.js";
 import Team from "../models/Team.js";
 import Tool from "../models/Tool.js";
 import VisionScene from "../models/VisionScene.js";
+import { resolveUniqueSlug } from "../utils/slug.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
 const createDigest = (value) =>
@@ -56,11 +57,41 @@ const handleControllerError = (res, error, fallbackMessage) => {
   throw new Error(fallbackMessage);
 };
 
+const modelSupportsSlug = (Model) =>
+  Boolean(Model?.schema?.path("slug")) && Boolean(Model?.schema?.path("title"));
+
+const normalizeSlugPayload = async (Model, payload, resourceId = null) => {
+  const nextPayload = { ...payload };
+
+  if (typeof nextPayload.title === "string") {
+    nextPayload.title = nextPayload.title.trim();
+  }
+
+  if (!modelSupportsSlug(Model)) {
+    return nextPayload;
+  }
+
+  if (typeof nextPayload.slug === "string") {
+    nextPayload.slug = nextPayload.slug.trim();
+  }
+
+  const slugSource = nextPayload.slug || nextPayload.title;
+
+  if (!slugSource) {
+    delete nextPayload.slug;
+    return nextPayload;
+  }
+
+  nextPayload.slug = await resolveUniqueSlug(Model, slugSource, resourceId);
+  return nextPayload;
+};
+
 const createEntity = (Model, label) =>
   asyncHandler(async (req, res) => {
     try {
       ensurePayload(req.body, `A ${label}`);
-      const document = await Model.create(req.body);
+      const payload = await normalizeSlugPayload(Model, req.body);
+      const document = await Model.create(payload);
       res.status(201).json({
         message: `${label} created successfully`,
         data: document,
@@ -75,8 +106,9 @@ const updateEntity = (Model, label) =>
     try {
       ensureObjectId(req.params.id);
       ensurePayload(req.body, `A ${label}`);
+      const payload = await normalizeSlugPayload(Model, req.body, req.params.id);
 
-      const document = await Model.findByIdAndUpdate(req.params.id, req.body, {
+      const document = await Model.findByIdAndUpdate(req.params.id, payload, {
         new: true,
         runValidators: true,
       });

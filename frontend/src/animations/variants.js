@@ -1,9 +1,9 @@
 export const pageTransition = {
   initial: {
     opacity: 0,
-    y: 18,
-    scale: 0.985,
-    filter: "blur(14px)",
+    y: 10,
+    scale: 0.994,
+    filter: "blur(6px)",
   },
   enter: {
     opacity: 1,
@@ -11,18 +11,18 @@ export const pageTransition = {
     scale: 1,
     filter: "blur(0px)",
     transition: {
-      duration: 0.75,
+      duration: 0.45,
       ease: [0.22, 1, 0.36, 1],
-      staggerChildren: 0.08,
+      staggerChildren: 0.04,
     },
   },
   exit: {
     opacity: 0,
-    y: -10,
-    scale: 1.01,
-    filter: "blur(10px)",
+    y: -6,
+    scale: 1.002,
+    filter: "blur(5px)",
     transition: {
-      duration: 0.42,
+      duration: 0.26,
       ease: [0.65, 0, 0.35, 1],
     },
   },
@@ -31,9 +31,9 @@ export const pageTransition = {
 export const revealUp = {
   hidden: {
     opacity: 0,
-    y: 36,
-    scale: 0.97,
-    filter: "blur(10px)",
+    y: 22,
+    scale: 0.985,
+    filter: "blur(8px)",
   },
   show: (delay = 0) => ({
     opacity: 1,
@@ -41,7 +41,7 @@ export const revealUp = {
     scale: 1,
     filter: "blur(0px)",
     transition: {
-      duration: 0.85,
+      duration: 0.55,
       delay,
       ease: [0.22, 1, 0.36, 1],
     },

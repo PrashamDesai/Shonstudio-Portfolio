@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import Modal from "./ui/Modal";
 
 const splitLines = (value) =>
   String(value || "")
@@ -11,10 +12,13 @@ const joinLines = (items) => (Array.isArray(items) ? items.join("\n") : "");
 const createProjectForm = (value = {}) => ({
   title: value.title || "",
   slug: value.slug || "",
-  tagline: value.tagline || "",
+  shortDescription: value.shortDescription || value.tagline || "",
+  tagline: value.tagline || value.shortDescription || "",
   description: value.description || "",
-  coverImage: value.coverImage || "",
-  heroImage: value.heroImage || "",
+  cardImage: value.cardImage || value.coverImage || "",
+  carouselImage: value.carouselImage || value.heroImage || value.cardImage || value.coverImage || "",
+  coverImage: value.coverImage || value.cardImage || "",
+  heroImage: value.heroImage || value.carouselImage || "",
   gallery: joinLines(value.gallery),
   technologies: joinLines(value.technologies),
   featured: Boolean(value.featured),
@@ -30,7 +34,10 @@ const createProjectForm = (value = {}) => ({
 const createServiceForm = (value = {}) => ({
   title: value.title || "",
   slug: value.slug || "",
-  summary: value.summary || "",
+  shortDescription: value.shortDescription || value.summary || "",
+  summary: value.summary || value.shortDescription || "",
+  cardImage: value.cardImage || "",
+  carouselImage: value.carouselImage || value.cardImage || "",
   description: value.description || "",
   category: value.category || "",
   icon: value.icon || "spark",
@@ -42,18 +49,32 @@ const createServiceForm = (value = {}) => ({
 const createToolForm = (value = {}) => ({
   title: value.title || "",
   slug: value.slug || "",
+  shortDescription: value.shortDescription || value.description || "",
+  cardImage: value.cardImage || value.image || "",
+  carouselImage: value.carouselImage || value.cardImage || value.image || "",
   type: value.type || "",
-  image: value.image || "",
+  category: value.category || "Dev Tools",
+  image: value.image || value.cardImage || "",
   description: value.description || "",
   useCase: value.useCase || "",
+  features: joinLines(value.features),
+  techUsed: joinLines(value.techUsed),
+  price: value.price || "",
+  ctaLabel: value.ctaLabel || "Use Tool",
+  ctaUrl: value.ctaUrl || "",
+  gallery: joinLines(value.gallery),
   tags: joinLines(value.tags),
 });
 
 const createCourseForm = (value = {}) => ({
   title: value.title || "",
   slug: value.slug || "",
+  shortDescription: value.shortDescription || value.summary || "",
+  cardImage: value.cardImage || "",
+  carouselImage: value.carouselImage || value.cardImage || "",
   duration: value.duration || "",
-  summary: value.summary || "",
+  level: value.level || "Beginner",
+  summary: value.summary || value.shortDescription || "",
   curriculum: joinLines(value.curriculum),
   outcomes: joinLines(value.outcomes),
 });
@@ -93,10 +114,13 @@ const buildPayload = (entityType, form) => {
       return {
         title: form.title.trim(),
         slug: form.slug.trim(),
-        tagline: form.tagline.trim(),
+        shortDescription: form.shortDescription.trim(),
+        tagline: (form.tagline || form.shortDescription).trim(),
         description: form.description.trim(),
-        coverImage: form.coverImage.trim(),
-        heroImage: form.heroImage.trim(),
+        cardImage: form.cardImage.trim(),
+        carouselImage: form.carouselImage.trim(),
+        coverImage: (form.cardImage || form.coverImage).trim(),
+        heroImage: (form.carouselImage || form.heroImage).trim(),
         gallery: splitLines(form.gallery),
         technologies: splitLines(form.technologies),
         featured: Boolean(form.featured),
@@ -111,7 +135,10 @@ const buildPayload = (entityType, form) => {
       return {
         title: form.title.trim(),
         slug: form.slug.trim(),
-        summary: form.summary.trim(),
+        shortDescription: form.shortDescription.trim(),
+        cardImage: form.cardImage.trim(),
+        carouselImage: form.carouselImage.trim(),
+        summary: (form.shortDescription || form.summary).trim(),
         description: form.description.trim(),
         category: form.category.trim(),
         icon: form.icon.trim(),
@@ -123,18 +150,32 @@ const buildPayload = (entityType, form) => {
       return {
         title: form.title.trim(),
         slug: form.slug.trim(),
+        shortDescription: form.shortDescription.trim(),
+        cardImage: form.cardImage.trim(),
+        carouselImage: form.carouselImage.trim(),
         type: form.type.trim(),
-        image: form.image.trim(),
+        category: form.category.trim(),
+        image: (form.cardImage || form.image).trim(),
         description: form.description.trim(),
         useCase: form.useCase.trim(),
+        features: splitLines(form.features),
+        techUsed: splitLines(form.techUsed),
+        price: form.price.trim(),
+        ctaLabel: form.ctaLabel.trim(),
+        ctaUrl: form.ctaUrl.trim(),
+        gallery: splitLines(form.gallery),
         tags: splitLines(form.tags),
       };
     case "courses":
       return {
         title: form.title.trim(),
         slug: form.slug.trim(),
+        shortDescription: form.shortDescription.trim(),
+        cardImage: form.cardImage.trim(),
+        carouselImage: form.carouselImage.trim(),
         duration: form.duration.trim(),
-        summary: form.summary.trim(),
+        level: form.level.trim(),
+        summary: (form.shortDescription || form.summary).trim(),
         curriculum: splitLines(form.curriculum),
         outcomes: splitLines(form.outcomes),
       };
@@ -185,19 +226,10 @@ const ImagePreview = ({ src, alt, className = "h-40" }) =>
     />
   ) : null;
 
-const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave }) => {
+const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, onDelete }) => {
   const [form, setForm] = useState(() => buildInitialForm(entityType, initialValue));
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-    };
-  }, []);
 
   useEffect(() => {
     setForm(buildInitialForm(entityType, initialValue));
@@ -306,8 +338,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave }) 
   };
 
   return (
-    <div className="admin-modal-shell">
-      <div className="admin-modal-panel w-full max-w-4xl overflow-hidden">
+    <Modal open onClose={onClose} maxWidthClass="max-w-3xl" panelClassName="admin-modal-panel">
         <div className="flex items-center justify-between border-b border-white/8 px-6 py-5">
           <div>
             <h2 className="font-display text-2xl font-semibold text-white">{title}</h2>
@@ -349,9 +380,21 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave }) 
                   value={form.tagline || ""}
                   onChange={(event) => updateField("tagline", event.target.value)}
                   className={textInputClass}
-                  required
                 />
               </Field>
+            ) : null}
+
+            {entityType !== "vision-scenes" ? (
+              <div className="md:col-span-2">
+                <Field label="Short description" hint="Primary line used in cards and compact previews.">
+                  <textarea
+                    value={form.shortDescription || ""}
+                    onChange={(event) => updateField("shortDescription", event.target.value)}
+                    className={textareaClass}
+                    required
+                  />
+                </Field>
+              </div>
             ) : null}
 
             {entityType === "vision-scenes" ? (
@@ -408,6 +451,18 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave }) 
               </Field>
             ) : null}
 
+            {entityType === "tools" ? (
+              <Field label="Category">
+                <input
+                  value={form.category || ""}
+                  onChange={(event) => updateField("category", event.target.value)}
+                  className={textInputClass}
+                  placeholder="2D Assets / 3D Assets / UI Packs / VFX & Particles / Dev Tools"
+                  required
+                />
+              </Field>
+            ) : null}
+
             {entityType === "courses" ? (
               <Field label="Duration">
                 <input
@@ -419,37 +474,48 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave }) 
               </Field>
             ) : null}
 
-            {entityType === "projects" ? (
-              <Field label="Cover image key">
+            {entityType === "courses" ? (
+              <Field label="Level">
                 <input
-                  value={form.coverImage || ""}
-                  onChange={(event) => updateField("coverImage", event.target.value)}
+                  value={form.level || ""}
+                  onChange={(event) => updateField("level", event.target.value)}
                   className={textInputClass}
+                  placeholder="Beginner, Intermediate, Advanced"
                 />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => handleSingleImageUpload("coverImage", event.target.files?.[0])}
-                  className="mt-3 block w-full text-sm text-muted file:mr-4 file:rounded-full file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
-                />
-                <ImagePreview src={form.coverImage} alt="Project cover preview" className="h-44" />
               </Field>
             ) : null}
 
-            {entityType === "projects" ? (
-              <Field label="Hero carousel image">
+            {entityType !== "vision-scenes" ? (
+              <Field label="Card image" hint="Used in listing cards (16:9 recommended).">
                 <input
-                  value={form.heroImage || ""}
-                  onChange={(event) => updateField("heroImage", event.target.value)}
+                  value={form.cardImage || ""}
+                  onChange={(event) => updateField("cardImage", event.target.value)}
                   className={textInputClass}
                 />
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(event) => handleSingleImageUpload("heroImage", event.target.files?.[0])}
+                  onChange={(event) => handleSingleImageUpload("cardImage", event.target.files?.[0])}
                   className="mt-3 block w-full text-sm text-muted file:mr-4 file:rounded-full file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
                 />
-                <ImagePreview src={form.heroImage} alt="Hero image preview" className="h-44" />
+                <ImagePreview src={form.cardImage} alt="Card image preview" className="h-44" />
+              </Field>
+            ) : null}
+
+            {entityType !== "vision-scenes" ? (
+              <Field label="Carousel image" hint="Used in hero carousel and feature panels.">
+                <input
+                  value={form.carouselImage || ""}
+                  onChange={(event) => updateField("carouselImage", event.target.value)}
+                  className={textInputClass}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(event) => handleSingleImageUpload("carouselImage", event.target.files?.[0])}
+                  className="mt-3 block w-full text-sm text-muted file:mr-4 file:rounded-full file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
+                />
+                <ImagePreview src={form.carouselImage} alt="Carousel image preview" className="h-44" />
               </Field>
             ) : null}
 
@@ -467,23 +533,6 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave }) 
                   className="mt-3 block w-full text-sm text-muted file:mr-4 file:rounded-full file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
                 />
                 <ImagePreview src={form.panelImage} alt="Panel image preview" className="h-44" />
-              </Field>
-            ) : null}
-
-            {entityType === "tools" ? (
-              <Field label="Image key">
-                <input
-                  value={form.image || ""}
-                  onChange={(event) => updateField("image", event.target.value)}
-                  className={textInputClass}
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) => handleSingleImageUpload("image", event.target.files?.[0])}
-                  className="mt-3 block w-full text-sm text-muted file:mr-4 file:rounded-full file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
-                />
-                <ImagePreview src={form.image} alt="Tool preview" className="h-44" />
               </Field>
             ) : null}
 
@@ -521,27 +570,13 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave }) 
               </label>
             ) : null}
 
-            {entityType !== "vision-scenes" ? (
+            {entityType === "services" || entityType === "courses" ? (
               <div className="md:col-span-2">
-                <Field label={entityType === "services" ? "Summary" : "Description"}>
+                <Field label="Legacy summary field (optional)">
                   <textarea
-                    value={
-                      entityType === "services"
-                        ? form.summary || ""
-                        : entityType === "courses"
-                          ? form.summary || ""
-                          : form.description || ""
-                    }
-                    onChange={(event) =>
-                      updateField(
-                        entityType === "services" || entityType === "courses"
-                          ? "summary"
-                          : "description",
-                        event.target.value,
-                      )
-                    }
+                    value={form.summary || ""}
+                    onChange={(event) => updateField("summary", event.target.value)}
                     className={textareaClass}
-                    required
                   />
                 </Field>
               </div>
@@ -560,6 +595,39 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave }) 
                   />
                 </Field>
               </div>
+            ) : null}
+
+            {entityType === "tools" ? (
+              <>
+                <Field label="Price">
+                  <input
+                    value={form.price || ""}
+                    onChange={(event) => updateField("price", event.target.value)}
+                    className={textInputClass}
+                    placeholder="Free / $19 / $49"
+                  />
+                </Field>
+
+                <Field label="CTA label">
+                  <input
+                    value={form.ctaLabel || ""}
+                    onChange={(event) => updateField("ctaLabel", event.target.value)}
+                    className={textInputClass}
+                    placeholder="Purchase / Use Tool"
+                  />
+                </Field>
+
+                <div className="md:col-span-2">
+                  <Field label="CTA URL">
+                    <input
+                      value={form.ctaUrl || ""}
+                      onChange={(event) => updateField("ctaUrl", event.target.value)}
+                      className={textInputClass}
+                      placeholder="https://..."
+                    />
+                  </Field>
+                </div>
+              </>
             ) : null}
 
             {entityType === "vision-scenes" ? (
@@ -707,6 +775,40 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave }) 
               </div>
             ) : null}
 
+            {entityType === "tools" ? (
+              <>
+                <div className="md:col-span-2">
+                  <Field label="Features" hint="Enter one feature per line.">
+                    <textarea
+                      value={form.features || ""}
+                      onChange={(event) => updateField("features", event.target.value)}
+                      className={textareaClass}
+                    />
+                  </Field>
+                </div>
+
+                <div className="md:col-span-2">
+                  <Field label="Tech used" hint="Enter one technology per line.">
+                    <textarea
+                      value={form.techUsed || ""}
+                      onChange={(event) => updateField("techUsed", event.target.value)}
+                      className={textareaClass}
+                    />
+                  </Field>
+                </div>
+
+                <div className="md:col-span-2">
+                  <Field label="Gallery images" hint="Enter one image key per line.">
+                    <textarea
+                      value={form.gallery || ""}
+                      onChange={(event) => updateField("gallery", event.target.value)}
+                      className={textareaClass}
+                    />
+                  </Field>
+                </div>
+              </>
+            ) : null}
+
             {entityType === "courses" ? (
               <>
                 <div className="md:col-span-2">
@@ -789,7 +891,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave }) 
 
           {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
 
-          <div className="mt-6 flex justify-end gap-3 border-t border-white/8 pt-5">
+          <div className="sticky bottom-0 mt-6 flex justify-end gap-3 border-t border-white/8 bg-surface/95 pt-5">
             <button
               type="button"
               onClick={onClose}
@@ -804,10 +906,18 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave }) 
             >
               {isSaving ? "Saving..." : "Save"}
             </button>
+            {onDelete ? (
+              <button
+                type="button"
+                onClick={onDelete}
+                className="admin-danger-button px-5 py-3"
+              >
+                Delete
+              </button>
+            ) : null}
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 };
 

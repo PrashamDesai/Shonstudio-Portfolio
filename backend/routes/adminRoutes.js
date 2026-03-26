@@ -370,9 +370,6 @@ router.route("/tools/:id").put(updateToolAdmin).delete(deleteToolAdmin);
 router.route("/training").post(createCourseAdmin);
 router.route("/training/:id").put(updateCourseAdmin).delete(deleteCourseAdmin);
 
-router.route("/courses").post(createCourseAdmin);
-router.route("/courses/:id").put(updateCourseAdmin).delete(deleteCourseAdmin);
-
 router.route("/company").put(updateCompanyAdmin);
 
 router.route("/team").post(createTeamAdmin);

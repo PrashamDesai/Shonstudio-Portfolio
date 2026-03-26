@@ -3,8 +3,8 @@ import { useMemo, useState } from "react";
 
 import { teamTemplate } from "../admin/entityTemplates";
 import { pageTransition } from "../animations/variants";
-import { teamMembers as teamMembersFallback } from "../assets/mockData";
 import AdminTeamModal from "../components/AdminTeamModal";
+import { CardGridSkeleton, PageDataEmpty } from "../components/ApiState";
 import TeamModal from "../components/TeamModal";
 import TeamSection from "../components/TeamSection";
 import { useAdmin } from "../context/AdminContext.jsx";
@@ -20,7 +20,7 @@ const TeamPage = () => {
   const [selectedMember, setSelectedMember] = useState(null);
   const [editingMember, setEditingMember] = useState(null);
   const [activeFilter, setActiveFilter] = useState("all");
-  const { data: teamMembers, error } = useCollection("/team", teamMembersFallback);
+  const { data: teamMembers, loading, error, isEmpty } = useCollection("/team");
   const { isAdmin, requestAdmin, signalRefresh } = useAdmin();
 
   const groupedMembers = useMemo(
@@ -126,31 +126,39 @@ const TeamPage = () => {
         </div>
       </section>
 
-      {(activeFilter === "all" || activeFilter === "developer") ? (
-        <TeamSection
-          eyebrow="Developing"
-          title="Developing team"
-          description="Engineers focused on gameplay systems, architecture, and immersive interaction."
-          members={groupedMembers.developer}
-          onOpenMember={setSelectedMember}
-          isAdmin={isAdmin}
-          onEditMember={setEditingMember}
-          onDeleteMember={deleteTeamMember}
-        />
-      ) : null}
+      {loading && !teamMembers.length ? (
+        <CardGridSkeleton count={6} className="h-72" />
+      ) : isEmpty ? (
+        <PageDataEmpty message="No team members available." />
+      ) : (
+        <>
+          {(activeFilter === "all" || activeFilter === "developer") ? (
+            <TeamSection
+              eyebrow="Developing"
+              title="Developing team"
+              description="Engineers focused on gameplay systems, architecture, and immersive interaction."
+              members={groupedMembers.developer}
+              onOpenMember={setSelectedMember}
+              isAdmin={isAdmin}
+              onEditMember={setEditingMember}
+              onDeleteMember={deleteTeamMember}
+            />
+          ) : null}
 
-      {(activeFilter === "all" || activeFilter === "designer") ? (
-        <TeamSection
-          eyebrow="Designing"
-          title="Designing team"
-          description="Designers shaping product experience, interface quality, and visual direction."
-          members={groupedMembers.designer}
-          onOpenMember={setSelectedMember}
-          isAdmin={isAdmin}
-          onEditMember={setEditingMember}
-          onDeleteMember={deleteTeamMember}
-        />
-      ) : null}
+          {(activeFilter === "all" || activeFilter === "designer") ? (
+            <TeamSection
+              eyebrow="Designing"
+              title="Designing team"
+              description="Designers shaping product experience, interface quality, and visual direction."
+              members={groupedMembers.designer}
+              onOpenMember={setSelectedMember}
+              isAdmin={isAdmin}
+              onEditMember={setEditingMember}
+              onDeleteMember={deleteTeamMember}
+            />
+          ) : null}
+        </>
+      )}
 
       <TeamModal member={selectedMember} onClose={() => setSelectedMember(null)} />
 

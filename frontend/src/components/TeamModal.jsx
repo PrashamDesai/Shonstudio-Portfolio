@@ -1,7 +1,7 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect } from "react";
+import { motion } from "framer-motion";
 
 import { resolveMedia } from "../assets/mediaMap";
+import Modal from "./ui/Modal";
 
 const contactConfig = [
   { key: "email", label: "Email", href: (value) => `mailto:${value}` },
@@ -10,45 +10,15 @@ const contactConfig = [
 ];
 
 const TeamModal = ({ member, onClose }) => {
-  useEffect(() => {
-    if (!member) {
-      return undefined;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [member, onClose]);
-
   return (
-    <AnimatePresence>
+    <Modal open={Boolean(member)} onClose={onClose} maxWidthClass="max-w-3xl" panelClassName="admin-modal-panel">
       {member ? (
-        <motion.div
-          className="admin-modal-shell"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
-        >
           <motion.div
             initial={{ opacity: 0, y: 26, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 18, scale: 0.985 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="admin-modal-panel w-full max-w-5xl overflow-hidden"
-            onClick={(event) => event.stopPropagation()}
+            className="overflow-hidden"
           >
             <div className="relative overflow-hidden border-b border-white/8 px-6 py-6 sm:px-8">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,212,255,0.16),transparent_28%),radial-gradient(circle_at_80%_18%,rgba(122,92,255,0.14),transparent_24%)]" />
@@ -171,9 +141,8 @@ const TeamModal = ({ member, onClose }) => {
               </div>
             </div>
           </motion.div>
-        </motion.div>
       ) : null}
-    </AnimatePresence>
+    </Modal>
   );
 };
 

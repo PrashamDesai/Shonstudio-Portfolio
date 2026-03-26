@@ -16,8 +16,21 @@ const serviceSchema = new mongoose.Schema(
     },
     summary: {
       type: String,
-      required: true,
+      default: "",
       trim: true
+    },
+    shortDescription: {
+      type: String,
+      default: "",
+      trim: true
+    },
+    cardImage: {
+      type: String,
+      default: ""
+    },
+    carouselImage: {
+      type: String,
+      default: ""
     },
     description: {
       type: String,

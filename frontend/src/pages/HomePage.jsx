@@ -11,33 +11,31 @@ import { Link } from "react-router-dom";
 import { pageTransition } from "../animations/variants";
 import { projectTemplate, serviceTemplate } from "../admin/entityTemplates";
 import { resolveMedia } from "../assets/mediaMap";
-import { projects as projectFallback, services as serviceFallback } from "../assets/mockData";
 import AdminEntityActions from "../components/AdminEntityActions";
 import AdminEntityModal from "../components/AdminEntityModal";
+import AdminQuickEditModal from "../components/AdminQuickEditModal";
+import { CardGridSkeleton, PageDataEmpty } from "../components/ApiState";
+import HeroCarousel from "../components/HeroCarousel";
 import MagneticButton from "../components/MagneticButton";
 import TechMarquee from "../components/TechMarquee";
+import { buildHeroCarouselData } from "../components/carouselDataAdapter";
 import { useAdmin } from "../context/AdminContext.jsx";
 import { useCollection } from "../hooks/usePageData";
 import { useSmoothScroll } from "../hooks/useSmoothScroll.jsx";
 
 const techLogos = [
-  { name: "Unity", mark: "U" },
-  { name: "C#", mark: "C#" },
-  { name: "Meta", mark: "M" },
-  { name: "Oculus", mark: "O" },
-  { name: "Apple Vision Pro", mark: "AVP" },
-  { name: "Gemini", mark: "G" },
-  { name: "Claude", mark: "CL" },
-  { name: "Codex", mark: "CX" },
-  { name: "ChatGPT", mark: "GPT" },
-  { name: "Cursor", mark: "CS" },
-];
-
-const conciseServiceLines = [
-  "2D & 3D Game Development",
-  "XR & Immersive Systems",
-  "Game Design & UI/UX",
-  "Audio & Production",
+  { name: "Unity", logo: "unity" },
+  { name: "C#", logo: "csharp" },
+  { name: "Meta", logo: "meta" },
+  { name: "Oculus", logo: "oculus" },
+  { name: "Apple Vision Pro", logo: "appleVisionPro" },
+  { name: "Gemini", logo: "gemini" },
+  { name: "Claude", logo: "claude" },
+  { name: "Codex", logo: "codex" },
+  { name: "ChatGPT", logo: "chatgpt" },
+  { name: "Cursor", logo: "cursor" },
+  { name: "iOS", logo: "ios" },
+  { name: "Android", logo: "android" },
 ];
 
 const mergeShowcaseItems = (primaryItems, fallbackItems, limit) => {
@@ -56,12 +54,11 @@ const mergeShowcaseItems = (primaryItems, fallbackItems, limit) => {
 
 const HomePage = () => {
   const [editingEntity, setEditingEntity] = useState(null);
-  const featuredFallback = useMemo(
-    () => projectFallback.filter((project) => project.featured),
-    [],
-  );
-  const { data: featuredProjects } = useCollection("/projects?featured=true", featuredFallback);
-  const { data: services } = useCollection("/services", serviceFallback);
+  const [quickEditingEntity, setQuickEditingEntity] = useState(null);
+  const { data: projects, loading: projectsLoading, error: projectsError } = useCollection("/projects");
+  const { data: services, loading: servicesLoading, error: servicesError } = useCollection("/services");
+  const { data: courses, loading: coursesLoading, error: coursesError } = useCollection("/training");
+  const { data: tools, loading: toolsLoading, error: toolsError } = useCollection("/tools");
   const { isAdmin, requestAdmin, signalRefresh } = useAdmin();
   const { smoothY } = useSmoothScroll();
   const prefersReducedMotion = useReducedMotion();
@@ -87,16 +84,33 @@ const HomePage = () => {
     [0, prefersReducedMotion ? -10 : -42],
   );
 
-  const topProjects = mergeShowcaseItems(featuredProjects, projectFallback, 3);
+  const topProjects = mergeShowcaseItems(
+    projects.filter((project) => project.featured),
+    projects,
+    3,
+  );
   const featuredServices = mergeShowcaseItems(
     services.filter((service) => service.featured),
     services,
     4,
   );
-  const conciseServices = conciseServiceLines.map((line, index) => ({
-    line,
-    service: featuredServices[index] || null,
-  }));
+  const isLoadingHeroContent =
+    (projectsLoading || servicesLoading || coursesLoading || toolsLoading) &&
+    !(projects.length || services.length || courses.length || tools.length);
+  const isServicesLoading = servicesLoading && !services.length;
+  const isProjectsLoading = projectsLoading && !projects.length;
+  const homeErrors = [projectsError, servicesError, coursesError, toolsError].filter(Boolean);
+  const primaryHomeError = homeErrors[0] || "";
+  const heroCarouselCategories = useMemo(
+    () =>
+      buildHeroCarouselData({
+        projects,
+        services,
+        courses,
+        tools,
+      }),
+    [projects, services, courses, tools],
+  );
 
   const saveEntity = async (payload) => {
     const entityType = editingEntity?.entityType;
@@ -122,6 +136,24 @@ const HomePage = () => {
         body: JSON.stringify(payload),
       });
     }
+
+    signalRefresh();
+  };
+
+  const saveQuickEntity = async (payload) => {
+    const entityType = quickEditingEntity?.entityType;
+
+    if (!entityType || !quickEditingEntity?._id) {
+      return;
+    }
+
+    await requestAdmin(`/${entityType}/${quickEditingEntity._id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
 
     signalRefresh();
   };
@@ -189,23 +221,37 @@ const HomePage = () => {
 
         <motion.div
           style={{ y: heroContentY }}
-          className="relative z-10 flex h-full flex-col justify-center gap-8 lg:max-w-[44rem]"
+          className="relative z-10 grid h-full items-stretch gap-8 lg:min-h-[34rem] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-10"
         >
-          <p className="eyebrow">ShonStudio</p>
-          <h1 className="font-display text-5xl font-semibold leading-[0.92] tracking-tight text-white sm:text-6xl lg:text-[5.2rem]">
-            Crafting Worlds Beyond Screens
-          </h1>
-          <p className="max-w-2xl text-base text-muted sm:text-lg">
-            Game development, XR products, and immersive systems for ambitious teams.
-          </p>
-          <div>
-            <MagneticButton
-              to="/projects"
-              cursorLabel="View"
-              className="theme-button-primary inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold uppercase tracking-[0.2em]"
-            >
-              View Projects
-            </MagneticButton>
+          <div className="flex h-full flex-col justify-center gap-8 lg:pr-2">
+            <p className="eyebrow">ShonStudio</p>
+            <h1 className="font-display text-5xl font-semibold leading-[0.92] tracking-tight text-white sm:text-6xl lg:text-[5.2rem]">
+              Crafting Worlds Beyond Screens
+            </h1>
+            <p className="max-w-2xl text-base text-muted sm:text-lg">
+              Game development, XR products, and immersive systems for ambitious teams.
+            </p>
+            <div className="pt-4 sm:pt-6 lg:pt-12">
+              <MagneticButton
+                to="/projects"
+                cursorLabel="View"
+                className="theme-button-primary inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold uppercase tracking-[0.2em]"
+              >
+                View Projects
+              </MagneticButton>
+            </div>
+          </div>
+
+          <div className="relative h-[21rem] min-h-[20rem] sm:h-[24rem] lg:h-full lg:min-h-[34rem]">
+            {isLoadingHeroContent ? (
+              <div className="section-shell panel-glow h-full animate-pulse rounded-[1.95rem] border border-white/10 bg-white/[0.03]" />
+            ) : heroCarouselCategories.length ? (
+              <HeroCarousel categories={heroCarouselCategories} />
+            ) : (
+              <div className="section-shell panel-glow flex h-full items-center justify-center rounded-[1.95rem] border border-white/10 bg-white/[0.03] p-6 text-center">
+                <p className="text-sm text-muted">No content available</p>
+              </div>
+            )}
           </div>
         </motion.div>
       </section>
@@ -218,6 +264,12 @@ const HomePage = () => {
       >
         <TechMarquee items={techLogos} />
       </motion.section>
+
+      {primaryHomeError ? (
+        <div className="section-shell panel-glow rounded-[1.8rem] border border-white/10 bg-white/[0.03] px-6 py-4 text-sm text-mutedDeep">
+          {primaryHomeError}
+        </div>
+      ) : null}
 
       <section className="section-shell panel-glow relative overflow-hidden rounded-[2rem] border border-white/10 bg-surface/70 px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(0,212,255,0.12),transparent_26%),radial-gradient(circle_at_84%_16%,rgba(122,92,255,0.12),transparent_24%)]" />
@@ -245,47 +297,53 @@ const HomePage = () => {
             ) : null}
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {conciseServices.map((item, index) => (
-              <motion.article
-                key={`${item.line}-${item.service?.slug || index}`}
-                initial={{ opacity: 0, y: 26 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 0.6, delay: index * 0.08 }}
-                whileHover={{ y: -6 }}
-                className="relative rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-xl"
-              >
-                {isAdmin && item.service?._id ? (
-                  <AdminEntityActions
-                    onEdit={() =>
-                      setEditingEntity({
-                        ...item.service,
-                        entityType: "services",
-                      })
-                    }
-                    onDelete={() => deleteEntity("services", item.service)}
-                  />
-                ) : null}
-                <p className="text-xs uppercase tracking-[0.24em] text-accentSoft/80">
-                  {item.service?.category || "Capability"}
-                </p>
-                <h3 className="mt-3 font-display text-2xl font-semibold leading-tight tracking-tight text-white">
-                  {item.line}
-                </h3>
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {(item.service?.highlights || []).slice(0, 2).map((highlight) => (
-                    <span
-                      key={highlight}
-                      className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-muted"
-                    >
-                      {highlight}
-                    </span>
-                  ))}
-                </div>
-              </motion.article>
-            ))}
-          </div>
+          {isServicesLoading ? (
+            <CardGridSkeleton count={4} className="h-52" />
+          ) : featuredServices.length ? (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {featuredServices.map((service, index) => (
+                <motion.article
+                  key={service.slug || index}
+                  initial={{ opacity: 0, y: 26 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  transition={{ duration: 0.6, delay: index * 0.08 }}
+                  whileHover={{ y: -6 }}
+                  className="relative rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-xl"
+                >
+                  {isAdmin && service._id ? (
+                    <AdminEntityActions
+                      onEdit={() =>
+                        setQuickEditingEntity({
+                          ...service,
+                          entityType: "services",
+                        })
+                      }
+                      onDelete={() => deleteEntity("services", service)}
+                    />
+                  ) : null}
+                  <p className="text-xs uppercase tracking-[0.24em] text-accentSoft/80">
+                    {service.category || "Capability"}
+                  </p>
+                  <h3 className="mt-3 font-display text-2xl font-semibold leading-tight tracking-tight text-white">
+                    {service.title || "Untitled service"}
+                  </h3>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {(service.highlights || []).slice(0, 2).map((highlight) => (
+                      <span
+                        key={highlight}
+                        className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-muted"
+                      >
+                        {highlight}
+                      </span>
+                    ))}
+                  </div>
+                </motion.article>
+              ))}
+            </div>
+          ) : (
+            <PageDataEmpty message="No services available." />
+          )}
         </div>
       </section>
 
@@ -315,58 +373,66 @@ const HomePage = () => {
             ) : null}
           </div>
 
-          <div className="grid gap-5 lg:grid-cols-3">
-            {topProjects.map((project, index) => (
-              <motion.article
-                key={project.slug}
-                initial={{ opacity: 0, y: 34, scale: 0.97 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.75, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                whileHover={{ y: -8 }}
-                className="group relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.04] backdrop-blur-xl"
-              >
-                {isAdmin && project._id ? (
-                  <AdminEntityActions
-                    onEdit={() =>
-                      setEditingEntity({
-                        ...project,
-                        entityType: "projects",
-                      })
-                    }
-                    onDelete={() => deleteEntity("projects", project)}
-                  />
-                ) : null}
-                <Link
-                  to={`/projects/${project.slug}`}
-                  data-cursor="link"
-                  data-cursor-label="Open"
-                  className="block"
+          {isProjectsLoading ? (
+            <CardGridSkeleton count={3} className="h-72" />
+          ) : topProjects.length ? (
+            <div className="grid gap-5 lg:grid-cols-3">
+              {topProjects.map((project, index) => (
+                <motion.article
+                  key={project.slug}
+                  initial={{ opacity: 0, y: 34, scale: 0.97 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.75, delay: index * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  whileHover={{ y: -8 }}
+                  className="group relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.04] backdrop-blur-xl"
                 >
-                  <div className="relative overflow-hidden border-b border-white/10">
-                    <motion.img
-                      src={resolveMedia(project.coverImage)}
-                      alt={project.title}
-                      loading="lazy"
-                      className="h-60 w-full object-cover sm:h-64"
-                      whileHover={{ scale: 1.07, y: -4 }}
-                      transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+                  {isAdmin && project._id ? (
+                    <AdminEntityActions
+                      onEdit={() =>
+                        setQuickEditingEntity({
+                          ...project,
+                          entityType: "projects",
+                        })
+                      }
+                      onDelete={() => deleteEntity("projects", project)}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-base/70 via-transparent to-transparent opacity-70" />
-                  </div>
-                  <div className="space-y-3 px-5 py-5">
-                    <p className="text-[11px] uppercase tracking-[0.3em] text-accentSoft/80">
-                      Featured
-                    </p>
-                    <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
-                      {project.title}
-                    </h3>
-                    <p className="text-sm leading-7 text-muted">{project.tagline}</p>
-                  </div>
-                </Link>
-              </motion.article>
-            ))}
-          </div>
+                  ) : null}
+                  <Link
+                    to={`/projects/${project.slug}`}
+                    data-cursor="link"
+                    data-cursor-label="Open"
+                    className="block"
+                  >
+                    <div className="relative overflow-hidden border-b border-white/10">
+                      <motion.img
+                        src={resolveMedia(project.cardImage || project.coverImage)}
+                        alt={project.title}
+                        loading="lazy"
+                        className="aspect-video w-full object-cover"
+                        whileHover={{ scale: 1.07, y: -4 }}
+                        transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-base/70 via-transparent to-transparent opacity-70" />
+                    </div>
+                    <div className="space-y-3 px-5 py-5">
+                      <p className="text-[11px] uppercase tracking-[0.3em] text-accentSoft/80">
+                        Featured
+                      </p>
+                      <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
+                        {project.title}
+                      </h3>
+                      <p className="text-sm leading-7 text-muted">
+                        {project.shortDescription || project.tagline}
+                      </p>
+                    </div>
+                  </Link>
+                </motion.article>
+              ))}
+            </div>
+          ) : (
+            <PageDataEmpty message="No projects available." />
+          )}
         </div>
       </section>
 
@@ -398,6 +464,25 @@ const HomePage = () => {
           initialValue={editingEntity}
           onClose={() => setEditingEntity(null)}
           onSave={saveEntity}
+          onDelete={
+            editingEntity._id
+              ? () => deleteEntity(editingEntity.entityType, editingEntity)
+              : undefined
+          }
+        />
+      ) : null}
+
+      {quickEditingEntity ? (
+        <AdminQuickEditModal
+          title="Quick edit card"
+          entityType={quickEditingEntity.entityType}
+          initialValue={quickEditingEntity}
+          onClose={() => setQuickEditingEntity(null)}
+          onSave={saveQuickEntity}
+          onDelete={async () => {
+            await deleteEntity(quickEditingEntity.entityType, quickEditingEntity);
+            setQuickEditingEntity(null);
+          }}
         />
       ) : null}
     </motion.main>

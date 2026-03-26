@@ -3,8 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 
 const CustomCursor = () => {
   const [visible, setVisible] = useState(false);
-  const [hovered, setHovered] = useState(false);
-  const [label, setLabel] = useState("");
   const isFinePointer = useMemo(
     () => window.matchMedia && window.matchMedia("(pointer: fine)").matches,
     [],
@@ -20,22 +18,14 @@ const CustomCursor = () => {
       return undefined;
     }
 
-    const interactiveSelector =
-      'a, button, input, textarea, [data-cursor="link"], [data-cursor="large"]';
-
     const handlePointerMove = (event) => {
-      const target = event.target.closest(interactiveSelector);
-
       mouseX.set(event.clientX);
       mouseY.set(event.clientY);
       setVisible(true);
-      setHovered(Boolean(target));
-      setLabel(target?.getAttribute("data-cursor-label") || "");
     };
 
     const handleLeave = () => {
       setVisible(false);
-      setLabel("");
     };
 
     window.addEventListener("pointermove", handlePointerMove);
@@ -68,18 +58,12 @@ const CustomCursor = () => {
       <motion.div
         className="pointer-events-none fixed left-0 top-0 z-[129] flex items-center justify-center rounded-full border border-white/15 bg-surface/50 backdrop-blur-xl"
         animate={{
-          width: hovered ? 84 : 28,
-          height: hovered ? 84 : 28,
+          width: 28,
+          height: 28,
           opacity: visible ? 1 : 0,
-          borderColor: hovered
-            ? "rgb(var(--accent-primary-rgb) / 0.58)"
-            : "rgb(var(--border-rgb) / 0.72)",
-          backgroundColor: hovered
-            ? "rgb(var(--surface-rgb) / 0.92)"
-            : "rgb(var(--surface-rgb) / 0.56)",
-          boxShadow: hovered
-            ? "0 0 20px rgb(var(--accent-primary-rgb) / 0.24), 0 0 24px rgb(var(--accent-secondary-rgb) / 0.18)"
-            : "0 0 10px rgb(var(--accent-primary-rgb) / 0.12)",
+          borderColor: "rgb(var(--border-rgb) / 0.72)",
+          backgroundColor: "rgb(var(--surface-rgb) / 0.56)",
+          boxShadow: "0 0 10px rgb(var(--accent-primary-rgb) / 0.12)",
         }}
         transition={{ type: "spring", stiffness: 190, damping: 24 }}
         style={{
@@ -88,14 +72,7 @@ const CustomCursor = () => {
           translateX: "-50%",
           translateY: "-50%",
         }}
-      >
-        <motion.span
-          animate={{ opacity: hovered && label ? 1 : 0, scale: hovered && label ? 1 : 0.8 }}
-          className="text-[10px] font-semibold uppercase tracking-[0.24em] text-accentSoft"
-        >
-          {label}
-        </motion.span>
-      </motion.div>
+      />
     </>
   );
 };

@@ -1,10 +1,36 @@
 import { motion } from "framer-motion";
 
 import { pageTransition } from "../animations/variants";
-import { counsellingSteps } from "../assets/mockData";
 import ContactPanel from "../components/ContactPanel";
 import Reveal from "../components/Reveal";
 import SectionHeader from "../components/SectionHeader";
+
+const counsellingSteps = [
+  {
+    step: "01",
+    title: "Idea validation",
+    description:
+      "We pressure-test the idea early by checking audience fit, production scope, platform needs, and the clearest value proposition.",
+  },
+  {
+    step: "02",
+    title: "Design framing",
+    description:
+      "Core mechanics, experience goals, art direction, and milestone expectations are shaped into a focused design route.",
+  },
+  {
+    step: "03",
+    title: "Development planning",
+    description:
+      "We define the build approach, team needs, technical risks, and a practical production roadmap before expensive momentum starts.",
+  },
+  {
+    step: "04",
+    title: "Testing and refinement",
+    description:
+      "We validate feel, flow, usability, and feature readiness so the project matures with fewer surprises.",
+  },
+];
 
 const CounsellingPage = () => (
   <motion.main

@@ -19,9 +19,28 @@ const courseSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    level: {
+      type: String,
+      default: "Beginner",
+      trim: true,
+    },
     summary: {
       type: String,
-      required: true,
+      default: "",
+      trim: true,
+    },
+    shortDescription: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    cardImage: {
+      type: String,
+      default: "",
+    },
+    carouselImage: {
+      type: String,
+      default: "",
       trim: true,
     },
     curriculum: {
