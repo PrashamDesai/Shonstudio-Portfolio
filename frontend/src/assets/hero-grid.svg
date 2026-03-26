@@ -1,0 +1,52 @@
+<svg width="900" height="760" viewBox="0 0 900 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="760" rx="40" fill="#0D1217"/>
+  <g opacity="0.4">
+    <path d="M74 102H826" stroke="url(#paint0_linear_12_2)" stroke-opacity="0.4"/>
+    <path d="M74 202H826" stroke="url(#paint1_linear_12_2)" stroke-opacity="0.4"/>
+    <path d="M74 302H826" stroke="url(#paint2_linear_12_2)" stroke-opacity="0.4"/>
+    <path d="M74 402H826" stroke="url(#paint3_linear_12_2)" stroke-opacity="0.4"/>
+    <path d="M74 502H826" stroke="url(#paint4_linear_12_2)" stroke-opacity="0.4"/>
+    <path d="M74 602H826" stroke="url(#paint5_linear_12_2)" stroke-opacity="0.4"/>
+    <path d="M164 62V698" stroke="url(#paint6_linear_12_2)" stroke-opacity="0.4"/>
+    <path d="M314 62V698" stroke="url(#paint7_linear_12_2)" stroke-opacity="0.4"/>
+    <path d="M464 62V698" stroke="url(#paint8_linear_12_2)" stroke-opacity="0.4"/>
+    <path d="M614 62V698" stroke="url(#paint9_linear_12_2)" stroke-opacity="0.4"/>
+    <path d="M764 62V698" stroke="url(#paint10_linear_12_2)" stroke-opacity="0.4"/>
+  </g>
+  <circle cx="235" cy="238" r="110" fill="url(#paint11_radial_12_2)"/>
+  <circle cx="626" cy="424" r="168" fill="url(#paint12_radial_12_2)"/>
+  <rect x="160" y="494" width="292" height="126" rx="24" fill="white" fill-opacity="0.04" stroke="white" stroke-opacity="0.08"/>
+  <rect x="196" y="530" width="134" height="18" rx="9" fill="#A0E871"/>
+  <rect x="196" y="562" width="222" height="10" rx="5" fill="white" fill-opacity="0.12"/>
+  <rect x="478" y="162" width="248" height="284" rx="28" fill="white" fill-opacity="0.04" stroke="white" stroke-opacity="0.08"/>
+  <rect x="514" y="198" width="176" height="176" rx="88" fill="url(#paint13_linear_12_2)"/>
+  <defs>
+    <linearGradient id="paint0_linear_12_2" x1="74" y1="102.5" x2="826" y2="102.5" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="paint1_linear_12_2" x1="74" y1="202.5" x2="826" y2="202.5" xlink:href="#paint0_linear_12_2"/>
+    <linearGradient id="paint2_linear_12_2" x1="74" y1="302.5" x2="826" y2="302.5" xlink:href="#paint0_linear_12_2"/>
+    <linearGradient id="paint3_linear_12_2" x1="74" y1="402.5" x2="826" y2="402.5" xlink:href="#paint0_linear_12_2"/>
+    <linearGradient id="paint4_linear_12_2" x1="74" y1="502.5" x2="826" y2="502.5" xlink:href="#paint0_linear_12_2"/>
+    <linearGradient id="paint5_linear_12_2" x1="74" y1="602.5" x2="826" y2="602.5" xlink:href="#paint0_linear_12_2"/>
+    <linearGradient id="paint6_linear_12_2" x1="164.5" y1="62" x2="164.5" y2="698" xlink:href="#paint0_linear_12_2"/>
+    <linearGradient id="paint7_linear_12_2" x1="314.5" y1="62" x2="314.5" y2="698" xlink:href="#paint0_linear_12_2"/>
+    <linearGradient id="paint8_linear_12_2" x1="464.5" y1="62" x2="464.5" y2="698" xlink:href="#paint0_linear_12_2"/>
+    <linearGradient id="paint9_linear_12_2" x1="614.5" y1="62" x2="614.5" y2="698" xlink:href="#paint0_linear_12_2"/>
+    <linearGradient id="paint10_linear_12_2" x1="764.5" y1="62" x2="764.5" y2="698" xlink:href="#paint0_linear_12_2"/>
+    <radialGradient id="paint11_radial_12_2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(235 238) rotate(90) scale(110)">
+      <stop stop-color="#9FE870"/>
+      <stop offset="1" stop-color="#9FE870" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="paint12_radial_12_2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(626 424) rotate(90) scale(168)">
+      <stop stop-color="#6B8DFF"/>
+      <stop offset="1" stop-color="#6B8DFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="paint13_linear_12_2" x1="514" y1="198" x2="690" y2="374" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9FE870"/>
+      <stop offset="1" stop-color="#6B8DFF"/>
+    </linearGradient>
+  </defs>
+</svg>
