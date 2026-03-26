@@ -1,0 +1,1 @@
+import{j as s,m as n}from"./index-Uwvf062X.js";const p=({children:i,className:t="",delay:e=0,y:o=24,scale:r=.975,amount:a=.2})=>s.jsx(n.div,{className:t,initial:{opacity:0,y:o,scale:r,filter:"blur(10px)"},whileInView:{opacity:1,y:0,scale:1,filter:"blur(0px)"},viewport:{once:!0,amount:a},transition:{duration:.85,delay:e,ease:[.22,1,.36,1]},children:i});export{p as R};

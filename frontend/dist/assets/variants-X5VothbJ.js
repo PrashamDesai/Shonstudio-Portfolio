@@ -1,0 +1,1 @@
+const i={initial:{opacity:0,y:18,scale:.985,filter:"blur(14px)"},enter:{opacity:1,y:0,scale:1,filter:"blur(0px)",transition:{duration:.75,ease:[.22,1,.36,1],staggerChildren:.08}},exit:{opacity:0,y:-10,scale:1.01,filter:"blur(10px)",transition:{duration:.42,ease:[.65,0,.35,1]}}};export{i as p};
