@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { teamTemplate } from "../admin/entityTemplates";
 import { pageTransition } from "../animations/variants";
 import AdminTeamModal from "../components/AdminTeamModal";
-import { CardGridSkeleton, PageDataEmpty } from "../components/ApiState";
+import { PageDataEmpty } from "../components/ApiState";
 import TeamModal from "../components/TeamModal";
 import TeamSection from "../components/TeamSection";
 import { useAdmin } from "../context/AdminContext.jsx";
@@ -15,6 +15,50 @@ const filterOptions = [
   { value: "developer", label: "Developing" },
   { value: "designer", label: "Designing" },
 ];
+
+const TeamCardsSkeleton = ({ count = 6 }) => (
+  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+    {Array.from({ length: count }).map((_, index) => (
+      <div
+        key={`team-skeleton-${index}`}
+        className="section-shell panel-glow relative flex min-h-[31rem] animate-pulse flex-col overflow-hidden"
+      >
+        <div className="relative h-36 overflow-hidden border-b border-white/8 bg-white/[0.04]">
+          <div className="absolute left-4 top-4 h-5 w-24 rounded-full bg-white/10" />
+          <div className="absolute -left-7 top-7 h-16 w-16 rounded-full border border-white/10" />
+          <div className="absolute right-6 top-5 h-8 w-8 rounded-full border border-white/10" />
+          <div className="absolute right-16 bottom-5 h-14 w-14 rounded-full border border-white/10" />
+        </div>
+
+        <div className="absolute left-1/2 top-36 -translate-x-1/2 -translate-y-1/2">
+          <div className="h-24 w-24 rounded-full border-2 border-white/20 bg-white/10 ring-4 ring-base/80" />
+        </div>
+
+        <div className="flex flex-1 flex-col space-y-5 p-6 pt-16">
+          <div className="flex flex-col items-center">
+            <div className="h-7 w-44 rounded-lg bg-white/10" />
+            <div className="mt-3 h-4 w-32 rounded-lg bg-white/10" />
+            <div className="mt-5 w-full space-y-3">
+              <div className="h-3 w-full rounded bg-white/10" />
+              <div className="h-3 w-11/12 rounded bg-white/10" />
+              <div className="h-3 w-5/6 rounded bg-white/10" />
+              <div className="h-3 w-4/6 rounded bg-white/10" />
+            </div>
+          </div>
+
+          <div className="mt-auto flex flex-wrap gap-2">
+            {Array.from({ length: 4 }).map((__, chipIndex) => (
+              <div
+                key={`team-skeleton-chip-${index}-${chipIndex}`}
+                className="h-6 w-20 rounded-full bg-white/10"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+);
 
 const TeamPage = () => {
   const [selectedMember, setSelectedMember] = useState(null);
@@ -127,7 +171,7 @@ const TeamPage = () => {
       </section>
 
       {loading && !teamMembers.length ? (
-        <CardGridSkeleton count={6} className="h-72" />
+        <TeamCardsSkeleton count={activeFilter === "all" ? 6 : 3} />
       ) : isEmpty ? (
         <PageDataEmpty message="No team members available." />
       ) : (

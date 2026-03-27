@@ -8,6 +8,7 @@ import { resolveMedia } from "../assets/mediaMap";
 import AdminEntityModal from "../components/AdminEntityModal";
 import { CardListSkeleton, PageDataEmpty } from "../components/ApiState";
 import HeroCarousel from "../components/HeroCarousel";
+import { mergeToolsWithMockAssets } from "../components/mockToolAssets";
 import Reveal from "../components/Reveal";
 import SectionHeader from "../components/SectionHeader";
 import { getToolCategoriesWithCounts, mapToolForCarousel } from "../components/toolCatalog";
@@ -19,10 +20,11 @@ const ToolsPage = () => {
   const { data: tools, loading, error, isEmpty } = useCollection("/tools");
   const { isAdmin, requestAdmin, signalRefresh } = useAdmin();
 
-  const categoryCards = useMemo(() => getToolCategoriesWithCounts(tools), [tools]);
+  const mergedTools = useMemo(() => mergeToolsWithMockAssets(tools), [tools]);
+  const categoryCards = useMemo(() => getToolCategoriesWithCounts(mergedTools), [mergedTools]);
   const carouselItems = useMemo(
-    () => tools.map((tool, index) => mapToolForCarousel(tool, index)),
-    [tools],
+    () => mergedTools.map((tool, index) => mapToolForCarousel(tool, index)),
+    [mergedTools],
   );
 
   const saveTool = async (payload) => {
@@ -94,7 +96,7 @@ const ToolsPage = () => {
 
       {loading && !tools.length ? (
         <CardListSkeleton count={3} className="h-80" />
-      ) : isEmpty ? (
+      ) : isEmpty && !mergedTools.length ? (
         <PageDataEmpty message="No tools available." />
       ) : (
         <section className="flex w-full flex-col gap-6">

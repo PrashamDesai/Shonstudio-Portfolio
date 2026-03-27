@@ -102,13 +102,19 @@ export const filterToolsByCategorySlug = (tools = [], categorySlug = "") => {
   return tools.filter((tool) => getToolCategory(tool) === category.key);
 };
 
-export const mapToolForCarousel = (tool = {}, index = 0) => ({
-  id: tool._id || tool.id || tool.slug || `tool-${index}`,
-  slug: tool.slug || slugify(tool.title || `tool-${index}`),
-  title: tool.title || "Tool",
-  shortDescription: tool.shortDescription || tool.description || tool.useCase || "Production-ready studio tool.",
-  carouselImage: tool.carouselImage || tool.cardImage || tool.image || "adaptive-dialogue-builder",
-});
+export const mapToolForCarousel = (tool = {}, index = 0) => {
+  const resolvedCategory = getToolCategory(tool);
+  const categorySlug = CATEGORY_DEFINITIONS.find((item) => item.key === resolvedCategory)?.slug || "";
+
+  return {
+    id: tool._id || tool.id || tool.slug || `tool-${index}`,
+    slug: tool.slug || slugify(tool.title || `tool-${index}`),
+    categorySlug,
+    title: tool.title || "Tool",
+    shortDescription: tool.shortDescription || tool.description || tool.useCase || "Production-ready studio tool.",
+    carouselImage: tool.carouselImage || tool.cardImage || tool.image || "adaptive-dialogue-builder",
+  };
+};
 
 export { CATEGORY_DEFINITIONS };
 

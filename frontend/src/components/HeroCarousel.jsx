@@ -9,7 +9,7 @@ const categoryPath = {
   projects: (item) => (item?.slug || item?.id ? `/projects/${item?.slug || item?.id}` : "/projects"),
   services: (item) => (item?.slug || item?.id ? `/services/${item?.slug || item?.id}` : "/services"),
   training: (item) => (item?.slug || item?.id ? `/training/${item?.slug || item?.id}` : "/training"),
-  tools: (item) => (item?.slug || item?.id ? `/tools/${item?.slug || item?.id}` : "/tools"),
+  tools: (item) => (item?.categorySlug ? `/tools/category/${item.categorySlug}` : "/tools"),
 };
 
 const getTargetPath = (categoryKey, item) => categoryPath[categoryKey]?.(item) || "/";

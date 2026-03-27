@@ -14,7 +14,7 @@ const ToolCard = ({ tool, adminActions = null }) => (
   >
     {adminActions ? <AdminEntityActions onEdit={adminActions.onEdit} onDelete={adminActions.onDelete} /> : null}
     <Link
-      to={`/tools/${tool.slug}`}
+      to="/tools"
       className="block h-full"
       data-cursor="link"
       data-cursor-label="Open"

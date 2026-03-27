@@ -28,7 +28,6 @@ const TeamPage = lazyWithPreload(() => import("./pages/Team"));
 const TrainingCatalogPage = lazyWithPreload(() => import("./pages/TeachingPage"));
 const TrainingPage = lazyWithPreload(() => import("./pages/TrainingPage"));
 const ToolCategoryPage = lazyWithPreload(() => import("./pages/ToolCategoryPage"));
-const ToolPage = lazyWithPreload(() => import("./pages/ToolPage"));
 const ToolsPage = lazyWithPreload(() => import("./pages/ToolsPage"));
 
 const preloadRouteComponents = () =>
@@ -45,7 +44,6 @@ const preloadRouteComponents = () =>
     TrainingPage.preload(),
     ToolsPage.preload(),
     ToolCategoryPage.preload(),
-    ToolPage.preload(),
     NotFoundPage.preload(),
   ]);
 
@@ -104,7 +102,6 @@ const App = () => {
                         <Route path="/teaching" element={<Navigate to="/training" replace />} />
                         <Route path="/tools" element={<ToolsPage />} />
                         <Route path="/tools/category/:categorySlug" element={<ToolCategoryPage />} />
-                        <Route path="/tools/:slug" element={<ToolPage />} />
                         <Route path="*" element={<NotFoundPage />} />
                       </Routes>
                     </AnimatePresence>

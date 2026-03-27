@@ -16,7 +16,7 @@ const TeamCard = ({ member, onOpen, adminActions = null }) => (
   <motion.article
     whileHover={{ y: -8, scale: 1.01 }}
     transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-    className="section-shell panel-glow group relative flex h-full cursor-pointer flex-col overflow-hidden"
+    className="section-shell panel-glow group relative flex h-full min-h-[31rem] cursor-pointer flex-col overflow-hidden"
     onClick={() => onOpen(member)}
     onKeyDown={(event) => {
       if (event.key === "Enter" || event.key === " ") {
@@ -72,10 +72,12 @@ const TeamCard = ({ member, onOpen, adminActions = null }) => (
           {member.name}
         </h3>
         <p className="mt-2 text-center text-sm uppercase tracking-[0.22em] text-mutedDeep">{member.role}</p>
-        <p className="mt-4 text-sm leading-7 text-muted">{member.bio}</p>
+        <p className="mt-4 min-h-[7rem] overflow-hidden text-sm leading-7 text-muted [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4]">
+          {member.bio}
+        </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="mt-auto flex flex-wrap gap-2">
         {(member.coreTech || []).slice(0, 4).map((tech) => (
           <span key={tech} className="theme-chip rounded-full px-3 py-1 text-xs">
             {tech}
