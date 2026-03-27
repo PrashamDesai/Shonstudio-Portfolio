@@ -9,14 +9,12 @@ import AdminEntityActions from "../components/AdminEntityActions";
 import AdminEntityModal from "../components/AdminEntityModal";
 import AdminQuickEditModal from "../components/AdminQuickEditModal";
 import { CardGridSkeleton, PageDataEmpty } from "../components/ApiState";
-import HeroCarousel from "../components/HeroCarousel";
 import ToolAssetModal from "../components/ToolAssetModal";
 import { mergeToolsWithMockAssets } from "../components/mockToolAssets";
 import {
   CATEGORY_DEFINITIONS,
   filterToolsByCategorySlug,
   getCategoryBySlug,
-  mapToolForCarousel,
 } from "../components/toolCatalog";
 import { useAdmin } from "../context/AdminContext.jsx";
 import { useCollection } from "../hooks/usePageData";
@@ -104,10 +102,6 @@ const ToolCategoryPage = () => {
   const filteredTools = useMemo(
     () => categoryTools.filter((tool) => matchesPriceFilter(tool, priceFilter)),
     [categoryTools, priceFilter],
-  );
-  const carouselItems = useMemo(
-    () => filteredTools.map((tool, index) => mapToolForCarousel(tool, index)),
-    [filteredTools],
   );
 
   useEffect(() => {
@@ -260,12 +254,6 @@ const ToolCategoryPage = () => {
           </label>
         </div>
       </section>
-
-      {carouselItems.length ? (
-        <section className="relative h-[20rem] sm:h-[24rem]">
-          <HeroCarousel categories={[{ key: "tools", label: "Tools", items: carouselItems }]} />
-        </section>
-      ) : null}
 
       {loading && !tools.length ? (
         <CardGridSkeleton count={6} className="h-80" />
