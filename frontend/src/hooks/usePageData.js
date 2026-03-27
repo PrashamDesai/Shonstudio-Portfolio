@@ -32,6 +32,10 @@ const CACHE_TTL_MS = 30_000;
 const responseCache = new Map();
 const EMPTY_ARRAY = [];
 
+const endpointFallbackMap = {
+  "/team": ["/teams", "/team-members"],
+};
+
 const getCachedResponse = (key) => {
   const cached = responseCache.get(key);
 
@@ -125,9 +129,42 @@ const useApiRequest = (
 
     const fetchData = async () => {
       try {
-        const response = await api.get(endpoint, {
-          signal: controller.signal,
-        });
+        const endpointCandidates = [
+          endpoint,
+          ...(endpointFallbackMap[endpoint] || []),
+        ];
+
+        let response = null;
+        let resolvedEndpoint = endpoint;
+        let lastError = null;
+
+        for (const candidate of endpointCandidates) {
+          try {
+            const candidateResponse = await api.get(candidate, {
+              signal: controller.signal,
+            });
+            response = candidateResponse;
+            resolvedEndpoint = candidate;
+            break;
+          } catch (candidateError) {
+            lastError = candidateError;
+
+            if (axios.isCancel(candidateError)) {
+              throw candidateError;
+            }
+
+            const status = Number(candidateError?.response?.status || 0);
+            const isNotFound = status === 404;
+
+            if (!isNotFound || candidate === endpointCandidates[endpointCandidates.length - 1]) {
+              throw candidateError;
+            }
+          }
+        }
+
+        if (!response && lastError) {
+          throw lastError;
+        }
 
         if (!active) {
           return;
@@ -140,6 +177,13 @@ const useApiRequest = (
         setNotFound(false);
         setStatusCode(response.status || 200);
         setCachedResponse(cacheKey, nextData);
+
+        if (resolvedEndpoint !== endpoint) {
+          responseCache.set(resolvedEndpoint, {
+            timestamp: Date.now(),
+            data: nextData,
+          });
+        }
       } catch (requestError) {
         if (!active || axios.isCancel(requestError)) {
           return;
