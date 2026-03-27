@@ -3,8 +3,28 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useAdmin } from "../context/AdminContext.jsx";
 
+const normalizeApiBase = (rawUrl) => {
+  const trimmed = String(rawUrl || "").trim();
+
+  if (!trimmed) {
+    return "/api";
+  }
+
+  const withoutTrailingSlash = trimmed.replace(/\/+$/, "");
+
+  if (withoutTrailingSlash.endsWith("/api")) {
+    return withoutTrailingSlash;
+  }
+
+  return `${withoutTrailingSlash}/api`;
+};
+
+const PUBLIC_API_BASE = normalizeApiBase(
+  import.meta.env.VITE_API_URL || "https://shonstudio-portfolio.onrender.com",
+);
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api",
+  baseURL: PUBLIC_API_BASE,
   timeout: 10000,
 });
 

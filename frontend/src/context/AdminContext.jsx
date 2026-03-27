@@ -1,8 +1,28 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const ADMIN_STORAGE_KEY = "shonstudioAdminToken";
-const ADMIN_LOGIN_PATH = "/api/shonstudio-admin-secured/login";
-const ADMIN_API_BASE = "/api/shonstudio-admin-secured";
+
+const normalizeApiBase = (rawUrl) => {
+  const trimmed = String(rawUrl || "").trim();
+
+  if (!trimmed) {
+    return "/api";
+  }
+
+  const withoutTrailingSlash = trimmed.replace(/\/+$/, "");
+
+  if (withoutTrailingSlash.endsWith("/api")) {
+    return withoutTrailingSlash;
+  }
+
+  return `${withoutTrailingSlash}/api`;
+};
+
+const API_BASE = normalizeApiBase(
+  import.meta.env.VITE_API_URL || "https://shonstudio-portfolio.onrender.com",
+);
+const ADMIN_LOGIN_PATH = `${API_BASE}/shonstudio-admin-secured/login`;
+const ADMIN_API_BASE = `${API_BASE}/shonstudio-admin-secured`;
 
 const AdminContext = createContext(null);
 
