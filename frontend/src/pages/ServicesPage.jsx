@@ -5,7 +5,7 @@ import { serviceTemplate } from "../admin/entityTemplates";
 import { pageTransition } from "../animations/variants";
 import AdminEntityModal from "../components/AdminEntityModal";
 import AdminQuickEditModal from "../components/AdminQuickEditModal";
-import { CardGridSkeleton, PageDataEmpty } from "../components/ApiState";
+import { CardListSkeleton, PageDataEmpty } from "../components/ApiState";
 import Reveal from "../components/Reveal";
 import SectionHeader from "../components/SectionHeader";
 import ServiceCard from "../components/ServiceCard";
@@ -100,7 +100,7 @@ const ServicesPage = () => {
       {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
 
       {loading && !services.length ? (
-        <CardGridSkeleton count={6} className="h-80" />
+        <CardListSkeleton count={6} className="h-72" />
       ) : isEmpty ? (
         <PageDataEmpty message="No services available." />
       ) : (

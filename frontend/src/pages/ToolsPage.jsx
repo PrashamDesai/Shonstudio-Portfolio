@@ -6,7 +6,7 @@ import { toolTemplate } from "../admin/entityTemplates";
 import { pageTransition } from "../animations/variants";
 import { resolveMedia } from "../assets/mediaMap";
 import AdminEntityModal from "../components/AdminEntityModal";
-import { CardGridSkeleton, PageDataEmpty } from "../components/ApiState";
+import { CardListSkeleton, PageDataEmpty } from "../components/ApiState";
 import HeroCarousel from "../components/HeroCarousel";
 import Reveal from "../components/Reveal";
 import SectionHeader from "../components/SectionHeader";
@@ -93,7 +93,7 @@ const ToolsPage = () => {
 
 
       {loading && !tools.length ? (
-        <CardGridSkeleton count={6} className="h-80" />
+        <CardListSkeleton count={3} className="h-80" />
       ) : isEmpty ? (
         <PageDataEmpty message="No tools available." />
       ) : (

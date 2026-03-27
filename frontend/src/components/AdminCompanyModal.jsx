@@ -110,6 +110,7 @@ const AdminCompanyModal = ({ title, initialValue, onClose, onSave }) => {
 
   return (
     <Modal open onClose={onClose} maxWidthClass="max-w-3xl" panelClassName="admin-modal-panel">
+      <div className="flex h-full flex-col overflow-hidden">
         <div className="flex items-center justify-between border-b border-white/8 px-6 py-5">
           <div>
             <h2 className="font-display text-2xl font-semibold text-white">{title}</h2>
@@ -120,7 +121,7 @@ const AdminCompanyModal = ({ title, initialValue, onClose, onSave }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-6">
+        <form id="admin-company-form" onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-6">
           <div className="grid gap-5">
             <Field label="Parent company">
               <textarea
@@ -220,20 +221,22 @@ const AdminCompanyModal = ({ title, initialValue, onClose, onSave }) => {
           </div>
 
           {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
-
-          <div className="sticky bottom-0 mt-6 flex justify-end gap-3 border-t border-white/8 bg-surface/95 pt-5">
-            <button type="button" onClick={onClose} className="admin-secondary-button px-5 py-3">
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="admin-save-button disabled:opacity-70"
-            >
-              {isSaving ? "Saving..." : "Save"}
-            </button>
-          </div>
         </form>
+
+        <div className="flex justify-end gap-3 border-t border-white/8 bg-surface/95 px-6 py-5">
+          <button type="button" onClick={onClose} className="admin-secondary-button px-5 py-3">
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="admin-company-form"
+            disabled={isSaving}
+            className="admin-save-button disabled:opacity-70"
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </div>
     </Modal>
   );
 };

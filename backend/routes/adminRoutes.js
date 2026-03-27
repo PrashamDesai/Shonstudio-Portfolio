@@ -27,7 +27,7 @@ import { getTeamMembers } from "../controllers/teamController.js";
 import verifyAdmin from "../middleware/verifyAdmin.js";
 
 const router = express.Router();
-const adminBasePath = "/api/shonstudio-admin-prasham9114";
+const adminBasePath = "/api/shonstudio-admin-secured";
 
 const createShell = (title, body, script = "") => `<!DOCTYPE html>
 <html lang="en">
@@ -265,39 +265,72 @@ const createBootstrapPage = () =>
 
 const createLoginPage = () =>
   createShell(
-    "ShonStudio Admin Login",
-    `<div class="shell" style="max-width:420px;">
-      <div class="header">
-        <p class="eyebrow">ShonStudio Admin</p>
-        <h1>Secure admin login</h1>
-        <p class="subcopy">
-          Sign in with the configured admin credentials to access the admin home and CRUD operations.
-        </p>
-      </div>
-      <div class="content">
-        <form id="admin-login-form">
-          <div class="field">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" autocomplete="username" required />
+    "ShonStudio Admin",
+    `<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+      <div class="shell" style="max-width:420px; width: 100%;" id="page-container">
+        <!-- Login form (shown when not logged in) -->
+        <div id="login-form-container">
+          <div class="header">
+            <p class="eyebrow">ShonStudio Admin</p>
+            <h1>Secure admin login</h1>
+            <p class="subcopy">
+              Sign in with the configured admin credentials to access the admin home and CRUD operations.
+            </p>
           </div>
-          <div class="field">
-            <label for="password">Password</label>
-            <input id="password" name="password" type="password" autocomplete="current-password" required />
+          <div class="content">
+            <form id="admin-login-form">
+              <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" autocomplete="username" required />
+              </div>
+              <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="current-password" required />
+              </div>
+              <button id="submit-button" type="submit">Log in</button>
+              <div id="message" class="message"></div>
+            </form>
           </div>
-          <button id="submit-button" type="submit">Log in</button>
-          <div id="message" class="message"></div>
-        </form>
+        </div>
+
+        <!-- Logout page (shown when logged in) -->
+        <div id="logout-container" style="display: none;">
+          <div class="header">
+            <p class="eyebrow">ShonStudio Admin</p>
+            <h1>Admin session active</h1>
+            <p class="subcopy">
+              You are currently logged in to the admin panel. Go back to the portfolio or log out below.
+            </p>
+          </div>
+          <div class="content">
+            <div class="actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <button id="back-button" class="secondary" style="flex: 1;">Back to portfolio</button>
+              <button id="logout-button" class="danger" style="flex: 1;">Log out</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>`,
     `
-      if (sessionStorage.getItem("shonstudioAdminToken")) {
-        window.location.replace("/");
-      }
-
+      const token = sessionStorage.getItem("shonstudioAdminToken");
+      const loginFormContainer = document.getElementById("login-form-container");
+      const logoutContainer = document.getElementById("logout-container");
       const form = document.getElementById("admin-login-form");
       const message = document.getElementById("message");
       const submitButton = document.getElementById("submit-button");
+      const backButton = document.getElementById("back-button");
+      const logoutButton = document.getElementById("logout-button");
 
+      // Show the appropriate view based on login status
+      if (token) {
+        loginFormContainer.style.display = "none";
+        logoutContainer.style.display = "block";
+      } else {
+        loginFormContainer.style.display = "block";
+        logoutContainer.style.display = "none";
+      }
+
+      // Login form submission
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
 
@@ -328,7 +361,8 @@ const createLoginPage = () =>
           }
 
           sessionStorage.setItem("shonstudioAdminToken", result.token);
-          window.location.replace("/");
+          loginFormContainer.style.display = "none";
+          logoutContainer.style.display = "block";
         } catch (error) {
           message.className = "message error";
           message.textContent = error.message || "Unable to log in";
@@ -336,6 +370,23 @@ const createLoginPage = () =>
           submitButton.disabled = false;
           submitButton.textContent = "Log in";
         }
+      });
+
+      // Back to portfolio button
+      backButton.addEventListener("click", () => {
+        window.location.replace("/");
+      });
+
+      // Logout button
+      logoutButton.addEventListener("click", () => {
+        sessionStorage.removeItem("shonstudioAdminToken");
+        loginFormContainer.style.display = "block";
+        logoutContainer.style.display = "none";
+        message.className = "message success";
+        message.textContent = "Logged out successfully";
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       });
     `,
   );

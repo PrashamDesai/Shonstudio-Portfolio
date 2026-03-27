@@ -51,6 +51,8 @@ const visionSceneSchema = new mongoose.Schema(
   },
 );
 
+visionSceneSchema.index({ createdAt: 1 });
+
 const VisionScene = mongoose.model("VisionScene", visionSceneSchema);
 
 export default VisionScene;

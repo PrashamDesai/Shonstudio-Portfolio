@@ -37,3 +37,14 @@ export const CardGridSkeleton = ({ count = 6, className = "h-72" }) => (
     ))}
   </div>
 );
+
+export const CardListSkeleton = ({ count = 3, className = "h-80" }) => (
+  <div className="flex w-full flex-col gap-6">
+    {Array.from({ length: count }).map((_, index) => (
+      <div
+        key={`skeleton-list-${index}`}
+        className={`section-shell panel-glow animate-pulse rounded-[1.9rem] border border-white/10 bg-white/[0.03] w-full ${className}`}
+      />
+    ))}
+  </div>
+);

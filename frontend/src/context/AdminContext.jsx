@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 const ADMIN_STORAGE_KEY = "shonstudioAdminToken";
-const ADMIN_LOGIN_PATH = "/api/shonstudio-admin-prasham9114/login";
-const ADMIN_API_BASE = "/api/shonstudio-admin-prasham9114";
+const ADMIN_LOGIN_PATH = "/api/shonstudio-admin-secured/login";
+const ADMIN_API_BASE = "/api/shonstudio-admin-secured";
 
 const AdminContext = createContext(null);
 

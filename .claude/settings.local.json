@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find backend:*)",
+      "Bash(grep -r shonstudio-admin-prasham9114 backend/ frontend/src --include=*.js --include=*.jsx)"
+    ]
+  }
+}

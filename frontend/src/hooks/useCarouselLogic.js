@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const CATEGORY_INTERVAL_MS = 12000;
+const CATEGORY_INTERVAL_MS = 8000;
 const TICK_MS = 100;
 
 const clampIndex = (index, length) => {
@@ -90,6 +90,19 @@ export const useCarouselLogic = ({ categories = [], paused = false }) => {
     : 0;
   const activeItem = activeCategory?.items?.[activeItemIndex] || null;
 
+  const nextCategoryIndex = validCategories.length ? clampIndex(activeCategoryIndex + 1, validCategories.length) : 0;
+  const nextCategory = validCategories[nextCategoryIndex] || null;
+
+  let nextItemIndex = 0;
+  if (nextCategory) {
+    if (nextCategoryIndex === activeCategoryIndex) {
+      nextItemIndex = clampIndex((itemIndexMap[nextCategory.key] || 0) + 1, nextCategory.items.length);
+    } else {
+      nextItemIndex = clampIndex(itemIndexMap[nextCategory.key] || 0, nextCategory.items.length);
+    }
+  }
+  const nextItem = nextCategory?.items?.[nextItemIndex] || null;
+
   return {
     categories: validCategories,
     activeCategory,
@@ -97,5 +110,6 @@ export const useCarouselLogic = ({ categories = [], paused = false }) => {
     activeItem,
     activeItemIndex,
     categoryProgress,
+    nextItem,
   };
 };

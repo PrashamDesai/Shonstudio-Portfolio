@@ -92,11 +92,25 @@ toolSchema.pre("validate", function toolSlug(next) {
     this.slug = this.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
+    }
+  },
+  {
+    timestamps: true
+  },
+);
+
+toolSchema.pre("validate", function toolSlug(next) {
+  if (!this.slug && this.title) {
+    this.slug = this.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
   }
 
   next();
 });
+
+toolSchema.index({ createdAt: -1 });
 
 const Tool = mongoose.model("Tool", toolSchema);
 

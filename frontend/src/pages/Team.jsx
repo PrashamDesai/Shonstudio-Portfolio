@@ -160,7 +160,11 @@ const TeamPage = () => {
         </>
       )}
 
-      <TeamModal member={selectedMember} onClose={() => setSelectedMember(null)} />
+      <TeamModal
+        member={selectedMember}
+        onClose={() => setSelectedMember(null)}
+        isAdmin={isAdmin}
+      />
 
       {editingMember ? (
         <AdminTeamModal

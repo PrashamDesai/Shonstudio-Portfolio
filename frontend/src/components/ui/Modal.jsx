@@ -35,7 +35,7 @@ const Modal = ({
     <AnimatePresence>
       {open ? (
         <motion.div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md"
+          className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -47,7 +47,7 @@ const Modal = ({
           }}
         >
           <motion.div
-            className={`mx-4 w-full ${maxWidthClass} max-h-[85vh] overflow-hidden rounded-2xl border border-white/10 bg-surface/95 shadow-soft ${panelClassName}`}
+            className={`mx-4 my-8 flex w-full ${maxWidthClass} max-h-[calc(100vh-64px)] flex-col rounded-2xl border border-white/10 bg-surface/95 shadow-soft ${panelClassName}`}
             initial={{ opacity: 0, scale: 0.96, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.98, y: 10 }}

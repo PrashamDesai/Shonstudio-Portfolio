@@ -94,6 +94,8 @@ projectSchema.pre("validate", function projectSlug(next) {
   next();
 });
 
+projectSchema.index({ createdAt: -1 });
+
 const Project = mongoose.model("Project", projectSchema);
 
 export default Project;

@@ -34,7 +34,7 @@ const TeamSection = ({
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {members.map((member, index) => (
-          <Reveal key={member._id || member.name} delay={index * 0.05}>
+          <Reveal key={member._id || member.name} delay={index * 0.05} className="h-full">
             <TeamCard
               member={member}
               onOpen={onOpenMember}

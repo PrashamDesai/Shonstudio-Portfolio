@@ -2,7 +2,6 @@ import { AnimatePresence, domAnimation, LazyMotion, LayoutGroup, MotionConfig } 
 import { lazy, Suspense, useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
-import AdminToolbar from "./components/AdminToolbar";
 import CustomCursor from "./components/CustomCursor";
 import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
@@ -87,7 +86,6 @@ const App = () => {
                 <ScrollProgressBar />
                 <CustomCursor />
                 <Navbar />
-                <AdminToolbar />
                 <div className="mx-auto min-h-screen max-w-[1600px] px-4 pt-6 sm:px-6 sm:pt-8 lg:px-10 lg:pt-10">
                   <Suspense fallback={<RouteFallback />}>
                     <AnimatePresence initial={false} mode="sync">

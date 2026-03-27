@@ -339,6 +339,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
 
   return (
     <Modal open onClose={onClose} maxWidthClass="max-w-3xl" panelClassName="admin-modal-panel">
+      <div className="flex h-full flex-col overflow-hidden">
         <div className="flex items-center justify-between border-b border-white/8 px-6 py-5">
           <div>
             <h2 className="font-display text-2xl font-semibold text-white">{title}</h2>
@@ -353,7 +354,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-6">
+        <form id="admin-entity-form" onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-6">
           <div className="grid gap-5 md:grid-cols-2">
             <Field label="Title">
               <input
@@ -890,33 +891,35 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
           ) : null}
 
           {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
+        </form>
 
-          <div className="sticky bottom-0 mt-6 flex justify-end gap-3 border-t border-white/8 bg-surface/95 pt-5">
+        <div className="flex justify-end gap-3 border-t border-white/8 bg-surface/95 px-6 py-5">
+          {onDelete ? (
             <button
               type="button"
-              onClick={onClose}
-              className="admin-secondary-button px-5 py-3"
+              onClick={onDelete}
+              className="admin-danger-button px-5 py-3"
             >
-              Cancel
+              Delete
             </button>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="admin-save-button disabled:opacity-70"
-            >
-              {isSaving ? "Saving..." : "Save"}
-            </button>
-            {onDelete ? (
-              <button
-                type="button"
-                onClick={onDelete}
-                className="admin-danger-button px-5 py-3"
-              >
-                Delete
-              </button>
-            ) : null}
-          </div>
-        </form>
+          ) : null}
+          <button
+            type="button"
+            onClick={onClose}
+            className="admin-secondary-button px-5 py-3"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="admin-entity-form"
+            disabled={isSaving}
+            className="admin-save-button disabled:opacity-70"
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </button>
+        </div>
+      </div>
     </Modal>
   );
 };

@@ -38,7 +38,7 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", service: "shonstudio-api" });
 });
 
-app.use("/api/shonstudio-admin-prasham9114", adminRoutes);
+app.use("/api/shonstudio-admin-secured", adminRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/tools", toolRoutes);

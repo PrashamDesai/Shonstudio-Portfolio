@@ -8,7 +8,7 @@ import { resolveMedia } from "../assets/mediaMap";
 import AdminEntityActions from "../components/AdminEntityActions";
 import AdminEntityModal from "../components/AdminEntityModal";
 import AdminQuickEditModal from "../components/AdminQuickEditModal";
-import { CardGridSkeleton, PageDataEmpty } from "../components/ApiState";
+import { CardListSkeleton, PageDataEmpty } from "../components/ApiState";
 import Reveal from "../components/Reveal";
 import SectionHeader from "../components/SectionHeader";
 import { useAdmin } from "../context/AdminContext.jsx";
@@ -102,7 +102,7 @@ const TrainingPage = () => {
       {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
 
       {loading && !courses.length ? (
-        <CardGridSkeleton count={4} className="h-96" />
+        <CardListSkeleton count={3} className="h-80" />
       ) : isEmpty ? (
         <PageDataEmpty message="No training modules available." />
       ) : (

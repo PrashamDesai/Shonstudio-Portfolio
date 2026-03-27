@@ -51,6 +51,14 @@ const courseSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    curriculum: {
+      type: [String],
+      default: [],
+    },
+    outcomes: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
@@ -67,6 +75,8 @@ courseSchema.pre("validate", function courseSlug(next) {
 
   next();
 });
+
+courseSchema.index({ title: 1 });
 
 const Course = mongoose.model("Course", courseSchema);
 

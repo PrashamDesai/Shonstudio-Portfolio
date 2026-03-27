@@ -9,12 +9,13 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import { pageTransition } from "../animations/variants";
-import { projectTemplate, serviceTemplate } from "../admin/entityTemplates";
+import { projectTemplate } from "../admin/entityTemplates";
 import { resolveMedia } from "../assets/mediaMap";
 import AdminEntityActions from "../components/AdminEntityActions";
 import AdminEntityModal from "../components/AdminEntityModal";
 import AdminQuickEditModal from "../components/AdminQuickEditModal";
-import { CardGridSkeleton, PageDataEmpty } from "../components/ApiState";
+import { PageDataEmpty } from "../components/ApiState";
+import WhatWeDoModal from "../components/WhatWeDoModal";
 import HeroCarousel from "../components/HeroCarousel";
 import MagneticButton from "../components/MagneticButton";
 import TechMarquee from "../components/TechMarquee";
@@ -55,6 +56,8 @@ const mergeShowcaseItems = (primaryItems, fallbackItems, limit) => {
 const HomePage = () => {
   const [editingEntity, setEditingEntity] = useState(null);
   const [quickEditingEntity, setQuickEditingEntity] = useState(null);
+  // Dedicated state for the What We Do modal (add=null means closed, {} means add new, or entity object means edit)
+  const [whatWeDoModal, setWhatWeDoModal] = useState(null);
   const { data: projects, loading: projectsLoading, error: projectsError } = useCollection("/projects");
   const { data: services, loading: servicesLoading, error: servicesError } = useCollection("/services");
   const { data: courses, loading: coursesLoading, error: coursesError } = useCollection("/training");
@@ -137,6 +140,34 @@ const HomePage = () => {
       });
     }
 
+    signalRefresh();
+  };
+
+  /** Save handler for the What We Do modal (add or edit) */
+  const saveWhatWeDo = async (payload) => {
+    if (whatWeDoModal?._id) {
+      await requestAdmin(`/services/${whatWeDoModal._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      await requestAdmin("/services", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
+    signalRefresh();
+  };
+
+  /** Delete handler for the What We Do modal */
+  const deleteWhatWeDo = async (item) => {
+    if (!item?._id) return;
+    const confirmed = window.confirm(`Delete "${item.title}"?`);
+    if (!confirmed) return;
+    await requestAdmin(`/services/${item._id}`, { method: "DELETE" });
+    setWhatWeDoModal(null);
     signalRefresh();
   };
 
@@ -284,25 +315,41 @@ const HomePage = () => {
             {isAdmin ? (
               <button
                 type="button"
-                onClick={() =>
-                  setEditingEntity({
-                    ...serviceTemplate,
-                    entityType: "services",
-                  })
-                }
+                onClick={() => setWhatWeDoModal({})}
                 className="theme-button-secondary rounded-full px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em]"
               >
-                Add Service
+                Add Capability
               </button>
             ) : null}
           </div>
 
           {isServicesLoading ? (
-            <CardGridSkeleton count={4} className="h-52" />
+            /* Skeleton mirrors the actual service card grid exactly */
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-pulse rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-xl"
+                >
+                  {/* Category eyebrow */}
+                  <div className="h-3 w-20 rounded-full bg-white/10" />
+                  {/* Title */}
+                  <div className="mt-3 space-y-2">
+                    <div className="h-6 w-3/4 rounded-lg bg-white/10" />
+                    <div className="h-6 w-1/2 rounded-lg bg-white/10" />
+                  </div>
+                  {/* Highlight pills */}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <div className="h-6 w-20 rounded-full bg-white/10" />
+                    <div className="h-6 w-16 rounded-full bg-white/10" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : featuredServices.length ? (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {featuredServices.map((service, index) => (
-                <motion.article
+                <motion.div
                   key={service.slug || index}
                   initial={{ opacity: 0, y: 26 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -311,15 +358,11 @@ const HomePage = () => {
                   whileHover={{ y: -6 }}
                   className="relative rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-xl"
                 >
+                  {/* Admin: click pencil to open dedicated What We Do modal */}
                   {isAdmin && service._id ? (
                     <AdminEntityActions
-                      onEdit={() =>
-                        setQuickEditingEntity({
-                          ...service,
-                          entityType: "services",
-                        })
-                      }
-                      onDelete={() => deleteEntity("services", service)}
+                      onEdit={() => setWhatWeDoModal(service)}
+                      onDelete={() => deleteWhatWeDo(service)}
                     />
                   ) : null}
                   <p className="text-xs uppercase tracking-[0.24em] text-accentSoft/80">
@@ -338,7 +381,7 @@ const HomePage = () => {
                       </span>
                     ))}
                   </div>
-                </motion.article>
+                </motion.div>
               ))}
             </div>
           ) : (
@@ -374,7 +417,24 @@ const HomePage = () => {
           </div>
 
           {isProjectsLoading ? (
-            <CardGridSkeleton count={3} className="h-72" />
+            <div className="grid gap-5 lg:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-pulse overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.04] backdrop-blur-xl"
+                >
+                  {/* Image area */}
+                  <div className="aspect-video w-full bg-white/10" />
+                  {/* Text area */}
+                  <div className="space-y-3 px-5 py-5">
+                    <div className="h-3 w-16 rounded-full bg-white/10" />
+                    <div className="h-6 w-3/4 rounded-lg bg-white/10" />
+                    <div className="h-4 w-full rounded-lg bg-white/10" />
+                    <div className="h-4 w-2/3 rounded-lg bg-white/10" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : topProjects.length ? (
             <div className="grid gap-5 lg:grid-cols-3">
               {topProjects.map((project, index) => (
@@ -483,6 +543,17 @@ const HomePage = () => {
             await deleteEntity(quickEditingEntity.entityType, quickEditingEntity);
             setQuickEditingEntity(null);
           }}
+        />
+      ) : null}
+
+      {/* Dedicated add/edit modal for the What We Do section */}
+      {whatWeDoModal !== null ? (
+        <WhatWeDoModal
+          isAdd={!whatWeDoModal._id}
+          initialValue={whatWeDoModal}
+          onClose={() => setWhatWeDoModal(null)}
+          onSave={saveWhatWeDo}
+          onDelete={whatWeDoModal._id ? () => deleteWhatWeDo(whatWeDoModal) : undefined}
         />
       ) : null}
     </motion.main>

@@ -75,6 +75,8 @@ serviceSchema.pre("validate", function serviceSlug(next) {
   next();
 });
 
+serviceSchema.index({ featured: -1, title: 1 });
+
 const Service = mongoose.model("Service", serviceSchema);
 
 export default Service;

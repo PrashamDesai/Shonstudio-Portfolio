@@ -94,6 +94,20 @@ export const teamTemplate = {
     linkedIn: "",
     github: "",
   },
+  resume: {
+    headline: "",
+    location: "",
+    totalExperience: "",
+    availability: "",
+    preferredEngagement: "",
+    languages: [],
+    certifications: [],
+    achievements: [],
+    workHistory: [],
+    caseStudies: [],
+    educationRecords: [],
+    testimonials: [],
+  },
   profileImage: "",
 };
 
