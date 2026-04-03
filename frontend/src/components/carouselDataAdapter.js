@@ -69,6 +69,11 @@ export const buildHeroCarouselData = ({ projects, services, courses, tools }) =>
   createCategory("projects", "Projects", projects),
   createCategory("services", "Services", services),
   createCategory("training", "Training", courses),
-  createCategory("tools", "Tools", tools),
+  // TEMPORARY TOOLS HOLD:
+  // Keep tools hidden from homepage hero carousel.
+  // AI REVERT INSTRUCTIONS:
+  // 1) Uncomment the line below to restore Tools in the carousel.
+  // 2) Confirm tools API is re-enabled in usePageData.js.
+  // createCategory("tools", "Tools", tools),
 ].filter((category) => category.items.length);
 

@@ -12,6 +12,7 @@ const MediaImage = ({
   fetchPriority = "auto",
   sizes,
   draggable = false,
+  transitionDurationMs = 700,
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
@@ -48,6 +49,7 @@ const MediaImage = ({
         draggable={draggable}
         onLoad={() => setIsLoaded(true)}
         onError={() => setHasError(true)}
+        style={{ transitionDuration: `${transitionDurationMs}ms` }}
         className={`${imgClassName} transition duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
           hasError ? "opacity-0" : isLoaded ? "scale-100 blur-0 opacity-100" : "scale-[1.02] blur-sm opacity-0"
         }`}

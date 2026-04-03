@@ -64,8 +64,8 @@ const TrainingPage = () => {
       <main className="py-24">
         <div className="section-shell mx-auto max-w-3xl p-10 text-center">
           <h1 className="font-display text-4xl font-semibold text-white">Unable to load training module</h1>
-          <p className="mt-3 text-sm leading-7 text-muted">{error}</p>
-          <Link to="/training" className="theme-link mt-6 inline-flex text-sm" data-cursor="link">
+          <p className="mt-4 text-base leading-8 text-muted sm:text-lg">{error}</p>
+          <Link to="/training" className="theme-link mt-7 inline-flex text-base" data-cursor="link">
             Return to training
           </Link>
         </div>
@@ -78,10 +78,10 @@ const TrainingPage = () => {
       <main className="py-24">
         <div className="section-shell mx-auto max-w-3xl p-10 text-center">
           <h1 className="font-display text-4xl font-semibold text-white">Training module not found</h1>
-          <p className="mt-3 text-sm leading-7 text-muted">
+          <p className="mt-4 text-base leading-8 text-muted sm:text-lg">
             This training module does not exist or is not published yet.
           </p>
-          <Link to="/training" className="theme-link mt-6 inline-flex text-sm" data-cursor="link">
+          <Link to="/training" className="theme-link mt-7 inline-flex text-base" data-cursor="link">
             Return to training
           </Link>
         </div>
@@ -95,27 +95,27 @@ const TrainingPage = () => {
       initial="initial"
       animate="enter"
       exit="exit"
-      className="space-y-8 pb-24"
+      className="space-y-10 pb-24"
     >
       <section className="section-shell panel-glow overflow-hidden rounded-[2rem] border border-white/10">
         <img
           src={resolveMedia(course.carouselImage || course.cardImage || "pulse-xr-lab")}
           alt={course.title}
-          className="h-64 sm:h-80 lg:h-96 w-full object-cover"
+          className="h-72 w-full object-cover sm:h-96 lg:h-[30rem]"
         />
       </section>
 
-      <section className="section-shell panel-glow rounded-[2rem] border border-white/10 p-6 sm:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+      <section className="section-shell panel-glow rounded-[2rem] border border-white/10 p-7 sm:p-10 lg:p-12">
+        <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="space-y-3">
-            <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">Training module</p>
-            <h1 className="font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.22em] text-white/85 sm:text-base">Training module</p>
+            <h1 className="font-display text-5xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
               {course.title}
             </h1>
-            <p className="max-w-3xl text-sm leading-7 text-muted sm:text-base">
+            <p className="max-w-4xl text-lg leading-9 text-muted sm:text-xl">
               {course.shortDescription || course.summary || "No summary available."}
             </p>
-            <p className="text-xs uppercase tracking-[0.24em] text-mutedDeep">
+            <p className="text-sm uppercase tracking-[0.2em] text-mutedDeep sm:text-base">
               {course.duration || "Duration not available"}
             </p>
           </div>
@@ -123,46 +123,46 @@ const TrainingPage = () => {
             <button
               type="button"
               onClick={() => setEditingCourse(course)}
-              className="theme-button-primary rounded-full px-5 py-3 text-sm font-semibold"
+              className="theme-button-primary rounded-full px-6 py-3.5 text-base font-semibold"
             >
               Edit full details
             </button>
           ) : null}
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-[1.35rem] border border-white/10 bg-white/[0.03] p-5">
-            <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">Curriculum</p>
-            <div className="mt-3 space-y-2">
+        <div className="mt-8 grid gap-7 lg:grid-cols-2">
+          <div className="rounded-[1.35rem] border border-white/10 bg-white/[0.03] p-6 sm:p-7">
+            <p className="text-sm uppercase tracking-[0.22em] text-accentSoft">Curriculum</p>
+            <div className="mt-4 space-y-3">
               {(course.curriculum || []).length ? (
                 course.curriculum.map((item) => (
-                  <p key={item} className="text-sm leading-7 text-muted">
+                  <p key={item} className="text-base leading-8 text-muted sm:text-lg sm:leading-9">
                     {item}
                   </p>
                 ))
               ) : (
-                <p className="text-sm text-muted">No curriculum available.</p>
+                <p className="text-base text-muted sm:text-lg">No curriculum available.</p>
               )}
             </div>
           </div>
 
-          <div className="rounded-[1.35rem] border border-white/10 bg-white/[0.03] p-5">
-            <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">Outcomes</p>
-            <div className="mt-3 space-y-2">
+          <div className="rounded-[1.35rem] border border-white/10 bg-white/[0.03] p-6 sm:p-7">
+            <p className="text-sm uppercase tracking-[0.22em] text-accentSoft">Outcomes</p>
+            <div className="mt-4 space-y-3">
               {(course.outcomes || []).length ? (
                 course.outcomes.map((item) => (
-                  <p key={item} className="text-sm leading-7 text-muted">
+                  <p key={item} className="text-base leading-8 text-muted sm:text-lg sm:leading-9">
                     {item}
                   </p>
                 ))
               ) : (
-                <p className="text-sm text-muted">No outcomes listed.</p>
+                <p className="text-base text-muted sm:text-lg">No outcomes listed.</p>
               )}
             </div>
           </div>
         </div>
 
-        {error ? <p className="mt-4 text-sm text-mutedDeep">{error}</p> : null}
+        {error ? <p className="mt-5 text-base text-mutedDeep sm:text-lg">{error}</p> : null}
       </section>
 
       {editingCourse ? (

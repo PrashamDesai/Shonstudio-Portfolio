@@ -19,7 +19,12 @@ const primaryNavItems = [
   { label: "Services", to: "/services" },
   { label: "Counselling", to: "/counselling" },
   { label: "Training", to: "/training" },
-  { label: "Tools", to: "/tools" },
+  // TEMPORARY TOOLS HOLD:
+  // Tools is hidden completely from navbar for now.
+  // AI REVERT INSTRUCTIONS:
+  // 1) Uncomment the line below.
+  // 2) Keep the exact `to: "/tools"` route value.
+  // { label: "Tools", to: "/tools" },
 ];
 
 const aboutItems = [
@@ -116,34 +121,55 @@ const ThemeToggleButton = ({ theme, onToggle, className = "" }) => (
   </motion.button>
 );
 
-const DesktopNavItem = ({ item }) => (
-  <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.25 }}>
-    <NavLink
-      to={item.to}
-      data-cursor="link"
-      data-cursor-label="Open"
-      className={({ isActive }) =>
-        `group relative flex h-11 items-center rounded-full px-5 text-[11px] font-semibold uppercase tracking-[0.24em] transition-colors ${
-          isActive ? "text-white" : "text-muted hover:text-white"
-        }`
-      }
-    >
-      {({ isActive }) => (
-        <>
-          {isActive ? (
-            <motion.span
-              layoutId="nav-active-pill"
-              className="absolute inset-0 rounded-full border border-accent/25 bg-theme-gradient opacity-80 shadow-glow"
-              transition={{ type: "spring", stiffness: 280, damping: 28 }}
-            />
-          ) : null}
-          <span className="absolute inset-x-3 bottom-[6px] h-px origin-left scale-x-0 bg-theme-gradient transition-transform duration-500 group-hover:scale-x-100" />
+const DesktopNavItem = ({ item }) => {
+  if (item.disabled) {
+    return (
+      <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.25 }}>
+        <span
+          className="group relative flex h-11 cursor-not-allowed items-center rounded-full border border-white/10 bg-white/[0.03] px-5 text-[11px] font-semibold uppercase tracking-[0.24em] text-muted/70"
+          title={item.comingSoon ? "Coming soon" : "Unavailable"}
+          aria-disabled="true"
+        >
           <span className="relative z-10">{item.label}</span>
-        </>
-      )}
-    </NavLink>
-  </motion.div>
-);
+          {item.comingSoon ? (
+            <span className="pointer-events-none absolute -bottom-8 left-1/2 -translate-x-1/2 rounded-md border border-white/12 bg-base/95 px-2 py-1 text-[9px] tracking-[0.2em] text-muted opacity-0 shadow-soft transition-opacity duration-200 group-hover:opacity-100">
+              Coming soon
+            </span>
+          ) : null}
+        </span>
+      </motion.div>
+    );
+  }
+
+  return (
+    <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.25 }}>
+      <NavLink
+        to={item.to}
+        data-cursor="link"
+        data-cursor-label="Open"
+        className={({ isActive }) =>
+          `group relative flex h-11 items-center rounded-full px-5 text-[11px] font-semibold uppercase tracking-[0.24em] transition-colors ${
+            isActive ? "text-white" : "text-muted hover:text-white"
+          }`
+        }
+      >
+        {({ isActive }) => (
+          <>
+            {isActive ? (
+              <motion.span
+                layoutId="nav-active-pill"
+                className="absolute inset-0 rounded-full border border-accent/25 bg-theme-gradient opacity-80 shadow-glow"
+                transition={{ type: "spring", stiffness: 280, damping: 28 }}
+              />
+            ) : null}
+            <span className="absolute inset-x-3 bottom-[6px] h-px origin-left scale-x-0 bg-theme-gradient transition-transform duration-500 group-hover:scale-x-100" />
+            <span className="relative z-10">{item.label}</span>
+          </>
+        )}
+      </NavLink>
+    </motion.div>
+  );
+};
 
 const DesktopAboutItem = ({ isActive, isOpen, onOpen, onClose }) => (
   <motion.div
@@ -544,34 +570,48 @@ const Navbar = () => {
                   <div className="space-y-3">
                     {primaryNavItems.map((item) => (
                       <motion.div key={item.to} variants={menuItemVariants}>
-                        <NavLink
-                          to={item.to}
-                          data-cursor="link"
-                          data-cursor-label="Open"
-                          className={({ isActive }) =>
-                            `group flex items-center justify-between rounded-[1.75rem] border px-5 py-4 text-white transition ${
-                              isActive
-                                ? "border-accent/28 bg-theme-gradient shadow-glow"
-                                : "border-white/8 bg-white/[0.04] hover:border-accent/18 hover:bg-white/[0.06]"
-                            }`
-                          }
-                        >
-                          {({ isActive }) => (
-                            <>
-                              <div>
-                                <p className="font-display text-2xl font-semibold tracking-tight">
-                                  {item.label}
-                                </p>
-                                <p className="mt-1 text-[10px] uppercase tracking-[0.34em] text-mutedDeep">
-                                  {isActive ? "Current route" : "Navigate"}
-                                </p>
-                              </div>
-                              <span className="text-sm text-accentSoft/80 transition group-hover:translate-x-1">
-                                /
-                              </span>
-                            </>
-                          )}
-                        </NavLink>
+                        {item.disabled ? (
+                          <div className="group flex cursor-not-allowed items-center justify-between rounded-[1.75rem] border border-white/8 bg-white/[0.04] px-5 py-4 text-white/75">
+                            <div>
+                              <p className="font-display text-2xl font-semibold tracking-tight">
+                                {item.label}
+                              </p>
+                              <p className="mt-1 text-[10px] uppercase tracking-[0.34em] text-mutedDeep">
+                                {item.comingSoon ? "Coming soon" : "Unavailable"}
+                              </p>
+                            </div>
+                            <span className="text-[10px] uppercase tracking-[0.24em] text-muted">Soon</span>
+                          </div>
+                        ) : (
+                          <NavLink
+                            to={item.to}
+                            data-cursor="link"
+                            data-cursor-label="Open"
+                            className={({ isActive }) =>
+                              `group flex items-center justify-between rounded-[1.75rem] border px-5 py-4 text-white transition ${
+                                isActive
+                                  ? "border-accent/28 bg-theme-gradient shadow-glow"
+                                  : "border-white/8 bg-white/[0.04] hover:border-accent/18 hover:bg-white/[0.06]"
+                              }`
+                            }
+                          >
+                            {({ isActive }) => (
+                              <>
+                                <div>
+                                  <p className="font-display text-2xl font-semibold tracking-tight">
+                                    {item.label}
+                                  </p>
+                                  <p className="mt-1 text-[10px] uppercase tracking-[0.34em] text-mutedDeep">
+                                    {isActive ? "Current route" : "Navigate"}
+                                  </p>
+                                </div>
+                                <span className="text-sm text-accentSoft/80 transition group-hover:translate-x-1">
+                                  /
+                                </span>
+                              </>
+                            )}
+                          </NavLink>
+                        )}
                       </motion.div>
                     ))}
 

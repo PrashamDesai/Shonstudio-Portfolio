@@ -25,9 +25,10 @@ const ProjectCard = ({ project, compact = false, adminActions = null, priority =
         <MediaImage
           src={resolveMedia(project.cardImage || project.coverImage)}
           alt={project.title}
-          loading={priority ? "eager" : "lazy"}
+          loading={priority ? "eager" : "auto"}
           fetchPriority={priority ? "high" : "auto"}
-          decoding={priority ? "sync" : "async"}
+          decoding="async"
+          transitionDurationMs={320}
           sizes="(min-width: 1280px) 33vw, (min-width: 1024px) 50vw, 100vw"
           wrapperClassName="aspect-video w-full bg-black/20"
           imgClassName="h-full w-full object-cover group-hover:scale-[1.06] group-hover:-translate-y-1.5"

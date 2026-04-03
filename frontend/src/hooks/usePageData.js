@@ -14,6 +14,13 @@ const PUBLIC_API_TIMEOUT_MS = 60_000;
 const MAX_REQUEST_ATTEMPTS = 1;
 const RETRY_DELAY_MS = 250;
 const CACHE_TTL_MS = 5 * 60_000;
+// TEMPORARY TOOLS HOLD:
+// Keep tools API disabled for now so no frontend request is sent to /tools.
+// AI REVERT INSTRUCTIONS:
+// 1) Set this constant to `false`.
+// 2) Keep the early-return block below if you want a reusable feature flag,
+//    or remove it entirely to restore original behavior.
+const TEMP_DISABLE_TOOLS_API = true;
 
 const responseCache = new Map();
 const EMPTY_ARRAY = [];
@@ -170,6 +177,19 @@ const useApiRequest = (
       setError("");
       setNotFound(false);
       setStatusCode(0);
+      return undefined;
+    }
+
+    // TEMPORARY TOOLS HOLD:
+    // Short-circuit tools requests so /tools API is never called.
+    // AI REVERT INSTRUCTIONS:
+    // - Remove this block OR set TEMP_DISABLE_TOOLS_API=false above.
+    if (TEMP_DISABLE_TOOLS_API && endpoint.startsWith("/tools")) {
+      setData(initialData);
+      setLoading(false);
+      setError("");
+      setNotFound(false);
+      setStatusCode(200);
       return undefined;
     }
 

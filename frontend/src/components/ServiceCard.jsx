@@ -4,17 +4,6 @@ import { Link } from "react-router-dom";
 import { resolveMedia } from "../assets/mediaMap";
 import AdminEntityActions from "./AdminEntityActions";
 
-const iconMap = {
-  grid: "[]",
-  layers: ":::",
-  cube: "3D",
-  orbit: "XR",
-  book: "ED",
-  shield: "QA",
-  wave: "AU",
-  spark: "AD",
-};
-
 const getServicePath = (service) => {
   const serviceIdentifier = service?.slug || service?._id;
   return serviceIdentifier ? `/services/${serviceIdentifier}` : "/services";
@@ -48,15 +37,12 @@ const ServiceCard = ({ service, adminActions = null }) => (
         <div className="absolute inset-0 bg-gradient-to-t from-base/55 via-transparent to-transparent" />
       </div>
 
-      <div className="flex flex-1 flex-col p-6 sm:w-3/4 justify-center">
-        <div className="flex items-center justify-between">
-          <span className="grid h-11 w-11 place-items-center rounded-2xl border border-accent/20 bg-[linear-gradient(135deg,rgba(0,212,255,0.12),rgba(122,92,255,0.12))] text-xs font-semibold uppercase tracking-[0.2em] text-accent shadow-glow">
-            {iconMap[service.icon] || "SV"}
-          </span>
-          <span className="text-xs uppercase tracking-[0.28em] text-mutedDeep">{service.category}</span>
-        </div>
+      <div className="flex flex-1 flex-col justify-center p-6 sm:w-3/4">
+        {service.category ? (
+          <p className="text-xs uppercase tracking-[0.28em] text-mutedDeep">{service.category}</p>
+        ) : null}
 
-        <div className="mt-4 space-y-3">
+        <div className="mt-2 space-y-3">
           <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
             {service.title || "Untitled service"}
           </h3>
