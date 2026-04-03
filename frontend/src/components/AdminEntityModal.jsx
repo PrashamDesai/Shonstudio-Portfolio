@@ -49,7 +49,7 @@ const createProjectForm = (value = {}) => ({
   slug: value.slug || "",
   shortDescription: value.shortDescription || value.tagline || "",
   tagline: value.tagline || value.shortDescription || "",
-  description: value.description || "",
+  description: value.description || value.caseStudy?.challenge || value.shortDescription || value.tagline || "",
   making: value.making || "",
   cardImage: value.cardImage || value.coverImage || "",
   carouselImage: value.carouselImage || value.heroImage || value.cardImage || value.coverImage || "",
@@ -145,13 +145,20 @@ const buildInitialForm = (entityType, value) => {
 
 const buildPayload = (entityType, form) => {
   switch (entityType) {
-    case "projects":
+    case "projects": {
+      const projectSummary = form.shortDescription.trim();
+      const projectDescription = (
+        form.description ||
+        form.caseStudyChallengeDescription ||
+        form.shortDescription
+      ).trim();
+
       return {
         title: form.title.trim(),
         slug: form.slug.trim(),
-        shortDescription: form.shortDescription.trim(),
-        tagline: (form.tagline || form.shortDescription).trim(),
-        description: form.description.trim(),
+        shortDescription: projectSummary,
+        tagline: projectSummary,
+        description: projectDescription,
         making: form.making.trim(),
         cardImage: form.cardImage.trim(),
         carouselImage: form.carouselImage.trim(),
@@ -169,6 +176,7 @@ const buildPayload = (entityType, form) => {
         },
         featured: Boolean(form.featured),
       };
+    }
     case "services":
       return {
         title: form.title.trim(),
@@ -575,7 +583,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
             {entityType === "projects" ? (
               <SectionBlock
                 title="Project Basics"
-                hint="These fields control the main title, subtitle, and opening copy shown at the top of the case study page."
+                hint="These fields control the project title, slug, and summary used across showcase cards."
               />
             ) : null}
 
@@ -598,23 +606,13 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
               ) : null}
             </Field>
 
-            {entityType === "projects" ? (
-              <Field label="Subtitle">
-                <input
-                  value={form.tagline || ""}
-                  onChange={(event) => updateField("tagline", event.target.value)}
-                  className={textInputClass}
-                />
-              </Field>
-            ) : null}
-
             {entityType !== "vision-scenes" ? (
               <div className="md:col-span-2">
                 <Field
                   label="Short description"
                   hint={
                     entityType === "projects"
-                      ? "This is the short summary used in cards and just below the project title."
+                      ? "This summary is used in project cards and compact showcase previews."
                       : "Primary line used in cards and compact previews."
                   }
                 >
@@ -917,20 +915,6 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
 
             {entityType === "projects" ? (
               <>
-                <div className="md:col-span-2">
-                  <Field
-                    label="Intro description"
-                    hint="Main paragraph shown under the subtitle in the top section."
-                  >
-                    <textarea
-                      value={form.description || ""}
-                      onChange={(event) => updateField("description", event.target.value)}
-                      className={textareaClass}
-                      required
-                    />
-                  </Field>
-                </div>
-
                 <div className="md:col-span-2">
                   <Field
                     label="Making of this project"

@@ -36,18 +36,15 @@ const fallbackCaseStudy = (project) => ({
 const ProjectPageSkeleton = () => (
   <main className="space-y-8 pb-24 sm:space-y-10">
     <section className="section-shell panel-glow overflow-hidden p-6 sm:p-8 lg:p-10">
-      <div className="grid gap-8 lg:grid-cols-[1.18fr_0.82fr] lg:items-start">
-        <div className="space-y-5 animate-pulse">
-          <div className="h-4 w-28 rounded-full bg-white/10" />
-          <div className="space-y-3">
-            <div className="h-12 w-full max-w-3xl rounded-2xl bg-white/10 sm:h-14" />
-            <div className="h-12 w-4/5 max-w-2xl rounded-2xl bg-white/10 sm:h-14" />
-          </div>
-          <div className="space-y-3">
-            <div className="h-5 w-full max-w-3xl rounded-xl bg-white/10" />
-            <div className="h-5 w-11/12 max-w-2xl rounded-xl bg-white/10" />
-            <div className="h-5 w-4/5 max-w-xl rounded-xl bg-white/10" />
-          </div>
+        <div className="grid gap-8 lg:grid-cols-[1.18fr_0.82fr] lg:items-start">
+          <div className="space-y-5 animate-pulse">
+            <div className="h-4 w-28 rounded-full bg-white/10" />
+            <div className="space-y-3">
+              <div className="h-12 w-full max-w-3xl rounded-2xl bg-white/10 sm:h-14" />
+              <div className="h-12 w-4/5 max-w-2xl rounded-2xl bg-white/10 sm:h-14" />
+            </div>
+          <div className="h-6 w-full max-w-3xl rounded-xl bg-white/10" />
+          <div className="h-11 w-36 rounded-full bg-white/10" />
         </div>
 
         <div className="h-[12rem] max-w-[20rem] animate-pulse rounded-[1.8rem] border border-white/8 bg-white/[0.05] sm:h-[15rem] lg:h-[18rem] lg:w-full lg:max-w-none" />
@@ -449,9 +446,8 @@ const ProjectPage = () => {
     );
   }
 
-  const summary = project.shortDescription || project.tagline || "No summary available.";
-  const description = project.description || "No description available.";
-  const making = project.making || description;
+  const summary = project.shortDescription || project.tagline || "";
+  const making = project.making || "";
   const technologies = project.technologies || [];
   const features = project.features || [];
   const caseStudy = fallbackCaseStudy(project);
@@ -470,12 +466,11 @@ const ProjectPage = () => {
             <h1 className="font-display text-4xl font-semibold leading-[0.95] tracking-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl">
               {project.title}
             </h1>
-            <p className="max-w-3xl text-lg leading-8 text-white/85 sm:text-xl sm:leading-9 lg:text-2xl">
-              {summary}
-            </p>
-            <p className="max-w-3xl text-base leading-8 text-muted sm:text-lg">
-              {description}
-            </p>
+            {summary ? (
+              <p className="max-w-3xl text-lg leading-8 text-white/85 sm:text-xl sm:leading-9 lg:text-2xl">
+                {summary}
+              </p>
+            ) : null}
             {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
             {isAdmin && project._id ? (
               <button
@@ -514,15 +509,17 @@ const ProjectPage = () => {
       <Reveal delay={0.06} immediate>
         <section className="section-shell panel-glow p-6 sm:p-8 lg:p-10">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">Making of this project</p>
-              <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-                Making of this project
-              </h2>
-              <p className="mt-4 max-w-3xl text-base leading-8 text-muted sm:text-lg">
-                {making}
-              </p>
-            </div>
+            {making ? (
+              <div className="max-w-3xl">
+                <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">Making of this project</p>
+                <h2 className="mt-3 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                  Making of this project
+                </h2>
+                <p className="mt-4 max-w-3xl text-base leading-8 text-muted sm:text-lg">
+                  {making}
+                </p>
+              </div>
+            ) : null}
 
             <div className="w-full rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-5 lg:max-w-xl">
               <p className="text-sm uppercase tracking-[0.24em] text-accentSoft/80">Tech used</p>

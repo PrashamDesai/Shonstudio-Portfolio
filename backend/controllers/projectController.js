@@ -93,7 +93,15 @@ export const clearProjectResponseCache = (identifier) => {
   }
 
   projectResponseCache.delete(buildProjectCacheKey("detail", normalizedIdentifier));
-  projectResponseCache.delete(buildProjectCacheKey("gallery", normalizedIdentifier));
+
+  const galleryCacheKey = buildProjectCacheKey("gallery", normalizedIdentifier);
+  const paginatedGalleryCachePrefix = `${galleryCacheKey}:`;
+
+  for (const key of projectResponseCache.keys()) {
+    if (key === galleryCacheKey || key.startsWith(paginatedGalleryCachePrefix)) {
+      projectResponseCache.delete(key);
+    }
+  }
 };
 
 export const getProjects = asyncHandler(async (req, res) => {

@@ -32,19 +32,68 @@ const DEFAULT_LOCAL_CLIENT_ORIGINS = [
   "http://127.0.0.1:4173",
 ];
 const DEFAULT_DEPLOYED_CLIENT_ORIGINS = ["https://shonstudio-portfolio-frontend.onrender.com"];
+const DEFAULT_DEPLOYED_CLIENT_ORIGIN_PATTERNS = [
+  "https://shonstudio-portfolio*.onrender.com",
+  "https://shonstudio-portfolio*.vercel.app",
+  "https://shonstudio-portfolio*.netlify.app",
+];
 
-const splitAndNormalizeOrigins = (...values) =>
+const normalizeOrigin = (value) => {
+  const trimmed = String(value || "").trim();
+
+  if (!trimmed) {
+    return "";
+  }
+
+  const withoutTrailingSlash = trimmed.replace(/\/+$/, "");
+
+  try {
+    const parsedUrl = new URL(withoutTrailingSlash);
+    const protocol = String(parsedUrl.protocol || "").toLowerCase();
+    const hostname = String(parsedUrl.hostname || "").toLowerCase();
+    const hasCustomPort =
+      parsedUrl.port &&
+      !(
+        (protocol === "http:" && parsedUrl.port === "80") ||
+        (protocol === "https:" && parsedUrl.port === "443")
+      );
+    const portSegment = hasCustomPort ? `:${parsedUrl.port}` : "";
+
+    return `${protocol}//${hostname}${portSegment}`;
+  } catch {
+    return withoutTrailingSlash.toLowerCase();
+  }
+};
+
+const normalizeOriginPattern = (value) =>
+  String(value || "").trim().replace(/\/+$/, "").toLowerCase();
+
+const splitAndNormalizeValues = (normalizer, ...values) =>
   values
     .flatMap((value) => String(value || "").split(","))
-    .map((origin) => origin.trim().replace(/\/+$/, ""))
+    .map((value) => normalizer(value))
     .filter(Boolean);
 
-const configuredClientOrigins = splitAndNormalizeOrigins(
+const wildcardPatternToRegExp = (pattern) => {
+  const escapedPattern = String(pattern || "")
+    .replace(/[|\\{}()[\]^$+?.]/g, "\\$&")
+    .replace(/\*/g, ".*");
+
+  return new RegExp(`^${escapedPattern}$`, "i");
+};
+
+const configuredClientOrigins = splitAndNormalizeValues(
+  normalizeOrigin,
   process.env.CORS_ORIGINS,
   process.env.CORS_ORIGIN,
   process.env.CLIENT_URL,
   process.env.LOCAL_CLIENT_URL,
   process.env.FRONTEND_URL,
+);
+const configuredClientOriginPatterns = splitAndNormalizeValues(
+  normalizeOriginPattern,
+  process.env.CORS_ORIGIN_PATTERNS,
+  process.env.CORS_ORIGIN_PATTERN,
 );
 const fallbackClientOrigins = process.env.NODE_ENV === "production"
   ? DEFAULT_DEPLOYED_CLIENT_ORIGINS
@@ -52,7 +101,14 @@ const fallbackClientOrigins = process.env.NODE_ENV === "production"
 const allowedClientOrigins = new Set([
   ...fallbackClientOrigins,
   ...configuredClientOrigins,
-]);
+].map((origin) => normalizeOrigin(origin)));
+const allowedClientOriginPatternMatchers = [
+  ...DEFAULT_DEPLOYED_CLIENT_ORIGIN_PATTERNS,
+  ...configuredClientOriginPatterns,
+]
+  .map((pattern) => normalizeOriginPattern(pattern))
+  .filter(Boolean)
+  .map((pattern) => wildcardPatternToRegExp(pattern));
 const allowLoopbackOrigins = process.env.NODE_ENV !== "production";
 
 const isLoopbackOrigin = (origin) => {
@@ -71,24 +127,41 @@ const isLoopbackOrigin = (origin) => {
   }
 };
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      const normalizedOrigin = String(origin || "").trim().replace(/\/+$/, "");
+const isAllowedClientOrigin = (origin) => {
+  const normalizedOrigin = normalizeOrigin(origin);
 
-      if (
-        !normalizedOrigin ||
-        allowedClientOrigins.has(normalizedOrigin) ||
-        (allowLoopbackOrigins && isLoopbackOrigin(normalizedOrigin))
-      ) {
-        callback(null, true);
-        return;
-      }
+  if (!normalizedOrigin) {
+    return true;
+  }
 
-      callback(new Error("Not allowed by CORS"));
-    },
-  }),
-);
+  if (allowedClientOrigins.has(normalizedOrigin)) {
+    return true;
+  }
+
+  if (allowLoopbackOrigins && isLoopbackOrigin(normalizedOrigin)) {
+    return true;
+  }
+
+  return allowedClientOriginPatternMatchers.some((matcher) => matcher.test(normalizedOrigin));
+};
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (isAllowedClientOrigin(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
