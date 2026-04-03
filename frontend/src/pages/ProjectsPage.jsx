@@ -1,9 +1,8 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { projectTemplate } from "../admin/entityTemplates";
 import { pageTransition } from "../animations/variants";
-import { resolveMedia } from "../assets/mediaMap";
 import AdminEntityModal from "../components/AdminEntityModal";
 import AdminQuickEditModal from "../components/AdminQuickEditModal";
 import { CardGridSkeleton, PageDataEmpty } from "../components/ApiState";
@@ -18,27 +17,6 @@ const ProjectsPage = () => {
   const [quickEditingProject, setQuickEditingProject] = useState(null);
   const { data: projects, loading, error, isEmpty } = useCollection("/projects");
   const { isAdmin, requestAdmin, signalRefresh } = useAdmin();
-
-  useEffect(() => {
-    if (!projects.length) {
-      return;
-    }
-
-    const imageSources = Array.from(
-      new Set(
-        projects
-          .slice(0, 12)
-          .map((project) => resolveMedia(project.cardImage || project.coverImage))
-          .filter(Boolean),
-      ),
-    );
-
-    imageSources.forEach((source) => {
-      const image = new window.Image();
-      image.decoding = "async";
-      image.src = source;
-    });
-  }, [projects]);
 
   const saveProject = async (payload) => {
     if (editingProject?._id) {
@@ -136,7 +114,7 @@ const ProjectsPage = () => {
             >
               <ProjectCard
                 project={project}
-                priority={index < 6}
+                priority={index < 3}
                 adminActions={
                   isAdmin && project._id
                     ? {

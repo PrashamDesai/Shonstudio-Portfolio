@@ -15,6 +15,7 @@ import AdminEntityActions from "../components/AdminEntityActions";
 import AdminEntityModal from "../components/AdminEntityModal";
 import AdminQuickEditModal from "../components/AdminQuickEditModal";
 import { PageDataEmpty } from "../components/ApiState";
+import MediaImage from "../components/MediaImage";
 import WhatWeDoModal from "../components/WhatWeDoModal";
 import HeroCarousel from "../components/HeroCarousel";
 import MagneticButton from "../components/MagneticButton";
@@ -478,13 +479,15 @@ const HomePage = () => {
                     className="block"
                   >
                     <div className="relative overflow-hidden border-b border-white/10">
-                      <motion.img
+                      <MediaImage
                         src={resolveMedia(project.cardImage || project.coverImage)}
                         alt={project.title}
-                        loading="lazy"
-                        className="aspect-video w-full object-cover"
-                        whileHover={{ scale: 1.07, y: -4 }}
-                        transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+                        loading={index === 0 ? "eager" : "lazy"}
+                        fetchPriority={index === 0 ? "high" : "low"}
+                        transitionDurationMs={240}
+                        sizes="(min-width: 1024px) 33vw, 100vw"
+                        wrapperClassName="aspect-video w-full bg-black/20"
+                        imgClassName="h-full w-full object-cover group-hover:scale-[1.07] group-hover:-translate-y-1"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-base/70 via-transparent to-transparent opacity-70" />
                       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-full border-t border-white/10 bg-black/72 px-4 py-3 transition duration-300 group-hover:translate-y-0">

@@ -203,9 +203,10 @@ const ProjectScreenshotBand = ({ project, loading = false }) => {
               <MediaImage
                 src={item.src}
                 alt={`${project.title} screenshot ${index % screenshots.length + 1}`}
-                loading={index < 2 ? "eager" : "lazy"}
-                fetchPriority={index === 0 ? "high" : "auto"}
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchPriority={index === 0 ? "high" : "low"}
                 decoding={index === 0 ? "sync" : "async"}
+                transitionDurationMs={240}
                 sizes="(min-width: 1280px) 28vw, (min-width: 768px) 42vw, 72vw"
                 wrapperClassName="h-full w-full bg-black/20"
                 skeletonClassName="bg-white/5"
@@ -493,6 +494,7 @@ const ProjectPage = () => {
               alt={`${project.title} showcase`}
               loading="eager"
               fetchPriority="high"
+              transitionDurationMs={240}
               sizes="(min-width: 1024px) 34vw, 100vw"
               wrapperClassName="h-full w-full bg-black/20"
               imgClassName="block h-full w-full object-cover object-center"
