@@ -31,15 +31,28 @@ const DEFAULT_LOCAL_CLIENT_ORIGINS = [
   "http://localhost:4173",
   "http://127.0.0.1:4173",
 ];
-const configuredClientOrigins = [
+const DEFAULT_DEPLOYED_CLIENT_ORIGINS = ["https://shonstudio-portfolio-frontend.onrender.com"];
+
+const splitAndNormalizeOrigins = (...values) =>
+  values
+    .flatMap((value) => String(value || "").split(","))
+    .map((origin) => origin.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+
+const configuredClientOrigins = splitAndNormalizeOrigins(
+  process.env.CORS_ORIGINS,
   process.env.CORS_ORIGIN,
   process.env.CLIENT_URL,
   process.env.LOCAL_CLIENT_URL,
-  ...DEFAULT_LOCAL_CLIENT_ORIGINS,
-]
-  .map((origin) => String(origin || "").trim().replace(/\/+$/, ""))
-  .filter(Boolean);
-const allowedClientOrigins = new Set(configuredClientOrigins);
+  process.env.FRONTEND_URL,
+);
+const fallbackClientOrigins = process.env.NODE_ENV === "production"
+  ? DEFAULT_DEPLOYED_CLIENT_ORIGINS
+  : [...DEFAULT_LOCAL_CLIENT_ORIGINS, ...DEFAULT_DEPLOYED_CLIENT_ORIGINS];
+const allowedClientOrigins = new Set([
+  ...fallbackClientOrigins,
+  ...configuredClientOrigins,
+]);
 const allowLoopbackOrigins = process.env.NODE_ENV !== "production";
 
 const isLoopbackOrigin = (origin) => {
