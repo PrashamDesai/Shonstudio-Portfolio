@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Modal from "./ui/Modal";
 
 const splitLines = (value) =>
@@ -8,6 +8,41 @@ const splitLines = (value) =>
     .filter(Boolean);
 
 const joinLines = (items) => (Array.isArray(items) ? items.join("\n") : "");
+const createCaseStudyRow = () => ({ title: "", summary: "" });
+const normalizeCaseStudyRows = (items) => {
+  const rows = Array.isArray(items)
+    ? items.map((item) => ({
+        title: String(item?.title || "").trim(),
+        summary: String(item?.summary || "").trim(),
+      }))
+    : [];
+
+  return rows.length ? rows : [createCaseStudyRow()];
+};
+const sanitizeCaseStudyRows = (items) =>
+  Array.isArray(items)
+    ? items
+        .map((item) => ({
+          title: String(item?.title || "").trim(),
+          summary: String(item?.summary || "").trim(),
+        }))
+        .filter((item) => item.title || item.summary)
+    : [];
+
+const MAX_ADMIN_PAYLOAD_BYTES = 14 * 1024 * 1024;
+const MAX_IMAGE_INPUT_BYTES = 8 * 1024 * 1024;
+const MAX_IMAGE_OUTPUT_BYTES = 750 * 1024;
+const MAX_IMAGE_DIMENSION = 1600;
+const TARGET_JPEG_QUALITY = 0.78;
+const MIN_JPEG_QUALITY = 0.62;
+
+const estimatePayloadSize = (payload) => {
+  try {
+    return new Blob([JSON.stringify(payload)]).size;
+  } catch {
+    return 0;
+  }
+};
 
 const createProjectForm = (value = {}) => ({
   title: value.title || "",
@@ -15,20 +50,20 @@ const createProjectForm = (value = {}) => ({
   shortDescription: value.shortDescription || value.tagline || "",
   tagline: value.tagline || value.shortDescription || "",
   description: value.description || "",
+  making: value.making || "",
   cardImage: value.cardImage || value.coverImage || "",
   carouselImage: value.carouselImage || value.heroImage || value.cardImage || value.coverImage || "",
-  coverImage: value.coverImage || value.cardImage || "",
-  heroImage: value.heroImage || value.carouselImage || "",
   gallery: joinLines(value.gallery),
+  screenshotOrientation: value.screenshotOrientation || "portrait",
   technologies: joinLines(value.technologies),
+  features: joinLines(value.features),
+  caseStudyTitle: value.caseStudy?.title || "",
+  caseStudyChallengeDescription: value.caseStudy?.challenge || "",
+  caseStudyChallengeBullets: joinLines(value.caseStudy?.goals),
+  caseStudySolutions: normalizeCaseStudyRows(value.caseStudy?.solutions),
+  caseStudyPillars: normalizeCaseStudyRows(value.caseStudy?.pillars),
+  caseStudyConclusion: value.caseStudy?.conclusion || "",
   featured: Boolean(value.featured),
-  roleBreakdown:
-    Array.isArray(value.roleBreakdown) && value.roleBreakdown.length
-      ? value.roleBreakdown.map((item) => ({
-          title: item?.title || "",
-          summary: item?.summary || "",
-        }))
-      : [{ title: "", summary: "" }],
 });
 
 const createServiceForm = (value = {}) => ({
@@ -117,19 +152,22 @@ const buildPayload = (entityType, form) => {
         shortDescription: form.shortDescription.trim(),
         tagline: (form.tagline || form.shortDescription).trim(),
         description: form.description.trim(),
+        making: form.making.trim(),
         cardImage: form.cardImage.trim(),
         carouselImage: form.carouselImage.trim(),
-        coverImage: (form.cardImage || form.coverImage).trim(),
-        heroImage: (form.carouselImage || form.heroImage).trim(),
         gallery: splitLines(form.gallery),
+        screenshotOrientation: form.screenshotOrientation === "landscape" ? "landscape" : "portrait",
         technologies: splitLines(form.technologies),
+        features: splitLines(form.features),
+        caseStudy: {
+          title: form.caseStudyTitle.trim(),
+          challenge: form.caseStudyChallengeDescription.trim(),
+          goals: splitLines(form.caseStudyChallengeBullets),
+          solutions: sanitizeCaseStudyRows(form.caseStudySolutions),
+          pillars: sanitizeCaseStudyRows(form.caseStudyPillars),
+          conclusion: form.caseStudyConclusion.trim(),
+        },
         featured: Boolean(form.featured),
-        roleBreakdown: (form.roleBreakdown || [])
-          .map((item) => ({
-            title: item.title.trim(),
-            summary: item.summary.trim(),
-          }))
-          .filter((item) => item.title || item.summary),
       };
     case "services":
       return {
@@ -200,6 +238,10 @@ const textInputClass =
   "theme-input mt-2 w-full rounded-[1rem] px-4 py-3 text-sm text-white";
 const textareaClass =
   "theme-input mt-2 min-h-[7.5rem] w-full rounded-[1rem] px-4 py-3 text-sm text-white";
+const tableInputClass =
+  "theme-input w-full rounded-[0.95rem] px-3 py-3 text-sm text-white";
+const tableTextareaClass =
+  "theme-input min-h-[6.25rem] w-full rounded-[0.95rem] px-3 py-3 text-sm text-white";
 
 const readFileAsDataUrl = (file) =>
   new Promise((resolve, reject) => {
@@ -209,6 +251,83 @@ const readFileAsDataUrl = (file) =>
     reader.readAsDataURL(file);
   });
 
+const readBlobAsDataUrl = (blob) =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Unable to process image."));
+    reader.readAsDataURL(blob);
+  });
+
+const loadImage = (dataUrl) =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Unable to process image."));
+    image.src = dataUrl;
+  });
+
+const compressImageFile = async (file) => {
+  if (!file) return "";
+
+  if (file.size > MAX_IMAGE_INPUT_BYTES) {
+    throw new Error("Image is too large. Please pick a file under 8 MB.");
+  }
+
+  const originalDataUrl = await readFileAsDataUrl(file);
+  let image;
+
+  try {
+    image = await loadImage(originalDataUrl);
+  } catch (error) {
+    throw new Error(error?.message || "Unable to process image.");
+  }
+
+  const needsResize = Math.max(image.width, image.height) > MAX_IMAGE_DIMENSION;
+
+  if (!needsResize && file.size <= MAX_IMAGE_OUTPUT_BYTES) {
+    return originalDataUrl;
+  }
+
+  const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(image.width, image.height));
+  const targetWidth = Math.max(1, Math.round(image.width * scale));
+  const targetHeight = Math.max(1, Math.round(image.height * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = targetWidth;
+  canvas.height = targetHeight;
+  const context = canvas.getContext("2d");
+  context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+  const toDataUrlWithQuality = (quality) =>
+    new Promise((resolve, reject) => {
+      canvas.toBlob(
+        async (blob) => {
+          if (!blob) {
+            reject(new Error("Unable to encode image."));
+            return;
+          }
+          resolve({
+            blob,
+            dataUrl: await readBlobAsDataUrl(blob),
+          });
+        },
+        "image/jpeg",
+        quality,
+      );
+    });
+
+  let quality = TARGET_JPEG_QUALITY;
+  let encoded = await toDataUrlWithQuality(quality);
+
+  if (encoded.blob.size > MAX_IMAGE_OUTPUT_BYTES) {
+    quality = Math.max(MIN_JPEG_QUALITY, TARGET_JPEG_QUALITY - 0.16);
+    encoded = await toDataUrlWithQuality(quality);
+  }
+
+  return encoded.dataUrl;
+};
+
 const Field = ({ label, children, hint }) => (
   <label className="block">
     <span className="text-sm font-medium text-white">{label}</span>
@@ -217,25 +336,102 @@ const Field = ({ label, children, hint }) => (
   </label>
 );
 
-const ImagePreview = ({ src, alt, className = "h-40" }) =>
+const ImagePreview = ({ src, alt, className = "h-40", fitClassName = "object-cover" }) =>
   src ? (
     <img
       src={src}
       alt={alt}
-      className={`mt-3 w-full rounded-[1rem] border border-white/10 object-cover ${className}`}
+      className={`mt-3 w-full rounded-[1rem] border border-white/10 ${fitClassName} ${className}`}
     />
   ) : null;
+
+const SectionBlock = ({ title, hint }) => (
+  <div className="md:col-span-2 rounded-[1.15rem] border border-white/8 bg-white/[0.03] px-4 py-4">
+    <h3 className="text-base font-semibold text-white">{title}</h3>
+    {hint ? <p className="mt-1 text-sm leading-6 text-muted">{hint}</p> : null}
+  </div>
+);
+
+const CaseStudyRowTable = ({
+  label,
+  hint,
+  rows,
+  titleLabel,
+  descriptionLabel,
+  addLabel,
+  onAdd,
+  onChange,
+  onRemove,
+}) => (
+  <div className="md:col-span-2">
+    <Field label={label} hint={hint}>
+      <div className="mt-3 space-y-3">
+        <div className="hidden grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)_auto] gap-3 px-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-accentSoft/80 md:grid">
+          <span>{titleLabel}</span>
+          <span>{descriptionLabel}</span>
+          <span className="text-right">Action</span>
+        </div>
+
+        {(rows || []).map((item, index) => (
+          <div
+            key={`${label}-${index}`}
+            className="grid gap-3 rounded-[1rem] border border-white/8 bg-white/[0.03] p-3 md:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)_auto] md:items-start"
+          >
+            <div className="space-y-2">
+              <span className="text-xs font-medium text-white md:hidden">{titleLabel}</span>
+              <input
+                value={item.title || ""}
+                onChange={(event) => onChange(index, "title", event.target.value)}
+                className={tableInputClass}
+                placeholder={titleLabel}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <span className="text-xs font-medium text-white md:hidden">{descriptionLabel}</span>
+              <textarea
+                value={item.summary || ""}
+                onChange={(event) => onChange(index, "summary", event.target.value)}
+                className={tableTextareaClass}
+                placeholder={descriptionLabel}
+              />
+            </div>
+
+            <div className="flex justify-end md:pt-9">
+              <button
+                type="button"
+                onClick={() => onRemove(index)}
+                className="admin-danger-button px-4 py-3 text-sm"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        onClick={onAdd}
+        className="admin-secondary-button mt-4 px-4 py-2 text-sm"
+      >
+        {addLabel}
+      </button>
+    </Field>
+  </div>
+);
 
 const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, onDelete }) => {
   const [form, setForm] = useState(() => buildInitialForm(entityType, initialValue));
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const formRef = useRef(null);
 
   useEffect(() => {
     setForm(buildInitialForm(entityType, initialValue));
   }, [entityType, initialValue]);
 
-  const isProject = entityType === "projects";
+  const isPortraitProjectGallery = (form.screenshotOrientation || "portrait") !== "landscape";
 
   const sectionTitle = useMemo(() => {
     switch (entityType) {
@@ -261,6 +457,38 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
     }));
   };
 
+  const updateCaseStudyRow = (field, index, key, value) => {
+    setForm((current) => ({
+      ...current,
+      [field]: (current[field] || []).map((item, currentIndex) =>
+        currentIndex === index
+          ? {
+              ...item,
+              [key]: value,
+            }
+          : item,
+      ),
+    }));
+  };
+
+  const addCaseStudyRow = (field) => {
+    setForm((current) => ({
+      ...current,
+      [field]: [...(current[field] || []), createCaseStudyRow()],
+    }));
+  };
+
+  const removeCaseStudyRow = (field, index) => {
+    setForm((current) => {
+      const nextRows = (current[field] || []).filter((_, currentIndex) => currentIndex !== index);
+
+      return {
+        ...current,
+        [field]: nextRows.length ? nextRows : [createCaseStudyRow()],
+      };
+    });
+  };
+
   const handleSingleImageUpload = async (field, file) => {
     if (!file) {
       return;
@@ -269,7 +497,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
     setError("");
 
     try {
-      const imageData = await readFileAsDataUrl(file);
+      const imageData = await compressImageFile(file);
       updateField(field, imageData);
     } catch (uploadError) {
       setError(uploadError.message || "Unable to load image.");
@@ -284,7 +512,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
     setError("");
 
     try {
-      const uploadedImages = await Promise.all(Array.from(files).map((file) => readFileAsDataUrl(file)));
+      const uploadedImages = await Promise.all(Array.from(files).map((file) => compressImageFile(file)));
       setForm((current) => ({
         ...current,
         gallery: joinLines([...(splitLines(current.gallery) || []), ...uploadedImages]),
@@ -294,41 +522,24 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
     }
   };
 
-  const updateRole = (index, field, value) => {
-    setForm((current) => ({
-      ...current,
-      roleBreakdown: current.roleBreakdown.map((item, currentIndex) =>
-        currentIndex === index
-          ? {
-              ...item,
-              [field]: value,
-            }
-          : item,
-      ),
-    }));
-  };
-
-  const addRole = () => {
-    setForm((current) => ({
-      ...current,
-      roleBreakdown: [...(current.roleBreakdown || []), { title: "", summary: "" }],
-    }));
-  };
-
-  const removeRole = (index) => {
-    setForm((current) => ({
-      ...current,
-      roleBreakdown: current.roleBreakdown.filter((_, currentIndex) => currentIndex !== index),
-    }));
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
     setIsSaving(true);
 
     try {
-      await onSave(buildPayload(entityType, form));
+      const payload = buildPayload(entityType, form);
+      const payloadSize = estimatePayloadSize(payload);
+
+      if (payloadSize > MAX_ADMIN_PAYLOAD_BYTES) {
+        throw new Error(
+          entityType === "projects"
+            ? "This case study is too large to save in one request. Reduce screenshot count or size, then try again."
+            : "This entry is too large to save in one request. Reduce uploaded image sizes, then try again.",
+        );
+      }
+
+      await onSave(payload);
       onClose();
     } catch (saveError) {
       setError(saveError.message || "Unable to save changes.");
@@ -354,8 +565,20 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
           </button>
         </div>
 
-        <form id="admin-entity-form" onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-6">
+        <form
+          id="admin-entity-form"
+          ref={formRef}
+          onSubmit={handleSubmit}
+          className="min-h-0 flex-1 overflow-y-auto p-6"
+        >
           <div className="grid gap-5 md:grid-cols-2">
+            {entityType === "projects" ? (
+              <SectionBlock
+                title="Project Basics"
+                hint="These fields control the main title, subtitle, and opening copy shown at the top of the case study page."
+              />
+            ) : null}
+
             <Field label="Title">
               <input
                 value={form.title || ""}
@@ -376,7 +599,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
             </Field>
 
             {entityType === "projects" ? (
-              <Field label="Tagline">
+              <Field label="Subtitle">
                 <input
                   value={form.tagline || ""}
                   onChange={(event) => updateField("tagline", event.target.value)}
@@ -387,7 +610,14 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
 
             {entityType !== "vision-scenes" ? (
               <div className="md:col-span-2">
-                <Field label="Short description" hint="Primary line used in cards and compact previews.">
+                <Field
+                  label="Short description"
+                  hint={
+                    entityType === "projects"
+                      ? "This is the short summary used in cards and just below the project title."
+                      : "Primary line used in cards and compact previews."
+                  }
+                >
                   <textarea
                     value={form.shortDescription || ""}
                     onChange={(event) => updateField("shortDescription", event.target.value)}
@@ -486,7 +716,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
               </Field>
             ) : null}
 
-            {entityType !== "vision-scenes" ? (
+            {entityType !== "vision-scenes" && entityType !== "projects" ? (
               <Field label="Card image" hint="Used in listing cards (16:9 recommended).">
                 <input
                   value={form.cardImage || ""}
@@ -503,7 +733,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
               </Field>
             ) : null}
 
-            {entityType !== "vision-scenes" ? (
+            {entityType !== "vision-scenes" && entityType !== "projects" ? (
               <Field label="Carousel image" hint="Used in hero carousel and feature panels.">
                 <input
                   value={form.carouselImage || ""}
@@ -688,7 +918,10 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
             {entityType === "projects" ? (
               <>
                 <div className="md:col-span-2">
-                  <Field label="Project description">
+                  <Field
+                    label="Intro description"
+                    hint="Main paragraph shown under the subtitle in the top section."
+                  >
                     <textarea
                       value={form.description || ""}
                       onChange={(event) => updateField("description", event.target.value)}
@@ -699,7 +932,76 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
                 </div>
 
                 <div className="md:col-span-2">
-                  <Field label="Gallery image keys" hint="Enter one image key per line.">
+                  <Field
+                    label="Making of this project"
+                    hint="Editorial copy shown at the top of the Making of this project section."
+                  >
+                    <textarea
+                      value={form.making || ""}
+                      onChange={(event) => updateField("making", event.target.value)}
+                      className={textareaClass}
+                    />
+                  </Field>
+                </div>
+
+                <SectionBlock
+                  title="Showcase Media"
+                  hint="Manage the service card image, the carousel image used in the top showcase slot, and the scrolling screenshot band."
+                />
+
+                <Field label="Card image" hint="Used for project cards and the banner image on the case study page.">
+                  <input
+                    value={form.cardImage || ""}
+                    onChange={(event) => updateField("cardImage", event.target.value)}
+                    className={textInputClass}
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => handleSingleImageUpload("cardImage", event.target.files?.[0])}
+                    className="mt-3 block w-full text-sm text-muted file:mr-4 file:rounded-full file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
+                  />
+                  <ImagePreview src={form.cardImage} alt="Card image preview" className="h-44" />
+                </Field>
+
+                <Field label="Carousel image" hint="Used in the smaller showcase panel beside the title and intro.">
+                  <input
+                    value={form.carouselImage || ""}
+                    onChange={(event) => updateField("carouselImage", event.target.value)}
+                    className={textInputClass}
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => handleSingleImageUpload("carouselImage", event.target.files?.[0])}
+                    className="mt-3 block w-full text-sm text-muted file:mr-4 file:rounded-full file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
+                  />
+                  <ImagePreview src={form.carouselImage} alt="Carousel image preview" className="h-44" />
+                </Field>
+
+                <SectionBlock
+                  title="Case Study Editorial"
+                  hint="These fields shape the detailed editorial section: the challenge, key solutions, supporting pillars, conclusion, and tech used."
+                />
+
+                <div className="md:col-span-2">
+                  <Field
+                    label="Case study title"
+                    hint="Optional editorial title stored with the project's long-form case study content."
+                  >
+                    <input
+                      value={form.caseStudyTitle || ""}
+                      onChange={(event) => updateField("caseStudyTitle", event.target.value)}
+                      className={textInputClass}
+                    />
+                  </Field>
+                </div>
+
+                <div className="md:col-span-2">
+                  <Field
+                    label="Screenshots"
+                    hint="Enter one image key, URL, or upload files. Uploads are auto-resized to ~1600px and compressed for faster saves."
+                  >
                     <textarea
                       value={form.gallery || ""}
                       onChange={(event) => updateField("gallery", event.target.value)}
@@ -718,8 +1020,9 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
                           <div key={`${index}-${item.slice(0, 12)}`} className="space-y-2">
                             <ImagePreview
                               src={item}
-                              alt={`Gallery preview ${index + 1}`}
-                              className="h-32"
+                              alt={`Screenshot preview ${index + 1}`}
+                              fitClassName="object-contain"
+                              className={isPortraitProjectGallery ? "h-72 object-contain bg-black/20 p-2" : "h-40"}
                             />
                             <button
                               type="button"
@@ -741,11 +1044,145 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
                 </div>
 
                 <div className="md:col-span-2">
-                  <Field label="Technologies" hint="Enter one technology per line.">
+                  <Field
+                    label="Screenshot layout"
+                    hint="Choose how the screenshots should appear in the scrolling band on the case study page."
+                  >
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      {[
+                        {
+                          value: "portrait",
+                          label: "Portrait",
+                          description: "Best for Play Store or mobile app screens.",
+                        },
+                        {
+                          value: "landscape",
+                          label: "Landscape",
+                          description: "Best for gameplay captures, desktop UI, or wide mockups.",
+                        },
+                      ].map((option) => (
+                        <label
+                          key={option.value}
+                          className={`rounded-[1rem] border px-4 py-4 transition ${
+                            form.screenshotOrientation === option.value
+                              ? "border-cyan-300/60 bg-cyan-400/10"
+                              : "border-white/8 bg-white/[0.03]"
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <input
+                              type="radio"
+                              name="project-screenshot-orientation"
+                              value={option.value}
+                              checked={form.screenshotOrientation === option.value}
+                              onChange={(event) => updateField("screenshotOrientation", event.target.value)}
+                              className="mt-1 h-4 w-4"
+                            />
+                            <div>
+                              <p className="text-sm font-semibold text-white">{option.label}</p>
+                              <p className="mt-1 text-xs leading-6 text-muted">{option.description}</p>
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </Field>
+                </div>
+
+                <div className="md:col-span-2">
+                  <Field
+                    label="Tech used"
+                    hint="Enter one technology per line. These appear in the case study header card."
+                  >
                     <textarea
                       value={form.technologies || ""}
                       onChange={(event) => updateField("technologies", event.target.value)}
                       className={textareaClass}
+                    />
+                  </Field>
+                </div>
+
+                <SectionBlock
+                  title="The Challenge"
+                  hint="Add the main challenge description and the supporting bullet points shown underneath it."
+                />
+
+                <div className="md:col-span-2">
+                  <Field label="Description">
+                    <textarea
+                      value={form.caseStudyChallengeDescription || ""}
+                      onChange={(event) =>
+                        updateField("caseStudyChallengeDescription", event.target.value)
+                      }
+                      className={textareaClass}
+                    />
+                  </Field>
+                </div>
+
+                <div className="md:col-span-2">
+                  <Field
+                    label="Bulleted points"
+                    hint="Enter one supporting point per line."
+                  >
+                    <textarea
+                      value={form.caseStudyChallengeBullets || ""}
+                      onChange={(event) =>
+                        updateField("caseStudyChallengeBullets", event.target.value)
+                      }
+                      className={textareaClass}
+                    />
+                  </Field>
+                </div>
+
+                <SectionBlock
+                  title="Key Features & Solutions"
+                  hint="Each row becomes one feature and solution entry in the editorial table."
+                />
+
+                <CaseStudyRowTable
+                  label="Feature and solution rows"
+                  hint="Add the feature title and the matching solution description for each row."
+                  rows={form.caseStudySolutions || []}
+                  titleLabel="Feature title"
+                  descriptionLabel="Solution description"
+                  addLabel="Add feature row"
+                  onAdd={() => addCaseStudyRow("caseStudySolutions")}
+                  onChange={(index, key, value) =>
+                    updateCaseStudyRow("caseStudySolutions", index, key, value)
+                  }
+                  onRemove={(index) => removeCaseStudyRow("caseStudySolutions", index)}
+                />
+
+                <SectionBlock
+                  title="Core Experience Pillars"
+                  hint="Add one title and description for each pillar card."
+                />
+
+                <CaseStudyRowTable
+                  label="Pillar rows"
+                  hint="Each row becomes one card in the core experience pillars section."
+                  rows={form.caseStudyPillars || []}
+                  titleLabel="Pillar title"
+                  descriptionLabel="Pillar description"
+                  addLabel="Add pillar"
+                  onAdd={() => addCaseStudyRow("caseStudyPillars")}
+                  onChange={(index, key, value) =>
+                    updateCaseStudyRow("caseStudyPillars", index, key, value)
+                  }
+                  onRemove={(index) => removeCaseStudyRow("caseStudyPillars", index)}
+                />
+
+                <SectionBlock
+                  title="Conclusion"
+                  hint="Short closing line for the final editorial section."
+                />
+
+                <div className="md:col-span-2">
+                  <Field label="Conclusion">
+                    <input
+                      value={form.caseStudyConclusion || ""}
+                      onChange={(event) => updateField("caseStudyConclusion", event.target.value)}
+                      className={textInputClass}
                     />
                   </Field>
                 </div>
@@ -835,61 +1272,6 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
             ) : null}
           </div>
 
-          {isProject ? (
-            <div className="mt-6 rounded-[1.4rem] border border-white/8 bg-white/[0.03] p-5">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-white">Role breakdown</h3>
-                  <p className="mt-1 text-sm text-muted">
-                    Add the project roles or delivery blocks shown in the case study.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={addRole}
-                  className="admin-secondary-button px-4 py-2"
-                >
-                  Add role
-                </button>
-              </div>
-
-              <div className="mt-4 space-y-4">
-                {(form.roleBreakdown || []).map((item, index) => (
-                  <div key={`${index}-${item.title}`} className="rounded-[1.15rem] border border-white/8 p-4">
-                    <div className="grid gap-4 md:grid-cols-[1fr_auto]">
-                      <Field label="Role title">
-                        <input
-                          value={item.title}
-                          onChange={(event) => updateRole(index, "title", event.target.value)}
-                          className={textInputClass}
-                        />
-                      </Field>
-
-                      <div className="flex items-end">
-                        <button
-                          type="button"
-                          onClick={() => removeRole(index)}
-                          className="admin-danger-button px-4 py-3"
-                          disabled={(form.roleBreakdown || []).length === 1}
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    </div>
-
-                    <Field label="Role summary">
-                      <textarea
-                        value={item.summary}
-                        onChange={(event) => updateRole(index, "summary", event.target.value)}
-                        className={textareaClass}
-                      />
-                    </Field>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
           {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
         </form>
 
@@ -911,8 +1293,8 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
             Cancel
           </button>
           <button
-            type="submit"
-            form="admin-entity-form"
+            type="button"
+            onClick={() => formRef.current?.requestSubmit()}
             disabled={isSaving}
             className="admin-save-button disabled:opacity-70"
           >

@@ -6,6 +6,15 @@ import Modal from "./ui/Modal";
 const textInputClass = "theme-input mt-2 w-full rounded-[1rem] px-4 py-3 text-sm text-white";
 const textareaClass =
   "theme-input mt-2 min-h-[6.5rem] w-full rounded-[1rem] px-4 py-3 text-sm text-white";
+const MAX_ADMIN_PAYLOAD_BYTES = 14 * 1024 * 1024;
+
+const estimatePayloadSize = (payload) => {
+  try {
+    return new Blob([JSON.stringify(payload)]).size;
+  } catch {
+    return 0;
+  }
+};
 
 const readFileAsDataUrl = (file) =>
   new Promise((resolve, reject) => {
@@ -47,8 +56,6 @@ const buildQuickPayload = (entityType, form) => {
       return {
         ...base,
         tagline: base.shortDescription,
-        coverImage: base.cardImage,
-        heroImage: base.carouselImage,
       };
     case "services":
       return {
@@ -114,7 +121,14 @@ const AdminQuickEditModal = ({
     setError("");
 
     try {
-      await onSave(buildQuickPayload(entityType, form));
+      const payload = buildQuickPayload(entityType, form);
+      const payloadSize = estimatePayloadSize(payload);
+
+      if (payloadSize > MAX_ADMIN_PAYLOAD_BYTES) {
+        throw new Error("This entry is too large to save in one request. Reduce uploaded image sizes, then try again.");
+      }
+
+      await onSave(payload);
       onClose();
     } catch (saveError) {
       setError(saveError.message || "Unable to save changes.");

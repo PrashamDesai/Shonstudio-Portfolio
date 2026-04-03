@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-import studioLogo from "../assets/ShonStudio Logo.svg";
+import brandMark from "../assets/brand-mark.svg";
 
 const LoadingScreen = () => {
   const [progress, setProgress] = useState(8);
@@ -56,7 +56,7 @@ const LoadingScreen = () => {
                 className="mx-auto w-fit overflow-hidden"
               >
                 <img
-                  src={studioLogo}
+                  src={brandMark}
                   alt="ShonStudio logo"
                   className="h-16 w-16 object-contain sm:h-20 sm:w-20"
                 />

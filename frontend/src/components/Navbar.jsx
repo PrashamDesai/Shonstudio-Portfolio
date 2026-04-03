@@ -6,10 +6,10 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 
-import studioLogo from "../assets/ShonStudio Logo.svg";
+import brandMark from "../assets/brand-mark.svg";
 import { useTheme } from "../context/ThemeContext.jsx";
 import MagneticButton from "./MagneticButton";
 
@@ -81,7 +81,7 @@ const ThemeToggleButton = ({ theme, onToggle, className = "" }) => (
     type="button"
     whileTap={{ scale: 0.95 }}
     onClick={onToggle}
-    className={`theme-toggle ${className}`}
+    className={`theme-toggle items-center justify-center ${className}`}
     data-cursor="link"
     data-cursor-label={theme === "dark" ? "Light mode" : "Dark mode"}
     aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
@@ -344,6 +344,28 @@ const Navbar = () => {
     pointerY.set(50);
   };
 
+  const shellColors = useMemo(() => {
+    if (theme === "light") {
+      return {
+        shellBackgroundIdle: "rgba(255, 255, 255, 0.7)",
+        shellBackgroundScrolled: "rgba(255, 255, 255, 0.9)",
+        shellBorderIdle: "rgba(111, 130, 168, 0.42)",
+        shellBorderScrolled: "rgba(49, 117, 255, 0.34)",
+        shellShadowIdle: "0 14px 34px rgba(42, 58, 89, 0.14), 0 0 0 1px rgba(255, 255, 255, 0.72)",
+        shellShadowScrolled: "0 20px 48px rgba(42, 58, 89, 0.2), 0 0 0 1px rgba(49, 117, 255, 0.2), 0 0 24px rgba(112, 93, 224, 0.18)",
+      };
+    }
+
+    return {
+      shellBackgroundIdle: "rgba(20, 27, 40, 0.62)",
+      shellBackgroundScrolled: "rgba(20, 27, 40, 0.9)",
+      shellBorderIdle: "rgba(145, 163, 201, 0.74)",
+      shellBorderScrolled: "rgba(85, 203, 255, 0.26)",
+      shellShadowIdle: "0 18px 42px rgba(6, 12, 27, 0.24), 0 0 20px rgba(85, 203, 255, 0.12)",
+      shellShadowScrolled: "0 24px 70px rgba(6, 12, 27, 0.36), 0 0 0 1px rgba(85, 203, 255, 0.12), 0 0 34px rgba(137, 109, 255, 0.2)",
+    };
+  }, [theme]);
+
   return (
     <header className="pointer-events-none relative z-[100] mb-2 sm:mb-3">
       <div className="mx-auto max-w-[1600px] px-4 pt-4 sm:px-6 lg:px-10">
@@ -356,21 +378,29 @@ const Navbar = () => {
             paddingTop: isScrolled ? 10 : 14,
             paddingBottom: isScrolled ? 10 : 14,
             backgroundColor: isScrolled
-              ? "rgb(var(--surface-rgb) / 0.9)"
-              : "rgb(var(--surface-rgb) / 0.62)",
+              ? shellColors.shellBackgroundScrolled
+              : shellColors.shellBackgroundIdle,
             borderColor: isScrolled
-              ? "rgb(var(--accent-primary-rgb) / 0.26)"
-              : "rgb(var(--border-rgb) / 0.74)",
+              ? shellColors.shellBorderScrolled
+              : shellColors.shellBorderIdle,
             boxShadow: isScrolled
-              ? "0 24px 70px rgb(6 12 27 / 0.36), 0 0 0 1px rgb(var(--accent-primary-rgb) / 0.12), 0 0 34px rgb(var(--accent-secondary-rgb) / 0.2)"
-              : "0 18px 42px rgb(6 12 27 / 0.24), 0 0 20px rgb(var(--accent-primary-rgb) / 0.12)",
+              ? shellColors.shellShadowScrolled
+              : shellColors.shellShadowIdle,
           }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           className="pointer-events-auto relative overflow-visible rounded-[1.9rem] border px-4 sm:px-6"
         >
           <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[1.9rem]">
             <motion.div className="absolute inset-0 opacity-90" style={{ backgroundImage: shellGlow }} />
-            <div className="absolute inset-[1px] rounded-[1.75rem] bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] backdrop-blur-2xl" />
+            <div
+              className="absolute inset-[1px] rounded-[1.75rem] backdrop-blur-2xl"
+              style={{
+                background:
+                  theme === "light"
+                    ? "linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2))"
+                    : "linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02))",
+              }}
+            />
             <div className="absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-accent/70 to-transparent" />
             <motion.div
               aria-hidden="true"
@@ -399,7 +429,7 @@ const Navbar = () => {
                     className="absolute inset-0 rounded-2xl bg-accent/10"
                   />
                   <img
-                    src={studioLogo}
+                    src={brandMark}
                     alt="ShonStudio logo"
                     className="relative z-10 h-8 w-8 object-contain"
                   />
@@ -428,7 +458,7 @@ const Navbar = () => {
             </nav>
 
             <div className="flex items-center gap-3">
-              <ThemeToggleButton theme={theme} onToggle={toggleTheme} className="hidden xl:grid" />
+              <ThemeToggleButton theme={theme} onToggle={toggleTheme} className="!hidden xl:!inline-flex" />
 
               <MagneticButton
                 to="/counselling"
@@ -438,7 +468,7 @@ const Navbar = () => {
                 Start project
               </MagneticButton>
 
-              <ThemeToggleButton theme={theme} onToggle={toggleTheme} className="xl:hidden" />
+              <ThemeToggleButton theme={theme} onToggle={toggleTheme} className="!inline-flex xl:!hidden" />
 
               <motion.button
                 type="button"
@@ -498,7 +528,6 @@ const Navbar = () => {
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <ThemeToggleButton theme={theme} onToggle={toggleTheme} />
                     <button
                       type="button"
                       onClick={() => setIsOpen(false)}

@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { FiDownload, FiExternalLink } from "react-icons/fi";
 
 import { resolveMedia } from "../assets/mediaMap";
-import { downloadTeamResumePdf } from "../utils/resumePdf";
+import { useItem } from "../hooks/usePageData";
 import { normalizeTeamResume } from "../utils/teamResume";
 import Modal from "./ui/Modal";
 
@@ -20,8 +21,34 @@ const SectionTitle = ({ title, subtitle }) => (
 );
 
 const TeamModal = ({ member, onClose, isAdmin = false }) => {
-  const profile = normalizeTeamResume(member || {});
+  const [isDownloadingResume, setIsDownloadingResume] = useState(false);
+  const shouldLoadFullProfile = Boolean(member?._id && !member?.resume);
+  const { data: detailedMember, loading: isLoadingProfile } = useItem(
+    member?._id ? `/team/${member._id}` : "",
+    {
+      enabled: shouldLoadFullProfile,
+      initialData: member,
+      timeoutMs: 30_000,
+    },
+  );
+  const resolvedMember = detailedMember || member;
+  const profile = normalizeTeamResume(resolvedMember || {});
   const skillMatrix = [...new Set([...(profile.coreTech || []), ...(profile.skills || [])])];
+
+  const handleDownloadResume = async () => {
+    if (!resolvedMember || isDownloadingResume) {
+      return;
+    }
+
+    setIsDownloadingResume(true);
+
+    try {
+      const { downloadTeamResumePdf } = await import("../utils/resumePdf");
+      await downloadTeamResumePdf(resolvedMember);
+    } finally {
+      setIsDownloadingResume(false);
+    }
+  };
 
   return (
     <Modal open={Boolean(member)} onClose={onClose} maxWidthClass="max-w-6xl" panelClassName="admin-modal-panel">
@@ -64,11 +91,12 @@ const TeamModal = ({ member, onClose, isAdmin = false }) => {
                   {isAdmin ? (
                     <button
                       type="button"
-                      onClick={() => downloadTeamResumePdf(member)}
+                      onClick={handleDownloadResume}
+                      disabled={isDownloadingResume}
                       className="theme-button-primary inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em]"
                     >
                       <FiDownload className="text-sm" />
-                      Download Resume PDF
+                      {isDownloadingResume ? "Preparing PDF" : "Download Resume PDF"}
                     </button>
                   ) : null}
 
@@ -80,6 +108,12 @@ const TeamModal = ({ member, onClose, isAdmin = false }) => {
             </div>
 
             <div className="min-h-0 flex-1 overflow-y-auto px-6 py-6 sm:px-8">
+              {isLoadingProfile ? (
+                <div className="mb-5 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs uppercase tracking-[0.24em] text-mutedDeep">
+                  Loading full profile...
+                </div>
+              ) : null}
+
               <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr]">
                 <div className="space-y-6">
                   <div className="section-shell panel-glow overflow-hidden p-4">

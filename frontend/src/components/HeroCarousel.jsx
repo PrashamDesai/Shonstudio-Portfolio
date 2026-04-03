@@ -37,56 +37,67 @@ const HeroCarousel = ({ categories = [] }) => {
   const activeSrc = activeItem?.carouselImage ? resolveMedia(activeItem.carouselImage) : null;
   const nextSrc = nextItem?.carouselImage ? resolveMedia(nextItem.carouselImage) : null;
 
-  // Pre-decode a single image URL, mark it as ready when done
-  const preDecodeImage = useCallback((url) => {
-    if (!url || decodedUrls.current.has(url)) return;
-    const img = new window.Image();
-    img.src = url;
-    // decode() resolves once the browser has the pixels ready to paint
-    img.decode().then(() => {
-      decodedUrls.current.add(url);
-    }).catch(() => {
-      // Still mark as "decoded" so we don't retry forever on broken URLs
-      decodedUrls.current.add(url);
-    });
+  const markDecoded = useCallback((url) => {
+    if (!url || decodedUrls.current.has(url)) {
+      return;
+    }
+
+    decodedUrls.current.add(url);
+
+    while (decodedUrls.current.size > 8) {
+      const oldestUrl = decodedUrls.current.values().next().value;
+      decodedUrls.current.delete(oldestUrl);
+    }
   }, []);
 
-  // On mount: eagerly pre-decode ALL carousel images so every slide is instant
-  useEffect(() => {
-    categories.forEach((category) => {
-      category?.items?.forEach((item) => {
-        if (item?.carouselImage) {
-          preDecodeImage(resolveMedia(item.carouselImage));
-        }
-      });
-    });
-  }, [categories, preDecodeImage]);
+  const preDecodeImage = useCallback((url, onSettled) => {
+    if (!url) {
+      return;
+    }
 
-  // Aggressively pre-decode the NEXT image whenever it changes
+    if (decodedUrls.current.has(url)) {
+      onSettled?.();
+      return;
+    }
+
+    const img = new window.Image();
+    img.decoding = "async";
+    img.src = url;
+    const finalize = () => {
+      markDecoded(url);
+      onSettled?.();
+    };
+
+    if (typeof img.decode === "function") {
+      img.decode().then(finalize).catch(finalize);
+      return;
+    }
+
+    img.onload = finalize;
+    img.onerror = finalize;
+  }, [markDecoded]);
+
   useEffect(() => {
-    if (nextSrc) preDecodeImage(nextSrc);
+    if (nextSrc) {
+      preDecodeImage(nextSrc);
+    }
   }, [nextSrc, preDecodeImage]);
 
-  // Pre-decode the active image and force re-render once ready (handles first load)
   useEffect(() => {
-    if (!activeSrc || decodedUrls.current.has(activeSrc)) return;
-    const img = new window.Image();
-    img.src = activeSrc;
-    img.decode().then(() => {
-      decodedUrls.current.add(activeSrc);
-      forceRender((n) => n + 1);
-    }).catch(() => {
-      decodedUrls.current.add(activeSrc);
-      forceRender((n) => n + 1);
+    if (!activeSrc) {
+      return;
+    }
+
+    preDecodeImage(activeSrc, () => {
+      forceRender((value) => value + 1);
     });
-  }, [activeSrc]);
+  }, [activeSrc, preDecodeImage]);
 
   if (!activeCategory || !activeItem) {
     return null;
   }
 
   const cardKey = `${activeCategory.key}-${activeItem.id}`;
-  // Image is ready if it has been pre-decoded (no visible loading flash)
   const isImageReady = activeSrc && decodedUrls.current.has(activeSrc);
 
   return (

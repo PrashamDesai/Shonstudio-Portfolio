@@ -3,7 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 
 import App from "./App";
-import studioLogo from "./assets/ShonStudio Logo.svg";
+import brandMark from "./assets/brand-mark.svg";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 import "./index.css";
 
@@ -12,7 +12,7 @@ const faviconLink =
 
 faviconLink.rel = "icon";
 faviconLink.type = "image/svg+xml";
-faviconLink.href = studioLogo;
+faviconLink.href = brandMark;
 document.head.appendChild(faviconLink);
 
 ReactDOM.createRoot(document.getElementById("root")).render(

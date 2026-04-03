@@ -36,6 +36,7 @@ const normalizeItem = (item, categoryKey, index) => {
   const carouselImage =
     pickFirstText(
       item?.carouselImage,
+      item?.cardImage,
       item?.heroImage,
       item?.coverImage,
       item?.image,

@@ -106,9 +106,15 @@ const ProjectsPage = () => {
       ) : (
         <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
           {projects.map((project, index) => (
-            <Reveal key={project.slug || project._id || index} delay={index * 0.05}>
+            <Reveal
+              key={project.slug || project._id || index}
+              delay={Math.min(index, 5) * 0.04}
+              amount={0.08}
+              immediate={index < 3}
+            >
               <ProjectCard
                 project={project}
+                priority={index < 3}
                 adminActions={
                   isAdmin && project._id
                     ? {

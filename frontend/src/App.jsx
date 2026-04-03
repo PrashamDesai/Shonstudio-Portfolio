@@ -1,6 +1,6 @@
 import { AnimatePresence, domAnimation, LazyMotion, LayoutGroup, MotionConfig } from "framer-motion";
 import { lazy, Suspense, useEffect } from "react";
-import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation, useParams } from "react-router-dom";
 
 import CustomCursor from "./components/CustomCursor";
 import Footer from "./components/Footer";
@@ -30,22 +30,37 @@ const TrainingPage = lazyWithPreload(() => import("./pages/TrainingPage"));
 const ToolCategoryPage = lazyWithPreload(() => import("./pages/ToolCategoryPage"));
 const ToolsPage = lazyWithPreload(() => import("./pages/ToolsPage"));
 
-const preloadRouteComponents = () =>
-  Promise.allSettled([
-    HomePage.preload(),
-    ProjectsPage.preload(),
-    ProjectPage.preload(),
-    ServicesPage.preload(),
-    ServicePage.preload(),
-    CounsellingPage.preload(),
-    CompanyPage.preload(),
-    TeamPage.preload(),
-    TrainingCatalogPage.preload(),
-    TrainingPage.preload(),
-    ToolsPage.preload(),
-    ToolCategoryPage.preload(),
-    NotFoundPage.preload(),
-  ]);
+const preloadRouteComponents = () => {
+  const preloadCritical = Promise.allSettled([HomePage.preload(), ProjectsPage.preload()]);
+  const preloadIdle = () =>
+    Promise.allSettled([
+      ProjectPage.preload(),
+      ServicesPage.preload(),
+      ServicePage.preload(),
+      CounsellingPage.preload(),
+      CompanyPage.preload(),
+      TeamPage.preload(),
+      TrainingCatalogPage.preload(),
+      TrainingPage.preload(),
+      ToolsPage.preload(),
+      ToolCategoryPage.preload(),
+      NotFoundPage.preload(),
+    ]);
+
+  const idle = typeof window !== "undefined" && "requestIdleCallback" in window
+    ? window.requestIdleCallback
+    : (callback) => setTimeout(callback, 1200);
+  const cancelIdle =
+    typeof window !== "undefined" && "cancelIdleCallback" in window
+      ? window.cancelIdleCallback
+      : clearTimeout;
+
+  const idleHandle = idle(() => {
+    void preloadIdle();
+  });
+
+  return () => cancelIdle(idleHandle);
+};
 
 const RouteFallback = () => (
   <div className="flex min-h-[50vh] items-center justify-center pb-24">
@@ -63,13 +78,25 @@ const RouteFallback = () => (
   </div>
 );
 
+const LegacyServiceRedirect = () => {
+  const { slug } = useParams();
+
+  return <Navigate to={slug ? `/services/${slug}` : "/services"} replace />;
+};
+
 const App = () => {
   const location = useLocation();
 
   useScrollToTop();
 
   useEffect(() => {
-    void preloadRouteComponents();
+    const cancelPreload = preloadRouteComponents();
+
+    return () => {
+      if (typeof cancelPreload === "function") {
+        cancelPreload();
+      }
+    };
   }, []);
 
   return (
@@ -91,6 +118,8 @@ const App = () => {
                         <Route path="/" element={<HomePage />} />
                         <Route path="/projects" element={<ProjectsPage />} />
                         <Route path="/projects/:slug" element={<ProjectPage />} />
+                        <Route path="/service" element={<LegacyServiceRedirect />} />
+                        <Route path="/service/:slug" element={<LegacyServiceRedirect />} />
                         <Route path="/services" element={<ServicesPage />} />
                         <Route path="/services/:slug" element={<ServicePage />} />
                         <Route path="/counselling" element={<CounsellingPage />} />

@@ -1,26 +1,10 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { getApiBase, getApiBaseCandidates } from "../utils/apiBase.js";
 
 const ADMIN_STORAGE_KEY = "shonstudioAdminToken";
 
-const normalizeApiBase = (rawUrl) => {
-  const trimmed = String(rawUrl || "").trim();
-
-  if (!trimmed) {
-    return "/api";
-  }
-
-  const withoutTrailingSlash = trimmed.replace(/\/+$/, "");
-
-  if (withoutTrailingSlash.endsWith("/api")) {
-    return withoutTrailingSlash;
-  }
-
-  return `${withoutTrailingSlash}/api`;
-};
-
-const API_BASE = normalizeApiBase(
-  import.meta.env.VITE_API_URL || "https://shonstudio-portfolio.onrender.com",
-);
+const API_BASE = getApiBase();
+const API_BASE_CANDIDATES = getApiBaseCandidates();
 const ADMIN_LOGIN_PATH = `${API_BASE}/shonstudio-admin-secured/login`;
 const ADMIN_API_BASE = `${API_BASE}/shonstudio-admin-secured`;
 
@@ -35,6 +19,28 @@ export const AdminProvider = ({ children }) => {
     return window.sessionStorage.getItem(ADMIN_STORAGE_KEY) || "";
   });
   const [refreshVersion, setRefreshVersion] = useState(0);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const incomingToken = params.get("adminToken");
+    const shouldLogout = params.get("adminLogout");
+
+    if (shouldLogout) {
+      window.sessionStorage.removeItem(ADMIN_STORAGE_KEY);
+      setToken("");
+    } else if (incomingToken) {
+      window.sessionStorage.setItem(ADMIN_STORAGE_KEY, incomingToken);
+      setToken(incomingToken);
+    }
+
+    if (shouldLogout || incomingToken) {
+      params.delete("adminToken");
+      params.delete("adminLogout");
+      const nextSearch = params.toString();
+      const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}${window.location.hash}`;
+      window.history.replaceState({}, "", nextUrl);
+    }
+  }, []);
 
   useEffect(() => {
     const syncToken = () => {
@@ -76,21 +82,31 @@ export const AdminProvider = ({ children }) => {
         setRefreshVersion((current) => current + 1);
       },
       requestAdmin: async (path, options = {}) => {
-        const response = await fetch(`${ADMIN_API_BASE}${path}`, {
-          ...options,
-          headers: {
-            ...(options.headers || {}),
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        let lastError = null;
 
-        const result = await response.json().catch(() => ({}));
+        for (const apiBase of API_BASE_CANDIDATES) {
+          try {
+            const response = await fetch(`${apiBase}/shonstudio-admin-secured${path}`, {
+              ...options,
+              headers: {
+                ...(options.headers || {}),
+                Authorization: `Bearer ${token}`,
+              },
+            });
 
-        if (!response.ok) {
-          throw new Error(result.message || "Admin request failed");
+            const result = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+              throw new Error(result.message || "Admin request failed");
+            }
+
+            return result;
+          } catch (requestError) {
+            lastError = requestError;
+          }
         }
 
-        return result;
+        throw lastError || new Error("Admin request failed");
       },
     };
   }, [refreshVersion, token]);

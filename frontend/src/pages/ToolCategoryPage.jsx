@@ -10,7 +10,6 @@ import AdminEntityModal from "../components/AdminEntityModal";
 import AdminQuickEditModal from "../components/AdminQuickEditModal";
 import { CardGridSkeleton, PageDataEmpty } from "../components/ApiState";
 import ToolAssetModal from "../components/ToolAssetModal";
-import { mergeToolsWithMockAssets } from "../components/mockToolAssets";
 import {
   CATEGORY_DEFINITIONS,
   filterToolsByCategorySlug,
@@ -94,10 +93,9 @@ const ToolCategoryPage = () => {
   const { isAdmin, requestAdmin, signalRefresh } = useAdmin();
 
   const category = getCategoryBySlug(categorySlug);
-  const mergedTools = useMemo(() => mergeToolsWithMockAssets(tools), [tools]);
   const categoryTools = useMemo(
-    () => filterToolsByCategorySlug(mergedTools, categorySlug),
-    [categorySlug, mergedTools],
+    () => filterToolsByCategorySlug(tools, categorySlug),
+    [categorySlug, tools],
   );
   const filteredTools = useMemo(
     () => categoryTools.filter((tool) => matchesPriceFilter(tool, priceFilter)),
@@ -300,7 +298,6 @@ const ToolCategoryPage = () => {
                 <div className="flex flex-1 flex-col gap-3 p-5">
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="font-display text-2xl font-semibold tracking-tight text-white">{tool.title}</h3>
-                    <p className="text-3xl font-black leading-none text-white">{tool.price || "FREE"}</p>
                   </div>
                   <p className="text-sm leading-7 text-muted">
                     {tool.shortDescription || tool.description || "Production-ready asset for delivery workflows."}

@@ -9,7 +9,12 @@ const connectDB = async () => {
     );
   }
 
-  const conn = await mongoose.connect(MONGO_URI);
+  const conn = await mongoose.connect(MONGO_URI, {
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
+    socketTimeoutMS: 20000,
+    maxPoolSize: 10,
+  });
   console.log(`MongoDB connected: ${conn.connection.host}`);
 };
 

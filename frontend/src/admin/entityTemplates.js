@@ -4,18 +4,23 @@ export const projectTemplate = {
   shortDescription: "",
   tagline: "",
   description: "",
+  making: "",
   cardImage: "",
   carouselImage: "",
   coverImage: "",
   heroImage: "",
   gallery: [],
+  screenshotOrientation: "portrait",
   technologies: [],
-  roleBreakdown: [
-    {
-      title: "",
-      summary: "",
-    },
-  ],
+  features: [],
+  caseStudy: {
+    title: "",
+    challenge: "",
+    goals: [],
+    solutions: [],
+    pillars: [],
+    conclusion: "",
+  },
   featured: false,
 };
 

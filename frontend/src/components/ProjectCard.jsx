@@ -3,8 +3,9 @@ import { Link } from "react-router-dom";
 
 import { resolveMedia } from "../assets/mediaMap";
 import AdminEntityActions from "./AdminEntityActions";
+import MediaImage from "./MediaImage";
 
-const ProjectCard = ({ project, compact = false, adminActions = null }) => (
+const ProjectCard = ({ project, compact = false, adminActions = null, priority = false }) => (
   <motion.article
     whileHover={{ y: -10, scale: 1.012 }}
     transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
@@ -21,19 +22,25 @@ const ProjectCard = ({ project, compact = false, adminActions = null }) => (
       aria-label={`Open ${project.title}`}
     >
       <div className="relative overflow-hidden border-b border-white/8">
-        <motion.img
+        <MediaImage
           src={resolveMedia(project.cardImage || project.coverImage)}
           alt={project.title}
-          fetchpriority="high"
-          decoding="async"
-          className="aspect-video w-full object-cover"
-          whileHover={{ scale: 1.08, y: -6 }}
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
+          decoding={priority ? "sync" : "async"}
+          sizes="(min-width: 1280px) 33vw, (min-width: 1024px) 50vw, 100vw"
+          wrapperClassName="aspect-video w-full bg-black/20"
+          imgClassName="h-full w-full object-cover group-hover:scale-[1.06] group-hover:-translate-y-1.5"
         />
         <motion.div
           className="absolute inset-0 bg-gradient-to-t from-base via-base/20 to-transparent opacity-0 transition duration-500 group-hover:opacity-100"
           aria-hidden="true"
         />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-full border-t border-white/10 bg-black/72 px-4 py-3 transition duration-300 group-hover:translate-y-0">
+          <p className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-white/85">
+            View Case Study
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col space-y-5 p-6">

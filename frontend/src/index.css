@@ -152,7 +152,7 @@ body::before {
 }
 
 @media (pointer: fine) {
-  body {
+  body[data-custom-cursor="enabled"] {
     cursor: none;
   }
 }
@@ -296,7 +296,7 @@ body::before {
 }
 
 .theme-toggle {
-  @apply grid h-11 w-11 place-items-center rounded-2xl border backdrop-blur-xl;
+  @apply h-11 w-11 rounded-2xl border backdrop-blur-xl;
   border-color: rgb(var(--border-rgb) / 0.75);
   background:
     radial-gradient(circle at top, rgb(var(--accent-primary-rgb) / 0.14), transparent 64%),
@@ -311,6 +311,30 @@ body::before {
   border-color: rgb(var(--accent-primary-rgb) / 0.34);
   color: rgb(var(--accent-primary-rgb));
   box-shadow: 0 0 18px rgb(var(--accent-primary-rgb) / 0.22);
+}
+
+:root[data-theme="light"] .theme-toggle {
+  border-color: rgb(var(--border-rgb) / 0.62);
+  background:
+    radial-gradient(circle at top, rgb(var(--accent-primary-rgb) / 0.08), transparent 64%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.8), rgb(255 255 255 / 0.5)),
+    rgb(var(--surface-rgb) / 0.98);
+  color: rgb(var(--text-primary-rgb));
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    0 12px 24px rgb(36 58 110 / 0.12);
+}
+
+:root[data-theme="light"] .theme-toggle:hover {
+  border-color: rgb(var(--accent-primary-rgb) / 0.42);
+  color: rgb(var(--accent-primary-rgb));
+  background:
+    radial-gradient(circle at top, rgb(var(--accent-primary-rgb) / 0.12), transparent 64%),
+    linear-gradient(180deg, rgb(255 255 255 / 0.88), rgb(255 255 255 / 0.68)),
+    rgb(var(--surface-rgb) / 1);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    0 12px 28px rgb(var(--accent-primary-rgb) / 0.14);
 }
 
 .theme-link {
@@ -541,6 +565,82 @@ body::before {
   }
 }
 
+@keyframes case-study-screenshot-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-33.333333% + ((2 * var(--case-study-gap)) / 3)));
+  }
+}
+
+.case-study-screenshot-band {
+  --case-study-gap: clamp(1rem, 2vw, 1.4rem);
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1rem, 2vw, 1.35rem);
+  border-color: rgb(var(--border-rgb) / 0.58);
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.02)),
+    rgb(var(--surface-rgb) / 0.84);
+  mask-image: linear-gradient(90deg, transparent, rgb(0 0 0 / 1) 10%, rgb(0 0 0 / 1) 90%, transparent);
+}
+
+.case-study-screenshot-track {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  gap: var(--case-study-gap);
+  animation: case-study-screenshot-scroll var(--case-study-scroll-duration, 36s) linear infinite;
+  will-change: transform;
+}
+
+.case-study-screenshot-band:hover .case-study-screenshot-track {
+  animation-play-state: paused;
+}
+
+.case-study-screenshot-track-static {
+  width: 100%;
+  justify-content: center;
+  animation: none;
+}
+
+.case-study-screenshot-frame {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgb(var(--border-rgb) / 0.68);
+  border-radius: 1.9rem;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.12), rgb(255 255 255 / 0.03)),
+    rgb(8 12 20 / 0.94);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.08),
+    0 18px 42px rgb(2 8 22 / 0.26);
+}
+
+.case-study-screenshot-band-portrait .case-study-screenshot-frame {
+  width: clamp(12rem, 17vw, 14.25rem);
+  height: clamp(23rem, 34vw, 28rem);
+}
+
+.case-study-screenshot-band-landscape .case-study-screenshot-frame {
+  width: clamp(19rem, 31vw, 25rem);
+  height: clamp(11rem, 18vw, 14.6rem);
+}
+
+.case-study-screenshot-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  background: rgb(10 14 24 / 0.92);
+}
+
 .tech-marquee-track {
   display: flex;
   width: max-content;
@@ -671,6 +771,11 @@ body::before {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .case-study-screenshot-track {
+    animation: none;
+    transform: translateX(0);
+  }
+
   .tech-marquee-track {
     animation: none;
     transform: translateX(0);
@@ -678,6 +783,20 @@ body::before {
 }
 
 @media (max-width: 768px) {
+  .case-study-screenshot-band {
+    mask-image: none;
+  }
+
+  .case-study-screenshot-band-portrait .case-study-screenshot-frame {
+    width: clamp(10.4rem, 58vw, 12rem);
+    height: clamp(20rem, 92vw, 24rem);
+  }
+
+  .case-study-screenshot-band-landscape .case-study-screenshot-frame {
+    width: clamp(15rem, 88vw, 18rem);
+    height: clamp(9rem, 50vw, 11rem);
+  }
+
   .tech-marquee {
     --marquee-inner-height: clamp(3.4rem, 14vw, 4.1rem);
   }

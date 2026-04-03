@@ -5,6 +5,7 @@ import pulse from "./project-pulse.svg";
 import environment from "./tool-environment.svg";
 import dialogue from "./tool-dialogue.svg";
 import audio from "./tool-audio.svg";
+import { getApiBase } from "../utils/apiBase.js";
 
 const mediaMap = {
   hero: heroGrid,
@@ -28,16 +29,74 @@ const mediaMap = {
   "audio-moodboard-library": audio,
 };
 
+const ABSOLUTE_URL_PATTERN = /^[a-z][a-z0-9+.-]*:/i;
+const MEDIA_FILE_PATTERN = /\.(avif|bmp|gif|ico|jpe?g|jfif|png|svg|webp)$/i;
+
+const getBackendOrigin = () => {
+  const apiBase = String(getApiBase() || "").trim();
+
+  if (!/^https?:\/\//i.test(apiBase)) {
+    return "";
+  }
+
+  return apiBase.replace(/\/api\/?$/i, "");
+};
+
+const looksLikeMediaPath = (value) =>
+  typeof value === "string" &&
+  (value.startsWith("/") ||
+    value.startsWith("./") ||
+    value.startsWith("../") ||
+    value.includes("\\") ||
+    value.includes("/") ||
+    MEDIA_FILE_PATTERN.test(value));
+
+const resolveDynamicMediaSource = (value) => {
+  const normalizedValue = String(value || "").trim();
+
+  if (!normalizedValue) {
+    return "";
+  }
+
+  if (
+    normalizedValue.startsWith("data:") ||
+    normalizedValue.startsWith("blob:") ||
+    normalizedValue.startsWith("//") ||
+    ABSOLUTE_URL_PATTERN.test(normalizedValue)
+  ) {
+    return normalizedValue;
+  }
+
+  if (!looksLikeMediaPath(normalizedValue)) {
+    return "";
+  }
+
+  const normalizedPath = normalizedValue.replace(/\\/g, "/");
+  const pathWithoutLeadingDots = normalizedPath.replace(/^\.?\//, "");
+  const absolutePath = pathWithoutLeadingDots.startsWith("/")
+    ? pathWithoutLeadingDots
+    : `/${pathWithoutLeadingDots}`;
+  const backendOrigin = getBackendOrigin();
+
+  return backendOrigin ? `${backendOrigin}${absolutePath}` : absolutePath;
+};
+
 export const resolveMedia = (key) => {
   if (!key) {
     return heroGrid;
   }
 
-  if (
-    typeof key === "string" &&
-    (key.startsWith("data:") || key.startsWith("http://") || key.startsWith("https://") || key.startsWith("/"))
-  ) {
-    return key;
+  if (typeof key === "string") {
+    const normalizedKey = key.trim();
+    const dynamicSource = resolveDynamicMediaSource(normalizedKey);
+
+    if (dynamicSource) {
+      return dynamicSource;
+    }
+
+    if (mediaMap[normalizedKey]) {
+      return mediaMap[normalizedKey];
+    }
   }
 
   return mediaMap[key] || heroGrid;

@@ -9,6 +9,10 @@ import Service from "../models/Service.js";
 import Team from "../models/Team.js";
 import Tool from "../models/Tool.js";
 import VisionScene from "../models/VisionScene.js";
+import { clearProjectListCache, clearProjectResponseCache } from "./projectController.js";
+import { clearServiceListCache } from "./serviceController.js";
+import { clearTeamCache } from "./teamController.js";
+import { clearToolCache } from "./toolController.js";
 import { resolveUniqueSlug } from "../utils/slug.js";
 import asyncHandler from "../utils/asyncHandler.js";
 
@@ -60,6 +64,79 @@ const handleControllerError = (res, error, fallbackMessage) => {
 const modelSupportsSlug = (Model) =>
   Boolean(Model?.schema?.path("slug")) && Boolean(Model?.schema?.path("title"));
 
+const hasOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
+
+const normalizeProjectMediaPayload = (Model, payload) => {
+  if (Model?.modelName !== "Project" || !isNonEmptyObject(payload)) {
+    return payload;
+  }
+
+  const nextPayload = { ...payload };
+  const normalizeText = (value) => (typeof value === "string" ? value.trim() : "");
+  const normalizeStringArray = (value) =>
+    Array.isArray(value)
+      ? value.map((item) => normalizeText(item)).filter(Boolean)
+      : [];
+  const normalizeCaseStudyRows = (value) =>
+    Array.isArray(value)
+      ? value
+          .map((item) => ({
+            title: normalizeText(item?.title),
+            summary: normalizeText(item?.summary),
+          }))
+          .filter((item) => item.title || item.summary)
+      : [];
+
+  const nextDescription = normalizeText(nextPayload.description);
+  const nextShortDescription = normalizeText(nextPayload.shortDescription);
+  const nextTagline = normalizeText(nextPayload.tagline);
+
+  if (!nextShortDescription && nextTagline) {
+    nextPayload.shortDescription = nextTagline;
+  }
+
+  if (!nextTagline && nextShortDescription) {
+    nextPayload.tagline = nextShortDescription;
+  }
+
+  if (!nextPayload.shortDescription && nextDescription) {
+    nextPayload.shortDescription = nextDescription;
+  }
+
+  if (!nextPayload.tagline && nextPayload.shortDescription) {
+    nextPayload.tagline = nextPayload.shortDescription;
+  }
+
+  if (hasOwn(nextPayload, "cardImage") && !hasOwn(nextPayload, "coverImage")) {
+    nextPayload.coverImage = nextPayload.cardImage;
+  }
+
+  if (hasOwn(nextPayload, "coverImage") && !hasOwn(nextPayload, "cardImage")) {
+    nextPayload.cardImage = nextPayload.coverImage;
+  }
+
+  if (hasOwn(nextPayload, "carouselImage") && !hasOwn(nextPayload, "heroImage")) {
+    nextPayload.heroImage = nextPayload.carouselImage;
+  }
+
+  if (hasOwn(nextPayload, "heroImage") && !hasOwn(nextPayload, "carouselImage")) {
+    nextPayload.carouselImage = nextPayload.heroImage;
+  }
+
+  if (isNonEmptyObject(nextPayload.caseStudy)) {
+    nextPayload.caseStudy = {
+      title: normalizeText(nextPayload.caseStudy.title),
+      challenge: normalizeText(nextPayload.caseStudy.challenge),
+      goals: normalizeStringArray(nextPayload.caseStudy.goals),
+      solutions: normalizeCaseStudyRows(nextPayload.caseStudy.solutions),
+      pillars: normalizeCaseStudyRows(nextPayload.caseStudy.pillars),
+      conclusion: normalizeText(nextPayload.caseStudy.conclusion),
+    };
+  }
+
+  return nextPayload;
+};
+
 const normalizeSlugPayload = async (Model, payload, resourceId = null) => {
   const nextPayload = { ...payload };
 
@@ -86,12 +163,36 @@ const normalizeSlugPayload = async (Model, payload, resourceId = null) => {
   return nextPayload;
 };
 
+const normalizeEntityPayload = async (Model, payload, resourceId = null) => {
+  const mediaNormalizedPayload = normalizeProjectMediaPayload(Model, payload);
+  return normalizeSlugPayload(Model, mediaNormalizedPayload, resourceId);
+};
+
 const createEntity = (Model, label) =>
   asyncHandler(async (req, res) => {
     try {
       ensurePayload(req.body, `A ${label}`);
-      const payload = await normalizeSlugPayload(Model, req.body);
+      const payload = await normalizeEntityPayload(Model, req.body);
       const document = await Model.create(payload);
+
+      if (Model?.modelName === "Project") {
+        clearProjectListCache();
+        clearProjectResponseCache(document?._id);
+        clearProjectResponseCache(document?.slug);
+      }
+
+      if (Model?.modelName === "Service") {
+        clearServiceListCache();
+      }
+
+      if (Model?.modelName === "Tool") {
+        clearToolCache(document?.slug);
+      }
+
+      if (Model?.modelName === "Team") {
+        clearTeamCache(document?._id);
+      }
+
       res.status(201).json({
         message: `${label} created successfully`,
         data: document,
@@ -106,7 +207,7 @@ const updateEntity = (Model, label) =>
     try {
       ensureObjectId(req.params.id);
       ensurePayload(req.body, `A ${label}`);
-      const payload = await normalizeSlugPayload(Model, req.body, req.params.id);
+      const payload = await normalizeEntityPayload(Model, req.body, req.params.id);
 
       const document = await Model.findByIdAndUpdate(req.params.id, payload, {
         new: true,
@@ -115,6 +216,27 @@ const updateEntity = (Model, label) =>
 
       if (!document) {
         throw createHttpError(404, `${label} not found`);
+      }
+
+      if (Model?.modelName === "Project") {
+        clearProjectListCache();
+        clearProjectResponseCache(req.params.id);
+        clearProjectResponseCache(document?._id);
+        clearProjectResponseCache(document?.slug);
+      }
+
+      if (Model?.modelName === "Service") {
+        clearServiceListCache();
+      }
+
+      if (Model?.modelName === "Tool") {
+        clearToolCache(req.params.id);
+        clearToolCache(document?.slug);
+      }
+
+      if (Model?.modelName === "Team") {
+        clearTeamCache(req.params.id);
+        clearTeamCache(document?._id);
       }
 
       res.json({
@@ -135,6 +257,27 @@ const deleteEntity = (Model, label) =>
 
       if (!document) {
         throw createHttpError(404, `${label} not found`);
+      }
+
+      if (Model?.modelName === "Project") {
+        clearProjectListCache();
+        clearProjectResponseCache(req.params.id);
+        clearProjectResponseCache(document?._id);
+        clearProjectResponseCache(document?.slug);
+      }
+
+      if (Model?.modelName === "Service") {
+        clearServiceListCache();
+      }
+
+      if (Model?.modelName === "Tool") {
+        clearToolCache(req.params.id);
+        clearToolCache(document?.slug);
+      }
+
+      if (Model?.modelName === "Team") {
+        clearTeamCache(req.params.id);
+        clearTeamCache(document?._id);
       }
 
       res.json({

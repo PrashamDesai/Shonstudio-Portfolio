@@ -53,6 +53,11 @@ const mergeShowcaseItems = (primaryItems, fallbackItems, limit) => {
   return ordered.slice(0, limit);
 };
 
+const getServicePath = (service) => {
+  const serviceIdentifier = service?.slug || service?._id;
+  return serviceIdentifier ? `/services/${serviceIdentifier}` : "/services";
+};
+
 const HomePage = () => {
   const [editingEntity, setEditingEntity] = useState(null);
   const [quickEditingEntity, setQuickEditingEntity] = useState(null);
@@ -365,22 +370,30 @@ const HomePage = () => {
                       onDelete={() => deleteWhatWeDo(service)}
                     />
                   ) : null}
-                  <p className="text-xs uppercase tracking-[0.24em] text-accentSoft/80">
-                    {service.category || "Capability"}
-                  </p>
-                  <h3 className="mt-3 font-display text-2xl font-semibold leading-tight tracking-tight text-white">
-                    {service.title || "Untitled service"}
-                  </h3>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {(service.highlights || []).slice(0, 2).map((highlight) => (
-                      <span
-                        key={highlight}
-                        className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-muted"
-                      >
-                        {highlight}
-                      </span>
-                    ))}
-                  </div>
+                  <Link
+                    to={getServicePath(service)}
+                    className="block"
+                    data-cursor="link"
+                    data-cursor-label="Open"
+                    aria-label={`Open ${service.title || "service"}`}
+                  >
+                    <p className="text-xs uppercase tracking-[0.24em] text-accentSoft/80">
+                      {service.category || "Capability"}
+                    </p>
+                    <h3 className="mt-3 font-display text-2xl font-semibold leading-tight tracking-tight text-white">
+                      {service.title || "Untitled service"}
+                    </h3>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {(service.highlights || []).slice(0, 2).map((highlight) => (
+                        <span
+                          key={highlight}
+                          className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-muted"
+                        >
+                          {highlight}
+                        </span>
+                      ))}
+                    </div>
+                  </Link>
                 </motion.div>
               ))}
             </div>
@@ -474,6 +487,11 @@ const HomePage = () => {
                         transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-base/70 via-transparent to-transparent opacity-70" />
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-full border-t border-white/10 bg-black/72 px-4 py-3 transition duration-300 group-hover:translate-y-0">
+                        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-white/85">
+                          View Case Study
+                        </p>
+                      </div>
                     </div>
                     <div className="space-y-3 px-5 py-5">
                       <p className="text-[11px] uppercase tracking-[0.3em] text-accentSoft/80">

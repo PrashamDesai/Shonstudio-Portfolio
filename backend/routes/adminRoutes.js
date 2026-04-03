@@ -242,6 +242,34 @@ const createShell = (title, body, script = "") => `<!DOCTYPE html>
     ${body}
     <script>
       const ADMIN_BASE_PATH = "${adminBasePath}";
+      const resolveClientUrl = () => {
+        const isLocalHost =
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1" ||
+          window.location.hostname === "::1";
+
+        if (isLocalHost) {
+          return "http://localhost:5173";
+        }
+
+        return "${process.env.CLIENT_URL || "http://localhost:5173"}";
+      };
+      const CLIENT_URL = resolveClientUrl();
+      const CLIENT_HOME_URL = new URL("/", CLIENT_URL).toString();
+      const buildClientUrl = (params = {}) => {
+        const url = new URL(CLIENT_HOME_URL);
+
+        Object.entries(params).forEach(([key, value]) => {
+          if (value) {
+            url.searchParams.set(key, value);
+          }
+        });
+
+        return url.toString();
+      };
+      const redirectToClient = (params = {}) => {
+        window.location.replace(buildClientUrl(params));
+      };
       ${script}
     </script>
   </body>
@@ -258,8 +286,7 @@ const createBootstrapPage = () =>
       </div>
     </div>`,
     `
-      const token = sessionStorage.getItem("shonstudioAdminToken");
-      window.location.replace(token ? "/" : ADMIN_BASE_PATH + "/login");
+      window.location.replace(ADMIN_BASE_PATH + "/login");
     `,
   );
 
@@ -321,7 +348,7 @@ const createLoginPage = () =>
       const backButton = document.getElementById("back-button");
       const logoutButton = document.getElementById("logout-button");
 
-      // Show the appropriate view based on login status
+      // Show the appropriate view based on login status.
       if (token) {
         loginFormContainer.style.display = "none";
         logoutContainer.style.display = "block";
@@ -363,6 +390,8 @@ const createLoginPage = () =>
           sessionStorage.setItem("shonstudioAdminToken", result.token);
           loginFormContainer.style.display = "none";
           logoutContainer.style.display = "block";
+          message.className = "message success";
+          message.textContent = "Login successful. Use the button below to return to the portfolio.";
         } catch (error) {
           message.className = "message error";
           message.textContent = error.message || "Unable to log in";
@@ -374,7 +403,14 @@ const createLoginPage = () =>
 
       // Back to portfolio button
       backButton.addEventListener("click", () => {
-        window.location.replace("/");
+        const activeToken = sessionStorage.getItem("shonstudioAdminToken");
+
+        if (activeToken) {
+          redirectToClient({ adminToken: activeToken });
+          return;
+        }
+
+        redirectToClient();
       });
 
       // Logout button
@@ -384,9 +420,6 @@ const createLoginPage = () =>
         logoutContainer.style.display = "none";
         message.className = "message success";
         message.textContent = "Logged out successfully";
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
       });
     `,
   );

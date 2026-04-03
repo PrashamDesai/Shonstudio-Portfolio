@@ -1,34 +1,20 @@
 import axios from "axios";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useAdmin } from "../context/AdminContext.jsx";
+import {
+  deleteCachedApiResponse,
+  readCachedApiResponse,
+  writeCachedApiResponse,
+} from "../utils/browserDb.js";
+import { getApiBaseCandidates } from "../utils/apiBase.js";
 
-const normalizeApiBase = (rawUrl) => {
-  const trimmed = String(rawUrl || "").trim();
+const PUBLIC_API_BASE_CANDIDATES = getApiBaseCandidates();
+const PUBLIC_API_TIMEOUT_MS = 60_000;
+const MAX_REQUEST_ATTEMPTS = 1;
+const RETRY_DELAY_MS = 250;
+const CACHE_TTL_MS = 5 * 60_000;
 
-  if (!trimmed) {
-    return "/api";
-  }
-
-  const withoutTrailingSlash = trimmed.replace(/\/+$/, "");
-
-  if (withoutTrailingSlash.endsWith("/api")) {
-    return withoutTrailingSlash;
-  }
-
-  return `${withoutTrailingSlash}/api`;
-};
-
-const PUBLIC_API_BASE = normalizeApiBase(
-  import.meta.env.VITE_API_URL || "https://shonstudio-portfolio.onrender.com",
-);
-
-const api = axios.create({
-  baseURL: PUBLIC_API_BASE,
-  timeout: 10000,
-});
-
-const CACHE_TTL_MS = 30_000;
 const responseCache = new Map();
 const EMPTY_ARRAY = [];
 
@@ -36,28 +22,65 @@ const endpointFallbackMap = {
   "/team": ["/teams", "/team-members"],
 };
 
-const getCachedResponse = (key) => {
-  const cached = responseCache.get(key);
+const getCachedRecord = (key) => responseCache.get(key) || null;
 
-  if (!cached) {
+const isCacheRecordFresh = (record) =>
+  Boolean(record) && Date.now() - Number(record.timestamp || 0) < CACHE_TTL_MS;
+
+const getCachedResponse = (key) => {
+  const cachedRecord = getCachedRecord(key);
+
+  if (!cachedRecord) {
     return null;
   }
 
-  const isFresh = Date.now() - cached.timestamp < CACHE_TTL_MS;
-
-  if (!isFresh) {
+  if (!isCacheRecordFresh(cachedRecord)) {
     responseCache.delete(key);
     return null;
   }
 
-  return cached.data;
+  return cachedRecord.data;
 };
 
 const setCachedResponse = (key, data) => {
-  responseCache.set(key, {
+  const record = {
     timestamp: Date.now(),
     data,
-  });
+  };
+
+  responseCache.set(key, record);
+  void writeCachedApiResponse(key, data);
+};
+
+const clearResponseCache = (key) => {
+  if (!key) {
+    return;
+  }
+
+  responseCache.delete(key);
+  void deleteCachedApiResponse(key);
+};
+
+const hydrateCachedResponse = async (key) => {
+  const cachedData = getCachedResponse(key);
+
+  if (cachedData !== null && cachedData !== undefined) {
+    return cachedData;
+  }
+
+  const persistedRecord = await readCachedApiResponse(key);
+
+  if (!persistedRecord) {
+    return null;
+  }
+
+  if (!isCacheRecordFresh(persistedRecord)) {
+    void deleteCachedApiResponse(key);
+    return null;
+  }
+
+  responseCache.set(key, persistedRecord);
+  return persistedRecord.data ?? null;
 };
 
 const extractRequestError = (requestError) => {
@@ -81,6 +104,33 @@ const extractRequestError = (requestError) => {
   return "Unable to load content right now.";
 };
 
+const canTryNextApiBase = (requestError) => {
+  if (!requestError || axios.isCancel(requestError)) {
+    return false;
+  }
+
+  const status = Number(requestError?.response?.status || 0);
+  return status === 0 || status >= 500;
+};
+
+const shouldRetryRequest = (requestError) => {
+  if (!requestError || axios.isCancel(requestError)) {
+    return false;
+  }
+
+  if (requestError?.code === "ECONNABORTED") {
+    return true;
+  }
+
+  const status = Number(requestError?.response?.status || 0);
+  return status === 0 || status === 429 || status >= 500;
+};
+
+const wait = (delayMs) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, delayMs);
+  });
+
 const useApiRequest = (
   endpoint,
   {
@@ -88,15 +138,30 @@ const useApiRequest = (
     initialData,
     transform = (payload) => payload,
     suppressNotFoundError = false,
+    timeoutMs = PUBLIC_API_TIMEOUT_MS,
   } = {},
 ) => {
   const { refreshVersion } = useAdmin();
+  const previousRefreshVersion = useRef(refreshVersion);
   const [requestVersion, setRequestVersion] = useState(0);
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(Boolean(enabled));
   const [error, setError] = useState("");
   const [notFound, setNotFound] = useState(false);
   const [statusCode, setStatusCode] = useState(0);
+
+  useEffect(() => {
+    if (!endpoint) {
+      previousRefreshVersion.current = refreshVersion;
+      return;
+    }
+
+    if (previousRefreshVersion.current !== refreshVersion) {
+      clearResponseCache(endpoint);
+    }
+
+    previousRefreshVersion.current = refreshVersion;
+  }, [endpoint, refreshVersion]);
 
   useEffect(() => {
     if (!enabled || !endpoint) {
@@ -109,25 +174,41 @@ const useApiRequest = (
     }
 
     const cacheKey = endpoint;
-    const cachedData = getCachedResponse(cacheKey);
+    const immediateCachedData = getCachedResponse(cacheKey);
     const controller = new AbortController();
     let active = true;
 
-    if (cachedData !== null && cachedData !== undefined) {
-      setData(cachedData);
+    setError("");
+    setNotFound(false);
+
+    if (immediateCachedData !== null && immediateCachedData !== undefined) {
+      setData(immediateCachedData);
       setLoading(false);
-      setError("");
-      setNotFound(false);
       setStatusCode(200);
-    } else {
-      setData(initialData);
-      setLoading(true);
-      setError("");
-      setNotFound(false);
-      setStatusCode(0);
+      return () => {
+        active = false;
+        controller.abort();
+      };
     }
 
+    setData(initialData);
+    setLoading(true);
+    setStatusCode(0);
+
     const fetchData = async () => {
+      const persistedCachedData = await hydrateCachedResponse(cacheKey);
+
+      if (!active) {
+        return;
+      }
+
+      if (persistedCachedData !== null && persistedCachedData !== undefined) {
+        setData(persistedCachedData);
+        setLoading(false);
+        setStatusCode(200);
+        return;
+      }
+
       try {
         const endpointCandidates = [
           endpoint,
@@ -139,26 +220,62 @@ const useApiRequest = (
         let lastError = null;
 
         for (const candidate of endpointCandidates) {
-          try {
-            const candidateResponse = await api.get(candidate, {
-              signal: controller.signal,
-            });
-            response = candidateResponse;
-            resolvedEndpoint = candidate;
+          for (const apiBase of PUBLIC_API_BASE_CANDIDATES) {
+            try {
+              let candidateResponse = null;
+
+              for (let attempt = 1; attempt <= MAX_REQUEST_ATTEMPTS; attempt += 1) {
+                try {
+                  candidateResponse = await axios.get(`${apiBase}${candidate}`, {
+                    signal: controller.signal,
+                    timeout: timeoutMs,
+                  });
+                  break;
+                } catch (attemptError) {
+                  if (axios.isCancel(attemptError)) {
+                    throw attemptError;
+                  }
+
+                  const canRetry =
+                    attempt < MAX_REQUEST_ATTEMPTS && shouldRetryRequest(attemptError);
+
+                  if (canRetry) {
+                    await wait(RETRY_DELAY_MS * attempt);
+                    continue;
+                  }
+
+                  throw attemptError;
+                }
+              }
+
+              response = candidateResponse;
+              resolvedEndpoint = candidate;
+              break;
+            } catch (candidateError) {
+              lastError = candidateError;
+
+              if (axios.isCancel(candidateError)) {
+                throw candidateError;
+              }
+
+              const status = Number(candidateError?.response?.status || 0);
+              const isNotFound = status === 404;
+              const shouldTryAnotherApiBase = canTryNextApiBase(candidateError);
+              const isLastApiBase =
+                apiBase === PUBLIC_API_BASE_CANDIDATES[PUBLIC_API_BASE_CANDIDATES.length - 1];
+
+              if (!isLastApiBase && shouldTryAnotherApiBase) {
+                continue;
+              }
+
+              if (!isNotFound || candidate === endpointCandidates[endpointCandidates.length - 1]) {
+                throw candidateError;
+              }
+            }
+          }
+
+          if (response) {
             break;
-          } catch (candidateError) {
-            lastError = candidateError;
-
-            if (axios.isCancel(candidateError)) {
-              throw candidateError;
-            }
-
-            const status = Number(candidateError?.response?.status || 0);
-            const isNotFound = status === 404;
-
-            if (!isNotFound || candidate === endpointCandidates[endpointCandidates.length - 1]) {
-              throw candidateError;
-            }
           }
         }
 
@@ -179,10 +296,7 @@ const useApiRequest = (
         setCachedResponse(cacheKey, nextData);
 
         if (resolvedEndpoint !== endpoint) {
-          responseCache.set(resolvedEndpoint, {
-            timestamp: Date.now(),
-            data: nextData,
-          });
+          setCachedResponse(resolvedEndpoint, nextData);
         }
       } catch (requestError) {
         if (!active || axios.isCancel(requestError)) {
@@ -216,7 +330,7 @@ const useApiRequest = (
       }
     };
 
-    fetchData();
+    void fetchData();
 
     return () => {
       active = false;
@@ -229,13 +343,12 @@ const useApiRequest = (
     refreshVersion,
     requestVersion,
     suppressNotFoundError,
+    timeoutMs,
     transform,
   ]);
 
   const refetch = useCallback(() => {
-    if (endpoint) {
-      responseCache.delete(endpoint);
-    }
+    clearResponseCache(endpoint);
     setRequestVersion((value) => value + 1);
   }, [endpoint]);
 
@@ -301,18 +414,20 @@ export const useItem = (endpoint, options = {}) => {
   const {
     enabled = true,
     initialData = null,
+    timeoutMs = PUBLIC_API_TIMEOUT_MS,
   } = options;
 
   return useApiRequest(endpoint, {
     enabled,
     initialData,
+    timeoutMs,
     suppressNotFoundError: true,
-    transform: useCallback((payload) => {
-      if (payload && typeof payload === "object" && !Array.isArray(payload)) {
-        return payload;
-      }
-
-      return initialData;
-    }, [initialData]),
+    transform: useCallback(
+      (payload) =>
+        payload && typeof payload === "object" && !Array.isArray(payload)
+          ? payload
+          : initialData,
+      [initialData],
+    ),
   });
 };

@@ -1,11 +1,9 @@
 import { motion } from "framer-motion";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 
 import { teamTemplate } from "../admin/entityTemplates";
 import { pageTransition } from "../animations/variants";
-import AdminTeamModal from "../components/AdminTeamModal";
 import { PageDataEmpty } from "../components/ApiState";
-import TeamModal from "../components/TeamModal";
 import TeamSection from "../components/TeamSection";
 import { useAdmin } from "../context/AdminContext.jsx";
 import { useCollection } from "../hooks/usePageData";
@@ -15,6 +13,9 @@ const filterOptions = [
   { value: "developer", label: "Developing" },
   { value: "designer", label: "Designing" },
 ];
+
+const TeamModal = lazy(() => import("../components/TeamModal"));
+const AdminTeamModal = lazy(() => import("../components/AdminTeamModal"));
 
 const TeamCardsSkeleton = ({ count = 6 }) => (
   <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -64,8 +65,9 @@ const TeamPage = () => {
   const [selectedMember, setSelectedMember] = useState(null);
   const [editingMember, setEditingMember] = useState(null);
   const [activeFilter, setActiveFilter] = useState("all");
-  const { data: teamMembers, loading, error, isEmpty } = useCollection("/team");
   const { isAdmin, requestAdmin, signalRefresh } = useAdmin();
+  const teamEndpoint = isAdmin ? "/team" : "/team?view=summary";
+  const { data: teamMembers, loading, error, isEmpty } = useCollection(teamEndpoint);
 
   const groupedMembers = useMemo(
     () => ({
@@ -204,20 +206,22 @@ const TeamPage = () => {
         </>
       )}
 
-      <TeamModal
-        member={selectedMember}
-        onClose={() => setSelectedMember(null)}
-        isAdmin={isAdmin}
-      />
-
-      {editingMember ? (
-        <AdminTeamModal
-          title={editingMember._id ? "Edit team member" : "Add team member"}
-          initialValue={editingMember}
-          onClose={() => setEditingMember(null)}
-          onSave={saveTeamMember}
+      <Suspense fallback={null}>
+        <TeamModal
+          member={selectedMember}
+          onClose={() => setSelectedMember(null)}
+          isAdmin={isAdmin}
         />
-      ) : null}
+
+        {editingMember ? (
+          <AdminTeamModal
+            title={editingMember._id ? "Edit team member" : "Add team member"}
+            initialValue={editingMember}
+            onClose={() => setEditingMember(null)}
+            onSave={saveTeamMember}
+          />
+        ) : null}
+      </Suspense>
     </motion.main>
   );
 };

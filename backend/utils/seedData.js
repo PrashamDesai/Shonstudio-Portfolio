@@ -1,3 +1,20 @@
+import { MOCK_TOOL_ASSETS } from "../../frontend/src/components/mockToolAssets.js";
+
+const dedupeBySlug = (items = []) => {
+  const seen = new Set();
+
+  return items.filter((item) => {
+    const slug = String(item?.slug || "").trim().toLowerCase();
+
+    if (!slug || seen.has(slug)) {
+      return false;
+    }
+
+    seen.add(slug);
+    return true;
+  });
+};
+
 const projects = [
   {
     title: "Project Aurora Drift",
@@ -6,11 +23,55 @@ const projects = [
     shortDescription: "Stylized 3D exploration built for narrative-led world discovery.",
     description:
       "Aurora Drift is a studio concept for a low-friction exploration game that blends environmental storytelling, modular level kits, and cinematic camera choreography for premium-feeling indie launches.",
+    making:
+      "The game was built around fast environment blockouts, cinematic traversal pacing, and lightweight narrative cues so the prototype could feel premium without overscoping production.",
     cardImage: "aurora-drift",
     carouselImage: "aurora-drift",
     coverImage: "aurora-drift",
     gallery: ["aurora-drift", "aurora-drift-detail", "aurora-drift-ui"],
+    screenshotOrientation: "landscape",
     technologies: ["Unity", "C#", "Blender", "FMOD", "Photoshop"],
+    features: ["Exploration-first progression", "Cinematic camera moments", "Environmental storytelling"],
+    caseStudy: {
+      title: "Case Study: Aurora Drift - Building a Cinematic Exploration Prototype",
+      challenge:
+        "Aurora Drift needed to feel atmospheric and premium very early, while still being small enough to prototype quickly without creating a heavy production burden.",
+      goals: [
+        "Create a readable exploration loop for new players.",
+        "Keep traversal cinematic without slowing the experience down.",
+        "Package the prototype in a way that was pitch-ready for stakeholders."
+      ],
+      solutions: [
+        {
+          title: "Exploration-first structure",
+          summary: "Modular level spaces and guidance cues were designed to encourage discovery without over-instructing the player."
+        },
+        {
+          title: "Cinematic pacing",
+          summary: "Camera composition and traversal beats were tuned to create mood while keeping interaction responsive."
+        },
+        {
+          title: "Prototype packaging",
+          summary: "Presentation assets, milestone slices, and supporting documentation made the concept easier to review and scale."
+        }
+      ],
+      pillars: [
+        {
+          title: "Atmosphere with clarity",
+          summary: "The project balanced visual richness with clear signposting so exploration felt intuitive."
+        },
+        {
+          title: "Fast production loops",
+          summary: "Modular kits and focused scope decisions helped the team iterate quickly."
+        },
+        {
+          title: "Pitch-ready delivery",
+          summary: "The prototype was framed to communicate value both as a play experience and as a stakeholder-facing concept."
+        }
+      ],
+      conclusion:
+        "Aurora Drift demonstrates how a small, focused prototype can still feel elevated when cinematic direction and scope discipline are shaped together."
+    },
     roleBreakdown: [
       {
         title: "Creative Direction",
@@ -34,11 +95,55 @@ const projects = [
     shortDescription: "2.5D combat sandbox with modular mission pacing and readable UX.",
     description:
       "Mech Siege Tactics demonstrates how the studio approaches tactical gameplay readability, progression balancing, and event-led content releases for long-term retention.",
+    making:
+      "The prototype focused on combat readability first, using modular encounter rules, layered HUD passes, and balancing checkpoints to keep the experience clear under pressure.",
     cardImage: "mech-siege-tactics",
     carouselImage: "mech-siege-tactics",
     coverImage: "mech-siege-tactics",
     gallery: ["mech-siege-tactics", "mech-siege-hud", "mech-siege-mission"],
+    screenshotOrientation: "landscape",
     technologies: ["Unity", "Addressables", "Cinemachine", "Illustrator"],
+    features: ["Tactical combat sandbox", "Readable mission HUD", "Modular event pacing"],
+    caseStudy: {
+      title: "Case Study: Mech Siege Tactics - Making Tactical Combat More Readable",
+      challenge:
+        "The core challenge was to keep a tactical combat game visually dramatic without sacrificing clarity during missions, upgrades, and encounter escalation.",
+      goals: [
+        "Make combat readable under pressure.",
+        "Create a modular mission framework for repeatable iteration.",
+        "Support progression and interface polish without overwhelming players."
+      ],
+      solutions: [
+        {
+          title: "Combat readability",
+          summary: "Enemy signaling, layout spacing, and HUD hierarchy were tuned to keep player decisions clear."
+        },
+        {
+          title: "Mission modularity",
+          summary: "The game structure was built around reusable encounter rules and event pacing blocks."
+        },
+        {
+          title: "UI system discipline",
+          summary: "The interface stayed cinematic while preserving fast access to critical mission information."
+        }
+      ],
+      pillars: [
+        {
+          title: "Pressure-tested interface design",
+          summary: "Every screen had to support tactical decision-making while remaining visually cohesive."
+        },
+        {
+          title: "Repeatable balancing",
+          summary: "Modular encounter rules made testing and iteration more efficient."
+        },
+        {
+          title: "Long-term progression framing",
+          summary: "The prototype was shaped to suggest scalable progression and event-led updates."
+        }
+      ],
+      conclusion:
+        "Mech Siege Tactics shows how tactical systems can feel stylish and high-energy without losing the clarity players depend on."
+    },
     roleBreakdown: [
       {
         title: "Systems Design",
@@ -62,11 +167,55 @@ const projects = [
     shortDescription: "Hands-on XR prototype designed for training-led simulation outcomes.",
     description:
       "Pulse XR Lab is a learning-first prototype that showcases how immersive mechanics, guided instruction layers, and realistic feedback systems can support teaching and simulation products.",
+    making:
+      "This case study was developed as a comfort-first XR flow, combining guided tasks, interaction checkpoints, and simulation feedback loops that support training outcomes.",
     cardImage: "pulse-xr-lab",
     carouselImage: "pulse-xr-lab",
     coverImage: "pulse-xr-lab",
     gallery: ["pulse-xr-lab", "pulse-xr-interface", "pulse-xr-training"],
+    screenshotOrientation: "landscape",
     technologies: ["Unity XR Toolkit", "Meta SDK", "Figma", "Substance 3D"],
+    features: ["Guided XR training tasks", "Comfort-first interaction design", "Performance feedback loops"],
+    caseStudy: {
+      title: "Case Study: Pulse XR Lab - Designing a Comfort-First Training Prototype",
+      challenge:
+        "The project needed to prove that XR training could feel immersive and structured at the same time, without sacrificing comfort or onboarding clarity.",
+      goals: [
+        "Keep interaction approachable for first-time XR users.",
+        "Map training checkpoints to measurable progress.",
+        "Present the prototype clearly to clients and reviewers."
+      ],
+      solutions: [
+        {
+          title: "Guided XR tasks",
+          summary: "The flow was divided into structured interactions that gradually increased complexity."
+        },
+        {
+          title: "Comfort-first decisions",
+          summary: "Interaction pacing, cues, and movement choices were tuned to reduce user fatigue."
+        },
+        {
+          title: "Feedback-driven learning",
+          summary: "Performance checkpoints and in-session guidance made progress easier to understand."
+        }
+      ],
+      pillars: [
+        {
+          title: "Accessibility in immersion",
+          summary: "The experience stayed approachable while preserving the value of XR presence."
+        },
+        {
+          title: "Training-oriented UX",
+          summary: "Every interaction was connected to an instructional or measurable outcome."
+        },
+        {
+          title: "Client-readable prototypes",
+          summary: "The concept was packaged so reviewers could quickly understand its learning value."
+        }
+      ],
+      conclusion:
+        "Pulse XR Lab demonstrates how XR training products can balance immersion, structure, and usability in a practical prototype format."
+    },
     roleBreakdown: [
       {
         title: "Prototype Architecture",
@@ -82,6 +231,83 @@ const projects = [
       }
     ],
     featured: false
+  },
+  {
+    title: "Chesstrix",
+    slug: "game-chesstrix",
+    tagline: "Adaptive digital chess platform for scalable play, live competition, and thoughtful learning.",
+    shortDescription: "Adaptive digital chess platform balancing live multiplayer depth with approachable, minimalist UX.",
+    description:
+      "Chesstrix is a modern digital chess platform designed as a middle ground between heavyweight professional suites and overly simplistic mobile apps. It combines adaptive AI, real-time global competition, and calm minimalist presentation so strategic depth feels approachable instead of intimidating.",
+    making:
+      "Chesstrix was shaped around three priorities: scaling from beginners to Grandmaster-level play, keeping multiplayer interactions fast across global networks, and making long-form improvement feel rewarding. The experience combines adaptive AI, secure matchmaking, multi-option hinting, social ranking loops, and eye-friendly themes to keep deep chess sessions clear and engaging.",
+    cardImage: "hero",
+    carouselImage: "hero",
+    coverImage: "hero",
+    gallery: [],
+    screenshotOrientation: "landscape",
+    technologies: ["Unity", "Figma", "Photon"],
+    features: [
+      "Adaptive AI Engine",
+      "Global Matchmaking",
+      "Cognitive Learning Hints",
+      "Visual Ergonomics",
+      "Friends & Rivalry system",
+      "Global ranking progression",
+      "Offline mode"
+    ],
+    caseStudy: {
+      title: "Case Study: Chesstrix - Building a Scalable and Engaging Digital Chess Platform",
+      challenge:
+        "The digital chess market is often divided between overly complex professional platforms and overly simplistic mobile apps. The goal for Chesstrix was to create a \"middle ground\" that offers:",
+      goals: [
+        "Scalability: Support for everyone from absolute beginners to Grandmaster-level players.",
+        "Performance: Seamless, lag-free multiplayer interaction across global networks.",
+        "Engagement: Moving beyond repetitive AI to provide a dynamic, evolving challenge."
+      ],
+      solutions: [
+        {
+          title: "Adaptive AI Engine",
+          summary:
+            "Developed a difficulty system that learns from player behavior, ensuring that the \"bar\" rises alongside the user's skill level."
+        },
+        {
+          title: "Global Matchmaking",
+          summary:
+            "Built a secure, robust back-end architecture to handle real-time multiplayer requests with minimal latency."
+        },
+        {
+          title: "Cognitive Learning (Hints)",
+          summary:
+            "Instead of a single \"best move,\" the system provides three strategic options, encouraging critical thinking rather than rote memorization."
+        },
+        {
+          title: "Visual Ergonomics",
+          summary:
+            "Designed four minimalist themes specifically curated to reduce eye strain during long-form sessions."
+        }
+      ],
+      pillars: [
+        {
+          title: "Strategic Social Integration",
+          summary:
+            "Chesstrix isn't just a board; it's a community. The platform features an integrated Friends & Rivalry system, allowing users to build private circles and issue direct challenges, fostering a competitive yet social environment."
+        },
+        {
+          title: "Dynamic Progression",
+          summary:
+            "With a unified Global Ranking system, every match contributes to a player's standing. This gamified approach provides tangible feedback on improvement, pushing players to climb the leaderboards through consistent play."
+        },
+        {
+          title: "Offline Accessibility",
+          summary:
+            "Recognizing the need for portability, Chesstrix includes a fully functional Offline Mode. Users can access puzzles and play against the adaptive AI without an internet connection, ensuring the platform remains a reliable \"commuter-friendly\" companion."
+        }
+      ],
+      conclusion:
+        "Chesstrix successfully balances technical depth with aesthetic simplicity. By prioritizing user choice, from board rotation and timers to the level of AI assistance, the project offers a tailored experience that respects the player's unique thinking style. It is more than a game; it is a scalable training tool for the modern strategist."
+    },
+    featured: true
   }
 ];
 
@@ -208,7 +434,7 @@ const services = [
   }
 ];
 
-const tools = [
+const tools = dedupeBySlug([
   {
     title: "Modular Environment Kit",
     slug: "modular-environment-kit",
@@ -308,8 +534,9 @@ const tools = [
     ctaUrl: "/tools/hud-interface-pack",
     gallery: ["mech-siege-hud", "mech-siege-mission"],
     tags: ["UI", "HUD", "Design System"]
-  }
-];
+  },
+  ...MOCK_TOOL_ASSETS,
+]);
 
 const courses = [
   {

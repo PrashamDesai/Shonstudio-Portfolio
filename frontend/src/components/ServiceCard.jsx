@@ -15,6 +15,11 @@ const iconMap = {
   spark: "AD",
 };
 
+const getServicePath = (service) => {
+  const serviceIdentifier = service?.slug || service?._id;
+  return serviceIdentifier ? `/services/${serviceIdentifier}` : "/services";
+};
+
 const ServiceCard = ({ service, adminActions = null }) => (
   <motion.article
     whileHover={{ y: -8, scale: 1.01 }}
@@ -25,16 +30,16 @@ const ServiceCard = ({ service, adminActions = null }) => (
   >
     {adminActions ? <AdminEntityActions onEdit={adminActions.onEdit} onDelete={adminActions.onDelete} /> : null}
     <Link
-      to={`/services/${service.slug}`}
+      to={getServicePath(service)}
       className="flex flex-col sm:flex-row h-full sm:h-72 w-full text-left"
       data-cursor="link"
       data-cursor-label="Open"
-      aria-label={`Open ${service.title}`}
+      aria-label={`Open ${service.title || "service"}`}
     >
       <div className="relative overflow-hidden border-b border-white/10 sm:w-1/4 sm:border-b-0 sm:border-r">
         <motion.img
-          src={resolveMedia(service.cardImage)}
-          alt={service.title}
+          src={resolveMedia(service.cardImage || service.carouselImage)}
+          alt={service.title || "Service"}
           loading="lazy"
           className="h-full w-full object-cover"
           whileHover={{ scale: 1.07, y: -4 }}
@@ -53,7 +58,7 @@ const ServiceCard = ({ service, adminActions = null }) => (
 
         <div className="mt-4 space-y-3">
           <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
-            {service.title}
+            {service.title || "Untitled service"}
           </h3>
           <p className="text-sm leading-7 text-muted">{service.shortDescription || service.summary}</p>
         </div>
@@ -68,7 +73,7 @@ const ServiceCard = ({ service, adminActions = null }) => (
         </div>
 
         <div className="mt-auto border-t border-white/8 pt-4 text-sm text-mutedDeep">
-          Delivery format: <span className="text-muted">{service.deliveryFormat}</span>
+          Delivery format: <span className="text-muted">{service.deliveryFormat || "Custom engagement"}</span>
         </div>
       </div>
     </Link>

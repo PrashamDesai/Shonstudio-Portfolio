@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useState } from "react";
 
 const THEME_STORAGE_KEY = "shonstudio-theme";
 
@@ -25,7 +25,7 @@ export const ThemeProvider = ({ children }) => {
   const [storedTheme, setStoredTheme] = useState(() => getStoredTheme());
   const [theme, setTheme] = useState(() => getStoredTheme() || resolveSystemTheme());
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = document.documentElement;
 
     root.setAttribute("data-theme", theme);

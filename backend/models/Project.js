@@ -16,6 +16,55 @@ const roleSchema = new mongoose.Schema(
   { _id: false },
 );
 
+const caseStudyRowSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      trim: true,
+      default: ""
+    },
+    summary: {
+      type: String,
+      trim: true,
+      default: ""
+    }
+  },
+  { _id: false },
+);
+
+const caseStudySchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      trim: true,
+      default: ""
+    },
+    challenge: {
+      type: String,
+      trim: true,
+      default: ""
+    },
+    goals: {
+      type: [String],
+      default: []
+    },
+    solutions: {
+      type: [caseStudyRowSchema],
+      default: []
+    },
+    pillars: {
+      type: [caseStudyRowSchema],
+      default: []
+    },
+    conclusion: {
+      type: String,
+      trim: true,
+      default: ""
+    }
+  },
+  { _id: false },
+);
+
 const projectSchema = new mongoose.Schema(
   {
     title: {
@@ -53,6 +102,11 @@ const projectSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    making: {
+      type: String,
+      default: "",
+      trim: true
+    },
     coverImage: {
       type: String,
       default: ""
@@ -65,9 +119,22 @@ const projectSchema = new mongoose.Schema(
       type: [String],
       default: []
     },
+    screenshotOrientation: {
+      type: String,
+      enum: ["portrait", "landscape"],
+      default: "portrait"
+    },
     technologies: {
       type: [String],
       default: []
+    },
+    features: {
+      type: [String],
+      default: []
+    },
+    caseStudy: {
+      type: caseStudySchema,
+      default: () => ({})
     },
     roleBreakdown: {
       type: [roleSchema],

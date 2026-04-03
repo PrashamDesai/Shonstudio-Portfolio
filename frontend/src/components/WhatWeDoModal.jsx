@@ -6,7 +6,6 @@ const textInputClass = "theme-input mt-2 w-full rounded-[1rem] px-4 py-3 text-sm
 const textareaClass =
   "theme-input mt-2 min-h-[5rem] w-full rounded-[1rem] px-4 py-3 text-sm text-white";
 
-/** Simple labeled field wrapper */
 const Field = ({ label, hint, children }) => (
   <label className="block">
     <span className="text-sm font-medium text-white">{label}</span>
@@ -15,11 +14,10 @@ const Field = ({ label, hint, children }) => (
   </label>
 );
 
-/** Parse a newline-separated textarea value into a string array */
 const parseLines = (raw) =>
   raw
     .split("\n")
-    .map((l) => l.trim())
+    .map((line) => line.trim())
     .filter(Boolean);
 
 const createForm = (value = {}) => ({
@@ -29,26 +27,26 @@ const createForm = (value = {}) => ({
   highlights: (value.highlights || []).join("\n"),
 });
 
-/**
- * Modal used exclusively by the "What We Do" section on the homepage.
- * Covers the fields visible on those compact service cards:
- *   - Title
- *   - Category (eyebrow label)
- *   - Highlights (up to 2 pill tags)
- */
+const slugify = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
 const WhatWeDoModal = ({ isAdd = false, initialValue = {}, onClose, onSave, onDelete }) => {
   const [form, setForm] = useState(() => createForm(initialValue));
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  // Re-sync when the entity being edited changes
   useEffect(() => {
     setForm(createForm(initialValue));
     setError("");
   }, [initialValue]);
 
-  const updateField = (field, value) =>
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const updateField = (field, value) => {
+    setForm((previous) => ({ ...previous, [field]: value }));
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -61,11 +59,9 @@ const WhatWeDoModal = ({ isAdd = false, initialValue = {}, onClose, onSave, onDe
         category: form.category.trim(),
         shortDescription: form.shortDescription.trim(),
         summary: form.shortDescription.trim(),
+        description: form.shortDescription.trim(),
         highlights: parseLines(form.highlights),
-        // Preserve existing slug on edit; generate a basic one for new
-        ...(isAdd
-          ? { slug: form.title.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") }
-          : {}),
+        ...(isAdd ? { slug: slugify(form.title) } : {}),
       });
       onClose();
     } catch (saveError) {
@@ -78,20 +74,18 @@ const WhatWeDoModal = ({ isAdd = false, initialValue = {}, onClose, onSave, onDe
   return (
     <Modal open onClose={onClose} maxWidthClass="max-w-xl" panelClassName="admin-modal-panel">
       <div className="flex h-full flex-col overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-white/8 px-6 py-5">
           <div>
             <h2 className="font-display text-2xl font-semibold text-white">
               {isAdd ? "Add Capability" : "Edit Capability"}
             </h2>
-            <p className="mt-1 text-sm text-muted">What We Do · homepage section</p>
+            <p className="mt-1 text-sm text-muted">What We Do - homepage section</p>
           </div>
           <button type="button" onClick={onClose} className="admin-secondary-button text-xs">
             Close
           </button>
         </div>
 
-        {/* Form */}
         <form
           id="what-we-do-form"
           onSubmit={handleSubmit}
@@ -100,7 +94,7 @@ const WhatWeDoModal = ({ isAdd = false, initialValue = {}, onClose, onSave, onDe
           <Field label="Title">
             <input
               value={form.title}
-              onChange={(e) => updateField("title", e.target.value)}
+              onChange={(event) => updateField("title", event.target.value)}
               className={textInputClass}
               placeholder="e.g. Game Development"
               required
@@ -110,7 +104,7 @@ const WhatWeDoModal = ({ isAdd = false, initialValue = {}, onClose, onSave, onDe
           <Field label="Category" hint="Eyebrow label shown above the title on the card.">
             <input
               value={form.category}
-              onChange={(e) => updateField("category", e.target.value)}
+              onChange={(event) => updateField("category", event.target.value)}
               className={textInputClass}
               placeholder="e.g. Capability"
             />
@@ -119,7 +113,7 @@ const WhatWeDoModal = ({ isAdd = false, initialValue = {}, onClose, onSave, onDe
           <Field label="Short description" hint="Shown in the service detail page and carousel.">
             <textarea
               value={form.shortDescription}
-              onChange={(e) => updateField("shortDescription", e.target.value)}
+              onChange={(event) => updateField("shortDescription", event.target.value)}
               className={textareaClass}
             />
           </Field>
@@ -130,7 +124,7 @@ const WhatWeDoModal = ({ isAdd = false, initialValue = {}, onClose, onSave, onDe
           >
             <textarea
               value={form.highlights}
-              onChange={(e) => updateField("highlights", e.target.value)}
+              onChange={(event) => updateField("highlights", event.target.value)}
               className={textareaClass}
               placeholder={"Unity / Unreal Engine\nC# / C++\nMultiplatform builds"}
             />
@@ -139,7 +133,6 @@ const WhatWeDoModal = ({ isAdd = false, initialValue = {}, onClose, onSave, onDe
           {error ? <p className="text-sm text-red-300">{error}</p> : null}
         </form>
 
-        {/* Footer */}
         <div className="flex justify-end gap-3 border-t border-white/8 bg-surface/95 px-6 py-5">
           {onDelete ? (
             <button type="button" onClick={onDelete} className="admin-danger-button px-5 py-3">
@@ -155,7 +148,7 @@ const WhatWeDoModal = ({ isAdd = false, initialValue = {}, onClose, onSave, onDe
             disabled={isSaving}
             className="admin-save-button disabled:opacity-70"
           >
-            {isSaving ? "Saving…" : isAdd ? "Add" : "Save"}
+            {isSaving ? "Saving..." : isAdd ? "Add" : "Save"}
           </button>
         </div>
       </div>

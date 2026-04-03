@@ -1,23 +1,38 @@
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { useEffect, useMemo, useState } from "react";
 
+const DEFAULT_CURSOR_RGB = "145, 163, 201";
+const DEFAULT_SURFACE_RGB = "20, 27, 40";
+
+const normalizeRgb = (value, fallback) => {
+  const normalizedValue = String(value || "")
+    .trim()
+    .replace(/\s+/g, ", ");
+
+  return normalizedValue || fallback;
+};
+
 const CustomCursor = () => {
   const [visible, setVisible] = useState(false);
-  const [cursorColor, setCursorColor] = useState(() => {
-    if (typeof window === "undefined") return "rgb(145, 163, 201)";
+  const [cursorRgb, setCursorRgb] = useState(() => {
+    if (typeof window === "undefined") {
+      return DEFAULT_CURSOR_RGB;
+    }
+
     const computedStyle = getComputedStyle(document.documentElement);
-    const borderRgb = computedStyle.getPropertyValue("--border-rgb").trim();
-    return borderRgb ? `rgb(${borderRgb})` : "rgb(145, 163, 201)";
+    return normalizeRgb(computedStyle.getPropertyValue("--border-rgb"), DEFAULT_CURSOR_RGB);
   });
-  const [surfaceColor, setSurfaceColor] = useState(() => {
-    if (typeof window === "undefined") return "rgb(20, 27, 40)";
+  const [surfaceRgb, setSurfaceRgb] = useState(() => {
+    if (typeof window === "undefined") {
+      return DEFAULT_SURFACE_RGB;
+    }
+
     const computedStyle = getComputedStyle(document.documentElement);
-    const surfaceRgb = computedStyle.getPropertyValue("--surface-rgb").trim();
-    return surfaceRgb ? `rgb(${surfaceRgb})` : "rgb(20, 27, 40)";
+    return normalizeRgb(computedStyle.getPropertyValue("--surface-rgb"), DEFAULT_SURFACE_RGB);
   });
 
   const isFinePointer = useMemo(
-    () => window.matchMedia && window.matchMedia("(pointer: fine)").matches,
+    () => typeof window !== "undefined" && window.matchMedia?.("(pointer: fine)").matches,
     [],
   );
 
@@ -26,15 +41,14 @@ const CustomCursor = () => {
   const ringX = useSpring(mouseX, { stiffness: 260, damping: 30, mass: 0.35 });
   const ringY = useSpring(mouseY, { stiffness: 260, damping: 30, mass: 0.35 });
 
-  // Update colors when theme changes
   useEffect(() => {
     const updateColors = () => {
       const computedStyle = getComputedStyle(document.documentElement);
-      const borderRgb = computedStyle.getPropertyValue("--border-rgb").trim();
-      const surfaceRgb = computedStyle.getPropertyValue("--surface-rgb").trim();
-      if (borderRgb) setCursorColor(`rgb(${borderRgb})`);
-      if (surfaceRgb) setSurfaceColor(`rgb(${surfaceRgb})`);
+      setCursorRgb(normalizeRgb(computedStyle.getPropertyValue("--border-rgb"), DEFAULT_CURSOR_RGB));
+      setSurfaceRgb(normalizeRgb(computedStyle.getPropertyValue("--surface-rgb"), DEFAULT_SURFACE_RGB));
     };
+
+    updateColors();
 
     const observer = new MutationObserver(updateColors);
     observer.observe(document.documentElement, {
@@ -47,8 +61,11 @@ const CustomCursor = () => {
 
   useEffect(() => {
     if (!isFinePointer) {
+      document.body?.removeAttribute("data-custom-cursor");
       return undefined;
     }
+
+    document.body?.setAttribute("data-custom-cursor", "enabled");
 
     const handlePointerMove = (event) => {
       mouseX.set(event.clientX);
@@ -65,6 +82,7 @@ const CustomCursor = () => {
     document.addEventListener("mouseleave", handleLeave);
 
     return () => {
+      document.body?.removeAttribute("data-custom-cursor");
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("blur", handleLeave);
       document.removeEventListener("mouseleave", handleLeave);
@@ -79,30 +97,32 @@ const CustomCursor = () => {
     <>
       <motion.div
         className="pointer-events-none fixed left-0 top-0 z-[10001] h-3 w-3 rounded-full bg-accent shadow-glow"
+        animate={{
+          opacity: visible ? 1 : 0,
+          marginLeft: -6,
+          marginTop: -6,
+        }}
         style={{
           x: mouseX,
           y: mouseY,
-          translateX: "-50%",
-          translateY: "-50%",
-          opacity: visible ? 1 : 0,
         }}
       />
       <motion.div
-        className="pointer-events-none fixed left-0 top-0 z-[10000] flex items-center justify-center rounded-full border backdrop-blur-xl"
+        className="pointer-events-none fixed left-0 top-0 z-[10000] rounded-full border backdrop-blur-xl"
         animate={{
           width: 28,
           height: 28,
           opacity: visible ? 1 : 0,
-          borderColor: `rgba(${cursorColor.match(/\d+, \d+, \d+/)?.[0] || "145, 163, 201"}, 0.72)`,
-          backgroundColor: `rgba(${surfaceColor.match(/\d+, \d+, \d+/)?.[0] || "20, 27, 40"}, 0.56)`,
+          marginLeft: -14,
+          marginTop: -14,
+          borderColor: `rgba(${cursorRgb}, 0.72)`,
+          backgroundColor: `rgba(${surfaceRgb}, 0.56)`,
           boxShadow: "0 0 10px rgba(85, 203, 255, 0.12)",
         }}
         transition={{ type: "spring", stiffness: 190, damping: 24 }}
         style={{
           x: ringX,
           y: ringY,
-          translateX: "-50%",
-          translateY: "-50%",
         }}
       />
     </>
