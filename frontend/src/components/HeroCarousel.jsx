@@ -148,11 +148,11 @@ const HeroCarousel = ({ categories = [] }) => {
           exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -20 }}
           transition={{ duration: prefersReducedMotion ? 0.2 : 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="text-[10px] uppercase tracking-[0.34em] text-white/78">{activeCategory.label}</p>
+          <p className="text-[11px] uppercase tracking-[0.30em] text-white/78">{activeCategory.label}</p>
           <h3 className="mt-2 font-display text-2xl font-semibold leading-tight text-white sm:text-3xl">
             {activeItem.title}
           </h3>
-          <p className="mt-2 max-w-[34ch] text-sm leading-6 text-white/82 sm:text-[0.95rem]">
+          <p className="mt-2 max-w-[100ch] text-sm leading-6 text-white/82 sm:text-[0.95rem]">
             {activeItem.shortDescription}
           </p>
         </motion.div>

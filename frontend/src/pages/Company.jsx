@@ -1,15 +1,150 @@
 import { motion, useReducedMotion, useTransform } from "framer-motion";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 
 import { pageTransition } from "../animations/variants";
 import AdminCompanyModal from "../components/AdminCompanyModal";
 import { PageDataEmpty, PageDataLoader } from "../components/ApiState";
+import CompanyBrandHero from "../components/CompanyBrandHero";
 import SceneSection from "../components/SceneSection";
 import SectionHeader from "../components/SectionHeader";
-import Timeline from "../components/Timeline";
 import { useAdmin } from "../context/AdminContext.jsx";
 import { useSingleton } from "../hooks/usePageData";
 import { useSmoothScroll } from "../hooks/useSmoothScroll.jsx";
+
+const initialTimelineMetrics = {
+  x: 0,
+  start: 0,
+  height: 0,
+};
+
+const StaticTimeline = ({ items = [] }) => {
+  const containerRef = useRef(null);
+  const dotRefs = useRef([]);
+  const [timelineMetrics, setTimelineMetrics] = useState(initialTimelineMetrics);
+
+  useLayoutEffect(() => {
+    if (!items.length) {
+      setTimelineMetrics(initialTimelineMetrics);
+      return undefined;
+    }
+
+    const measure = () => {
+      const container = containerRef.current;
+
+      if (!container) {
+        return;
+      }
+
+      const containerBounds = container.getBoundingClientRect();
+      const points = dotRefs.current
+        .slice(0, items.length)
+        .map((dot) => {
+          if (!dot) {
+            return null;
+          }
+
+          const dotBounds = dot.getBoundingClientRect();
+
+          return {
+            x: dotBounds.left - containerBounds.left + dotBounds.width / 2,
+            y: dotBounds.top - containerBounds.top + dotBounds.height / 2,
+          };
+        })
+        .filter((point) => Number.isFinite(point?.x) && Number.isFinite(point?.y));
+
+      if (!points.length) {
+        setTimelineMetrics(initialTimelineMetrics);
+        return;
+      }
+
+      const start = points[0].y;
+      const end = points[points.length - 1].y;
+
+      setTimelineMetrics({
+        x: points[0].x,
+        start,
+        height: Math.max(end - start, 0),
+      });
+    };
+
+    dotRefs.current.length = items.length;
+    const frameId = window.requestAnimationFrame(measure);
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined" ? new ResizeObserver(measure) : null;
+
+    if (resizeObserver && containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+      dotRefs.current.forEach((dot) => {
+        if (dot) {
+          resizeObserver.observe(dot);
+        }
+      });
+    }
+
+    window.addEventListener("resize", measure);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener("resize", measure);
+      resizeObserver?.disconnect();
+    };
+  }, [items]);
+
+  if (!items.length) {
+    return null;
+  }
+
+  return (
+    <div ref={containerRef} className="relative">
+      {timelineMetrics.height > 0 ? (
+        <div
+          className="pointer-events-none absolute z-0 w-px bg-white/12"
+          style={{
+            left: timelineMetrics.x,
+            top: timelineMetrics.start,
+            height: timelineMetrics.height,
+            transform: "translateX(-50%)",
+          }}
+        />
+      ) : null}
+
+      <div className="space-y-8 sm:space-y-10">
+        {items.map((item, index) => (
+          <article
+            key={`${item.date}-${item.title}`}
+            className="grid grid-cols-[2.4rem_minmax(0,1fr)] items-stretch gap-4 sm:grid-cols-[3.2rem_minmax(0,1fr)] sm:gap-6"
+          >
+            <div className="relative z-10 flex items-center justify-center self-stretch">
+              <span
+                ref={(node) => {
+                  dotRefs.current[index] = node;
+                }}
+                className="block h-4 w-4 rounded-full border border-accent/80 bg-[rgba(85,203,255,0.22)] shadow-[0_0_0_4px_rgba(11,15,23,0.92),0_0_18px_rgba(85,203,255,0.18)]"
+              />
+            </div>
+
+            <div className="section-shell panel-glow relative z-10 overflow-hidden px-6 py-6 sm:px-7">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,212,255,0.12),transparent_26%),radial-gradient(circle_at_80%_18%,rgba(122,92,255,0.12),transparent_24%)] opacity-80" />
+              <div className="relative z-10 grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-start">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.32em] text-accentSoft">{item.date}</p>
+                </div>
+                <div>
+                  <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
+                    {item.title}
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-muted sm:text-base">
+                    {item.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const CompanyPage = () => {
   const [isEditingCompany, setIsEditingCompany] = useState(false);
@@ -57,49 +192,7 @@ const CompanyPage = () => {
       exit="exit"
       className="space-y-8 pb-24"
     >
-      <section className="relative overflow-hidden rounded-[2.35rem] border border-white/8 bg-surface/75 px-6 py-10 shadow-soft sm:px-8 lg:px-10 lg:py-12">
-        <motion.div
-          className="absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(0,212,255,0.16),transparent_24%),radial-gradient(circle_at_82%_12%,rgba(122,92,255,0.16),transparent_24%),radial-gradient(circle_at_50%_100%,rgba(0,255,198,0.08),transparent_22%)] opacity-90"
-          style={{ y: haloY }}
-        />
-        <div className="hero-grid absolute inset-0 opacity-10" />
-
-        <div className="relative z-10 grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
-          <div className="space-y-6">
-            <SectionHeader
-              eyebrow="About the studio"
-              title="The story behind ShonStudio."
-              description="A concise narrative of our network, studio focus, and growth milestones."
-              fullWidth
-              actions={
-                isAdmin ? (
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingCompany(true)}
-                    className="theme-button-primary rounded-full px-5 py-3 text-sm font-semibold"
-                  >
-                    Edit company page
-                  </button>
-                ) : null
-              }
-            />
-            {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
-          </div>
-
-          <motion.div
-            style={{ y: cardY }}
-            className="section-shell panel-glow relative overflow-hidden rounded-[2rem] border border-white/10 bg-base/[0.24] p-6"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,212,255,0.14),transparent_30%),radial-gradient(circle_at_80%_10%,rgba(122,92,255,0.14),transparent_22%)]" />
-            <div className="relative z-10 space-y-5">
-              <p className="text-xs uppercase tracking-[0.32em] text-accentSoft">Studio signal</p>
-              <p className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl">
-                {company.vision}
-              </p>
-            </div>
-          </motion.div>
-        </div>
-      </section>
+      <CompanyBrandHero />
 
       <SceneSection
         panelClassName="px-6 py-10 sm:px-8 lg:px-12 lg:py-14"
@@ -112,11 +205,23 @@ const CompanyPage = () => {
         }
       >
         <SectionHeader
-          eyebrow="Studio overview"
-          title="A connected company structure."
-          description="The parent organization and ShonStudio division move as one aligned system."
+          eyebrow="About the studio"
+          title="The story behind ShonStudio."
+          description="A concise narrative of our network, studio focus, and growth milestones."
           fullWidth
+          actions={
+            isAdmin ? (
+              <button
+                type="button"
+                onClick={() => setIsEditingCompany(true)}
+                className="theme-button-primary rounded-full px-5 py-3 text-sm font-semibold"
+              >
+                Edit company page
+              </button>
+            ) : null
+          }
         />
+        {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
 
         <div className="grid gap-6 lg:grid-cols-2">
           <div className="section-shell panel-glow rounded-[1.8rem] border border-white/10 bg-white/[0.03] p-6 sm:p-7">
@@ -154,7 +259,7 @@ const CompanyPage = () => {
           fullWidth
         />
 
-        <Timeline items={company.timeline || []} />
+        <StaticTimeline items={company.timeline || []} />
       </SceneSection>
 
       <SceneSection
