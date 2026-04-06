@@ -30,26 +30,26 @@ const ProjectCard = ({ project, compact = false, adminActions = null, priority =
           decoding="async"
           transitionDurationMs={240}
           sizes="(min-width: 1280px) 33vw, (min-width: 1024px) 50vw, 100vw"
-          wrapperClassName="aspect-video w-full bg-black/20"
+          wrapperClassName="theme-media-frame aspect-video w-full"
           imgClassName="h-full w-full object-cover group-hover:scale-[1.06] group-hover:-translate-y-1.5"
         />
         <motion.div
-          className="absolute inset-0 bg-gradient-to-t from-base via-base/20 to-transparent opacity-0 transition duration-500 group-hover:opacity-100"
+          className="theme-image-scrim project-card-image-scrim absolute inset-0 opacity-0 transition duration-500 group-hover:opacity-100 group-focus-within:opacity-100 group-active:opacity-100"
           aria-hidden="true"
         />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-full border-t border-white/10 bg-black/72 px-4 py-3 transition duration-300 group-hover:translate-y-0">
+        <div className="theme-image-hover-ribbon pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-2 px-4 py-3 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 group-active:translate-y-0 group-active:opacity-100">
           <p className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-white/85">
             View Case Study
           </p>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col space-y-5 p-6">
+      <div className="flex flex-1 flex-col space-y-4 p-5 sm:space-y-5 sm:p-6">
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">
             {project.featured ? "Featured project" : "Project"}
           </p>
-          <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
+          <h3 className="font-display text-xl font-semibold tracking-tight text-white sm:text-2xl">
             {project.title}
           </h3>
           <p className="text-sm leading-7 text-muted">

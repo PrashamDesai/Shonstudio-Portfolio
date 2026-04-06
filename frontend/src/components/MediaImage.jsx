@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
+import BrandBounceLoader from "./BrandBounceLoader";
+
 const VIEWPORT_PRELOAD_MARGIN = "280px 0px";
 
 const MediaImage = ({
@@ -17,6 +19,7 @@ const MediaImage = ({
   transitionDurationMs = 700,
   deferUntilInView,
   rootMargin = VIEWPORT_PRELOAD_MARGIN,
+  forceLoaderAnimation = false,
 }) => {
   const wrapperRef = useRef(null);
   const imageRef = useRef(null);
@@ -89,9 +92,16 @@ const MediaImage = ({
     >
       {!isLoaded && !hasError ? (
         <div
-          className={`absolute inset-0 animate-pulse bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.14),rgba(255,255,255,0.04))] ${skeletonClassName}`}
+          className={`absolute inset-0 flex items-center justify-center bg-[linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.14),rgba(255,255,255,0.04))] ${skeletonClassName}`}
           aria-hidden="true"
-        />
+        >
+          <BrandBounceLoader
+            size="sm"
+            label="Loading image"
+            forceAnimate={forceLoaderAnimation}
+            className="pointer-events-none opacity-85"
+          />
+        </div>
       ) : null}
 
       {hasError ? (

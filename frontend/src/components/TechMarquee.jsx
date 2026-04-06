@@ -85,8 +85,8 @@ const TechMarquee = ({ items = [] }) => {
 
   return (
     <div className="tech-marquee section-shell panel-glow relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-white/[0.03] px-4 py-4 sm:px-6">
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-base via-base/80 to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-base via-base/80 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-10 bg-gradient-to-r from-base via-base/80 to-transparent min-[420px]:block sm:w-20" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden w-10 bg-gradient-to-l from-base via-base/80 to-transparent min-[420px]:block sm:w-20" />
       <div className="tech-marquee-track">
         {loopItems.map((item, index) => (
           <div key={`${item.name}-${index}`} className="tech-logo-pill">

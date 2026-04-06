@@ -63,7 +63,7 @@ const CompanyBrandHero = () => {
     <section
       onPointerMove={handlePointerMove}
       onPointerLeave={resetPointer}
-      className="relative -mx-4 min-h-[calc(100vh-5rem)] overflow-hidden bg-transparent sm:-mx-6 lg:-mx-10"
+      className="relative -mx-3 min-h-[68vh] overflow-hidden bg-transparent sm:-mx-6 sm:min-h-[calc(100vh-5rem)] lg:-mx-10"
     >
       <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(6,12,21,0.92),rgba(10,17,30,0.78)_42%,rgba(17,26,46,0.88))]" />
       <motion.div className="absolute inset-0 opacity-95" style={{ background: spotlightBackground }} />
@@ -94,7 +94,7 @@ const CompanyBrandHero = () => {
           <motion.img
             src={brandMark}
             alt="ShonStudio brand mark"
-            className="h-[66vh] w-auto max-w-none select-none object-contain opacity-[0.95] drop-shadow-[0_0_48px_rgba(85,203,255,0.16)] sm:h-[74vh] lg:h-[84vh] xl:h-[88vh]"
+            className="h-[48vh] w-auto max-w-[92vw] select-none object-contain opacity-[0.95] drop-shadow-[0_0_48px_rgba(85,203,255,0.16)] sm:h-[74vh] sm:max-w-none lg:h-[84vh] xl:h-[88vh]"
             animate={
               prefersReducedMotion
                 ? undefined

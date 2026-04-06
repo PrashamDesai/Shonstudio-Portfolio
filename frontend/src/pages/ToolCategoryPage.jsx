@@ -161,8 +161,8 @@ const ToolCategoryPage = () => {
   if (!category) {
     return (
       <main className="py-24">
-        <div className="section-shell mx-auto max-w-3xl p-10 text-center">
-          <h1 className="font-display text-4xl font-semibold text-white">Category not found</h1>
+        <div className="section-shell mx-auto max-w-3xl p-6 text-center sm:p-10">
+          <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">Category not found</h1>
           <Link to="/tools" className="theme-link mt-6 inline-flex text-sm" data-cursor="link">
             Return to tools
           </Link>
@@ -180,10 +180,10 @@ const ToolCategoryPage = () => {
       className="space-y-8 pb-24"
     >
       <section className="section-shell panel-glow rounded-[2rem] border border-white/10 p-6 sm:p-8">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="flex flex-col items-start gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
           <div className="space-y-3">
             <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">Tool category</p>
-            <h1 className="font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+            <h1 className="font-display text-[clamp(2rem,8vw,3.25rem)] font-semibold tracking-tight text-white sm:text-5xl">
               {category.title}
             </h1>
             <p className="max-w-3xl text-sm leading-7 text-muted sm:text-base">{category.description}</p>
@@ -195,10 +195,10 @@ const ToolCategoryPage = () => {
             {error ? <p className="text-sm text-mutedDeep">{error}</p> : null}
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
             <Link
               to="/tools"
-              className="theme-button-secondary rounded-full px-5 py-3 text-sm font-semibold"
+              className="theme-button-secondary w-full rounded-full px-5 py-3 text-sm font-semibold sm:w-auto"
             >
               All categories
             </Link>
@@ -206,7 +206,7 @@ const ToolCategoryPage = () => {
               <button
                 type="button"
                 onClick={() => setEditingTool({ ...toolTemplate, category: category.title })}
-                className="theme-button-primary rounded-full px-5 py-3 text-sm font-semibold"
+                className="theme-button-primary w-full rounded-full px-5 py-3 text-sm font-semibold sm:w-auto"
               >
                 Add tool
               </button>
@@ -226,10 +226,10 @@ const ToolCategoryPage = () => {
                   navigate(`/tools/category/${nextCategorySlug}`);
                 }
               }}
-              className="w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-white/35"
+              className="theme-select-surface w-full rounded-xl border px-4 py-3 text-sm outline-none transition"
             >
               {CATEGORY_DEFINITIONS.map((item) => (
-                <option key={item.slug} value={item.slug} className="bg-slate-900 text-white">
+                <option key={item.slug} value={item.slug} className="theme-select-option">
                   {item.title}
                 </option>
               ))}
@@ -241,10 +241,10 @@ const ToolCategoryPage = () => {
             <select
               value={priceFilter}
               onChange={(event) => setPriceFilter(event.target.value)}
-              className="w-full rounded-xl border border-white/15 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-white/35"
+              className="theme-select-surface w-full rounded-xl border px-4 py-3 text-sm outline-none transition"
             >
               {PRICE_FILTER_OPTIONS.map((item) => (
-                <option key={item.value} value={item.value} className="bg-slate-900 text-white">
+                <option key={item.value} value={item.value} className="theme-select-option">
                   {item.label}
                 </option>
               ))}
@@ -285,11 +285,11 @@ const ToolCategoryPage = () => {
                     loading="lazy"
                     className="aspect-video w-full object-cover transition duration-700 group-hover:scale-[1.04]"
                   />
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 bg-gradient-to-t from-black/80 via-black/35 to-transparent p-4">
+                  <div className="theme-image-overlay-bottom pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4">
                     <p className="text-xs uppercase tracking-[0.2em] text-white/85">{tool.type || "Asset"}</p>
-                    <div className="rounded-xl border border-white/25 bg-black/55 px-3 py-2 text-right shadow-[0_10px_30px_rgba(0,0,0,0.45)]">
+                    <div className="theme-image-hover-ribbon rounded-xl border border-white/25 px-3 py-2 text-right shadow-[0_10px_30px_rgba(0,0,0,0.45)]">
                       <p className="text-[0.6rem] uppercase tracking-[0.22em] text-white/70">Price</p>
-                      <p className="text-2xl font-black leading-none text-white sm:text-3xl">
+                      <p className="text-xl font-black leading-none text-white sm:text-3xl">
                         {tool.price || "FREE"}
                       </p>
                     </div>
@@ -297,7 +297,7 @@ const ToolCategoryPage = () => {
                 </div>
                 <div className="flex flex-1 flex-col gap-3 p-5">
                   <div className="flex items-start justify-between gap-3">
-                    <h3 className="font-display text-2xl font-semibold tracking-tight text-white">{tool.title}</h3>
+                    <h3 className="font-display text-xl font-semibold tracking-tight text-white sm:text-2xl">{tool.title}</h3>
                   </div>
                   <p className="text-sm leading-7 text-muted">
                     {tool.shortDescription || tool.description || "Production-ready asset for delivery workflows."}

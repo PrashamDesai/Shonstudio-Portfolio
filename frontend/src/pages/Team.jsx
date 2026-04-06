@@ -4,6 +4,7 @@ import { lazy, Suspense, useMemo, useState } from "react";
 import { teamTemplate } from "../admin/entityTemplates";
 import { pageTransition } from "../animations/variants";
 import { PageDataEmpty } from "../components/ApiState";
+import BrandBounceLoader from "../components/BrandBounceLoader";
 import TeamSection from "../components/TeamSection";
 import { useAdmin } from "../context/AdminContext.jsx";
 import { useCollection } from "../hooks/usePageData";
@@ -18,17 +19,16 @@ const TeamModal = lazy(() => import("../components/TeamModal"));
 const AdminTeamModal = lazy(() => import("../components/AdminTeamModal"));
 
 const TeamCardsSkeleton = ({ count = 6 }) => (
-  <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+  <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
     {Array.from({ length: count }).map((_, index) => (
       <div
         key={`team-skeleton-${index}`}
-        className="section-shell panel-glow relative flex min-h-[31rem] animate-pulse flex-col overflow-hidden"
+        className="section-shell panel-glow relative flex min-h-[31rem] flex-col overflow-hidden"
       >
         <div className="relative h-36 overflow-hidden border-b border-white/8 bg-white/[0.04]">
-          <div className="absolute left-4 top-4 h-5 w-24 rounded-full bg-white/10" />
-          <div className="absolute -left-7 top-7 h-16 w-16 rounded-full border border-white/10" />
-          <div className="absolute right-6 top-5 h-8 w-8 rounded-full border border-white/10" />
-          <div className="absolute right-16 bottom-5 h-14 w-14 rounded-full border border-white/10" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <BrandBounceLoader size="md" label="Loading team profiles" />
+          </div>
         </div>
 
         <div className="absolute left-1/2 top-36 -translate-x-1/2 -translate-y-1/2">
@@ -124,7 +124,7 @@ const TeamPage = () => {
       exit="exit"
       className="space-y-8 pb-24"
     >
-      <section className="relative overflow-hidden rounded-[2.35rem] border border-white/8 bg-surface/75 px-6 py-10 shadow-soft sm:px-8 lg:px-10 lg:py-12">
+      <section className="relative overflow-hidden rounded-[2rem] border border-white/8 bg-surface/75 px-5 py-8 shadow-soft sm:px-8 sm:py-10 lg:rounded-[2.35rem] lg:px-10 lg:py-12">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_18%,rgba(0,212,255,0.16),transparent_24%),radial-gradient(circle_at_82%_12%,rgba(122,92,255,0.16),transparent_24%),radial-gradient(circle_at_50%_100%,rgba(0,255,198,0.08),transparent_22%)] opacity-90" />
         <div className="hero-grid absolute inset-0 opacity-10" />
 
@@ -146,7 +146,7 @@ const TeamPage = () => {
               <button
                 type="button"
                 onClick={() => setEditingMember(teamTemplate)}
-                className="theme-button-primary rounded-full px-5 py-3 text-sm font-semibold"
+                className="theme-button-primary w-full rounded-full px-5 py-3 text-sm font-semibold sm:w-auto"
               >
                 Add team member
               </button>
@@ -159,7 +159,7 @@ const TeamPage = () => {
                 key={option.value}
                 type="button"
                 onClick={() => setActiveFilter(option.value)}
-                className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] transition ${
+                className={`rounded-full border px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] transition sm:text-xs sm:tracking-[0.24em] ${
                   activeFilter === option.value
                     ? "border-accent/28 bg-theme-gradient text-white shadow-glow"
                     : "border-white/10 bg-white/[0.04] text-muted hover:border-accent/20 hover:text-textPrimary"

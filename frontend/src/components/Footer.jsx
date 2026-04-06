@@ -2,18 +2,18 @@ import { Link } from "react-router-dom";
 
 const Footer = () => (
   <footer className="border-t border-white/8 bg-surface/75 backdrop-blur-xl">
-    <div className="mx-auto grid max-w-[1600px] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-10">
+    <div className="mx-auto grid max-w-[1760px] gap-10 px-3 py-10 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-10 2xl:px-12">
       <div className="space-y-4">
         <p className="text-xs uppercase tracking-[0.28em] text-mutedDeep">ShonStudio</p>
-        <h2 className="max-w-xl font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-          Minimal design. Strong execution. Immersive digital products.
+        <h2 className="max-w-xl font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl lg:text-4xl">
+          Playable ideas. Scalable impact.
         </h2>
         <p className="max-w-lg text-sm text-muted">
-          We build game and XR experiences with a product mindset and studio-level craft.
+          Execution defines everything, turning ideas into experiences that hold attention and deliver real impact.
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <div className="space-y-3">
           <p className="text-sm font-semibold text-white">Navigate</p>
           <Link to="/projects" className="theme-link block text-sm text-muted">
@@ -35,7 +35,7 @@ const Footer = () => (
             Team
           </Link>
         </div>
-        <div className="space-y-3">
+        <div className="space-y-3 sm:col-span-2 lg:col-span-1">
           <p className="text-sm font-semibold text-white">Contact</p>
           <a
             href="mailto:hello@shonstudio.dev"

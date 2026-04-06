@@ -7,6 +7,7 @@ import Footer from "./components/Footer";
 import LoadingScreen from "./components/LoadingScreen";
 import Navbar from "./components/Navbar";
 import ScrollProgressBar from "./components/ScrollProgressBar";
+import TabPageLoader from "./components/TabPageLoader";
 import { AdminProvider } from "./context/AdminContext.jsx";
 import useScrollToTop from "./hooks/useScrollToTop";
 import { SmoothScrollProvider } from "./hooks/useSmoothScroll.jsx";
@@ -22,6 +23,7 @@ const lazyWithPreload = (loadComponent) => {
 const CounsellingPage = lazyWithPreload(() => import("./pages/CounsellingPage"));
 const CompanyPage = lazyWithPreload(() => import("./pages/Company"));
 const HomePage = lazyWithPreload(() => import("./pages/HomePage"));
+const LoadersLabPage = lazyWithPreload(() => import("./pages/LoadersLabPage"));
 const NotFoundPage = lazyWithPreload(() => import("./pages/NotFoundPage"));
 const ProjectPage = lazyWithPreload(() => import("./pages/ProjectPage"));
 const ProjectsPage = lazyWithPreload(() => import("./pages/ProjectsPage"));
@@ -41,6 +43,7 @@ const preloadRouteComponents = () => {
       ServicesPage.preload(),
       ServicePage.preload(),
       CounsellingPage.preload(),
+      LoadersLabPage.preload(),
       CompanyPage.preload(),
       TeamPage.preload(),
       TrainingCatalogPage.preload(),
@@ -66,19 +69,11 @@ const preloadRouteComponents = () => {
 };
 
 const RouteFallback = () => (
-  <div className="flex min-h-[50vh] items-center justify-center pb-24">
-    <div className="section-shell panel-glow flex w-full max-w-3xl items-center justify-between gap-6 px-6 py-5 sm:px-8">
-      <div>
-        <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">Loading page</p>
-        <p className="mt-2 text-sm text-muted">
-          Bringing the next section in without dropping the layout.
-        </p>
-      </div>
-      <div className="h-2 w-24 overflow-hidden rounded-full bg-white/[0.06]">
-        <div className="h-full w-14 animate-pulse rounded-full bg-theme-gradient" />
-      </div>
-    </div>
-  </div>
+  <TabPageLoader
+    eyebrow="Loading page"
+    title="Opening the next tab"
+    message="Bringing the next section in without dropping the layout."
+  />
 );
 
 const LegacyServiceRedirect = () => {
@@ -135,18 +130,19 @@ const App = () => {
             <LayoutGroup id="portfolio-layout">
               <div className="relative min-h-screen overflow-x-hidden bg-base text-textPrimary">
                 <div className="pointer-events-none fixed inset-0 -z-10 bg-mesh-radial opacity-80" />
-                <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[38rem] bg-[radial-gradient(circle_at_top,rgb(var(--accent-primary-rgb)_/_0.16),transparent_34%),radial-gradient(circle_at_78%_0%,rgb(var(--accent-secondary-rgb)_/_0.14),transparent_26%)]" />
+                <div className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[24rem] bg-[radial-gradient(circle_at_top,rgb(var(--accent-primary-rgb)_/_0.16),transparent_34%),radial-gradient(circle_at_78%_0%,rgb(var(--accent-secondary-rgb)_/_0.14),transparent_26%)] sm:h-[38rem]" />
                 <AnimatePresence mode="wait">
                   {showInitialLoader ? <LoadingScreen key="initial-loading-screen" /> : null}
                 </AnimatePresence>
                 <ScrollProgressBar />
                 <CustomCursor />
                 <Navbar />
-                <div className="mx-auto min-h-screen max-w-[1600px] px-4 pt-6 sm:px-6 sm:pt-8 lg:px-10 lg:pt-10">
+                <div className="mx-auto min-h-screen max-w-[1760px] px-3 pt-4 sm:px-6 sm:pt-8 lg:px-10 lg:pt-10 2xl:px-12">
                   <Suspense fallback={<RouteFallback />}>
                     <AnimatePresence initial={false} mode="sync">
                       <Routes location={location} key={location.pathname}>
                         <Route path="/" element={<HomePage />} />
+                        <Route path="/dev/loaders" element={<LoadersLabPage />} />
                         <Route path="/projects" element={<ProjectsPage />} />
                         <Route path="/projects/:slug" element={<ProjectPage />} />
                         <Route path="/service" element={<LegacyServiceRedirect />} />

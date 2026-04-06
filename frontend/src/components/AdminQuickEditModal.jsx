@@ -89,6 +89,15 @@ const AdminQuickEditModal = ({
   const [error, setError] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  const modalMaxWidthClass = entityType === "services" || entityType === "courses" ? "max-w-4xl" : "max-w-3xl";
+  const shortDescriptionLabel = entityType === "courses" ? "Module summary" : "Short description";
+  const shortDescriptionHint =
+    entityType === "services"
+      ? "Used as the lead summary in service cards and service header."
+      : entityType === "courses"
+      ? "Used in training cards and module header summary."
+      : null;
+
   useEffect(() => {
     setForm(createInitialForm(initialValue));
   }, [initialValue]);
@@ -138,19 +147,19 @@ const AdminQuickEditModal = ({
   };
 
   return (
-    <Modal open onClose={onClose} maxWidthClass="max-w-3xl" panelClassName="admin-modal-panel">
+    <Modal open onClose={onClose} maxWidthClass={modalMaxWidthClass} panelClassName="admin-modal-panel">
       <div className="flex h-full flex-col overflow-hidden">
-        <div className="flex items-center justify-between border-b border-white/8 px-6 py-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 px-5 py-4 sm:px-6 sm:py-5">
           <div>
-            <h2 className="font-display text-2xl font-semibold text-white">{title}</h2>
+            <h2 className="font-display text-xl font-semibold text-white sm:text-2xl">{title}</h2>
             <p className="mt-1 text-sm text-muted">Quick card edit</p>
           </div>
-          <button type="button" onClick={onClose} className="admin-secondary-button text-xs">
+          <button type="button" onClick={onClose} className="admin-secondary-button w-full text-xs sm:w-auto">
             Close
           </button>
         </div>
 
-        <form id="admin-quick-form" onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-6">
+        <form id="admin-quick-form" onSubmit={handleSubmit} className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
         <div className="grid gap-5 md:grid-cols-2">
           <Field label="Title">
             <input
@@ -170,7 +179,7 @@ const AdminQuickEditModal = ({
           </Field>
 
           <div className="md:col-span-2">
-            <Field label="Short description">
+            <Field label={shortDescriptionLabel} hint={shortDescriptionHint}>
               <textarea
                 value={form.shortDescription}
                 onChange={(event) => updateField("shortDescription", event.target.value)}
@@ -201,7 +210,16 @@ const AdminQuickEditModal = ({
             ) : null}
           </Field>
 
-          <Field label="Carousel image" hint="Used in hero carousel and cinematic panels.">
+          <Field
+            label={entityType === "courses" ? "Top banner image" : "Carousel / banner image"}
+            hint={
+              entityType === "services"
+                ? "Used in the top service banner and spotlight placements."
+                : entityType === "courses"
+                ? "Used in the top training module banner."
+                : "Used in hero carousel and cinematic panels."
+            }
+          >
             <input
               value={form.carouselImage}
               onChange={(event) => updateField("carouselImage", event.target.value)}
@@ -226,20 +244,25 @@ const AdminQuickEditModal = ({
         {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
         </form>
 
-        <div className="flex justify-end gap-3 border-t border-white/8 bg-surface/95 px-6 py-5">
+        <div className="flex flex-col-reverse gap-3 border-t border-white/8 bg-surface/95 px-5 py-4 sm:flex-row sm:justify-end sm:px-6 sm:py-5">
           {onDelete ? (
             <button
               type="button"
               onClick={onDelete}
-              className="admin-danger-button px-5 py-3"
+              className="admin-danger-button w-full px-5 py-3 sm:w-auto"
             >
               Delete
             </button>
           ) : null}
-          <button type="button" onClick={onClose} className="admin-secondary-button px-5 py-3">
+          <button type="button" onClick={onClose} className="admin-secondary-button w-full px-5 py-3 sm:w-auto">
             Cancel
           </button>
-          <button type="submit" form="admin-quick-form" disabled={isSaving} className="admin-save-button disabled:opacity-70">
+          <button
+            type="submit"
+            form="admin-quick-form"
+            disabled={isSaving}
+            className="admin-save-button w-full disabled:opacity-70 sm:w-auto"
+          >
             {isSaving ? "Saving..." : "Save"}
           </button>
         </div>

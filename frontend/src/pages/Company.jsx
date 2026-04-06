@@ -123,9 +123,9 @@ const StaticTimeline = ({ items = [] }) => {
               />
             </div>
 
-            <div className="section-shell panel-glow relative z-10 overflow-hidden px-6 py-6 sm:px-7">
+            <div className="section-shell panel-glow relative z-10 overflow-hidden px-5 py-5 sm:px-7 sm:py-6">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,212,255,0.12),transparent_26%),radial-gradient(circle_at_80%_18%,rgba(122,92,255,0.12),transparent_24%)] opacity-80" />
-              <div className="relative z-10 grid gap-4 sm:grid-cols-[10rem_1fr] sm:items-start">
+              <div className="relative z-10 grid gap-4 md:grid-cols-[10rem_1fr] md:items-start">
                 <div>
                   <p className="text-xs uppercase tracking-[0.32em] text-accentSoft">{item.date}</p>
                 </div>

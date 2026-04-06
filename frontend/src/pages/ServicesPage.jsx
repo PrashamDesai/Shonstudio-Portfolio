@@ -78,7 +78,7 @@ const ServicesPage = () => {
       initial="initial"
       animate="enter"
       exit="exit"
-      className="space-y-10 pb-24"
+      className="space-y-8 pb-24 sm:space-y-10"
     >
       <SectionHeader
         eyebrow="Services"
@@ -89,7 +89,7 @@ const ServicesPage = () => {
             <button
               type="button"
               onClick={() => setEditingService(serviceTemplate)}
-              className="theme-button-primary rounded-full px-5 py-3 text-sm font-semibold"
+              className="theme-button-primary w-full rounded-full px-5 py-3 text-sm font-semibold sm:w-auto"
             >
               Add service
             </button>

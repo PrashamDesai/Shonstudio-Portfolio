@@ -458,6 +458,18 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
     }
   }, [entityType]);
 
+  const modalMaxWidthClass = useMemo(() => {
+    if (entityType === "projects") {
+      return "max-w-5xl";
+    }
+
+    if (entityType === "services" || entityType === "courses") {
+      return "max-w-4xl";
+    }
+
+    return "max-w-3xl";
+  }, [entityType]);
+
   const updateField = (field, value) => {
     setForm((current) => ({
       ...current,
@@ -557,17 +569,17 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
   };
 
   return (
-    <Modal open onClose={onClose} maxWidthClass="max-w-3xl" panelClassName="admin-modal-panel">
+    <Modal open onClose={onClose} maxWidthClass={modalMaxWidthClass} panelClassName="admin-modal-panel">
       <div className="flex h-full flex-col overflow-hidden">
-        <div className="flex items-center justify-between border-b border-white/8 px-6 py-5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 px-5 py-4 sm:px-6 sm:py-5">
           <div>
-            <h2 className="font-display text-2xl font-semibold text-white">{title}</h2>
+            <h2 className="font-display text-xl font-semibold text-white sm:text-2xl">{title}</h2>
             <p className="mt-1 text-sm text-muted">{sectionTitle}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="admin-secondary-button text-xs"
+            className="admin-secondary-button w-full text-xs sm:w-auto"
           >
             Close
           </button>
@@ -577,9 +589,23 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
           id="admin-entity-form"
           ref={formRef}
           onSubmit={handleSubmit}
-          className="min-h-0 flex-1 overflow-y-auto p-6"
+          className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6"
         >
           <div className="grid gap-5 md:grid-cols-2">
+            {entityType === "services" ? (
+              <SectionBlock
+                title="Service Hero and Messaging"
+                hint="Manage the service title, summary, and category data shown at the top of the page."
+              />
+            ) : null}
+
+            {entityType === "courses" ? (
+              <SectionBlock
+                title="Training Module Header"
+                hint="Configure the training title, level, duration, and summary shown in the module header."
+              />
+            ) : null}
+
             {entityType === "projects" ? (
               <SectionBlock
                 title="Project Basics"
@@ -715,7 +741,16 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
             ) : null}
 
             {entityType !== "vision-scenes" && entityType !== "projects" ? (
-              <Field label="Card image" hint="Used in listing cards (16:9 recommended).">
+              <Field
+                label={entityType === "courses" ? "Module card image" : "Card image"}
+                hint={
+                  entityType === "services"
+                    ? "Used in service cards and listing previews (16:9 recommended)."
+                    : entityType === "courses"
+                    ? "Used in training module cards and list previews."
+                    : "Used in listing cards (16:9 recommended)."
+                }
+              >
                 <input
                   value={form.cardImage || ""}
                   onChange={(event) => updateField("cardImage", event.target.value)}
@@ -732,7 +767,16 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
             ) : null}
 
             {entityType !== "vision-scenes" && entityType !== "projects" ? (
-              <Field label="Carousel image" hint="Used in hero carousel and feature panels.">
+              <Field
+                label={entityType === "courses" ? "Top banner image" : "Carousel / banner image"}
+                hint={
+                  entityType === "services"
+                    ? "Used for the top service banner image and spotlight placements."
+                    : entityType === "courses"
+                    ? "Used as the top training module banner image."
+                    : "Used in hero carousel and feature panels."
+                }
+              >
                 <input
                   value={form.carouselImage || ""}
                   onChange={(event) => updateField("carouselImage", event.target.value)}
@@ -763,6 +807,13 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
                 />
                 <ImagePreview src={form.panelImage} alt="Panel image preview" className="h-44" />
               </Field>
+            ) : null}
+
+            {entityType === "services" ? (
+              <SectionBlock
+                title="Service Delivery Details"
+                hint="These fields feed the long-form service details, delivery format, and highlight chips."
+              />
             ) : null}
 
             {entityType === "services" ? (
@@ -1232,6 +1283,13 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
             ) : null}
 
             {entityType === "courses" ? (
+              <SectionBlock
+                title="Training Content Details"
+                hint="Manage curriculum and outcomes shown across training catalog and module detail pages."
+              />
+            ) : null}
+
+            {entityType === "courses" ? (
               <>
                 <div className="md:col-span-2">
                   <Field label="Curriculum" hint="Enter one curriculum point per line.">
@@ -1259,12 +1317,12 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
           {error ? <p className="mt-4 text-sm text-red-300">{error}</p> : null}
         </form>
 
-        <div className="flex justify-end gap-3 border-t border-white/8 bg-surface/95 px-6 py-5">
+        <div className="flex flex-col-reverse gap-3 border-t border-white/8 bg-surface/95 px-5 py-4 sm:flex-row sm:justify-end sm:px-6 sm:py-5">
           {onDelete ? (
             <button
               type="button"
               onClick={onDelete}
-              className="admin-danger-button px-5 py-3"
+              className="admin-danger-button w-full px-5 py-3 sm:w-auto"
             >
               Delete
             </button>
@@ -1272,7 +1330,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
           <button
             type="button"
             onClick={onClose}
-            className="admin-secondary-button px-5 py-3"
+            className="admin-secondary-button w-full px-5 py-3 sm:w-auto"
           >
             Cancel
           </button>
@@ -1280,7 +1338,7 @@ const AdminEntityModal = ({ title, entityType, initialValue, onClose, onSave, on
             type="button"
             onClick={() => formRef.current?.requestSubmit()}
             disabled={isSaving}
-            className="admin-save-button disabled:opacity-70"
+            className="admin-save-button w-full disabled:opacity-70 sm:w-auto"
           >
             {isSaving ? "Saving..." : "Save"}
           </button>

@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { pageTransition } from "../animations/variants";
 import { resolveMedia } from "../assets/mediaMap";
 import AdminEntityModal from "../components/AdminEntityModal";
+import BrandBounceLoader from "../components/BrandBounceLoader";
 import MediaImage from "../components/MediaImage";
 import Reveal from "../components/Reveal";
 import { useAdmin } from "../context/AdminContext.jsx";
@@ -36,37 +37,41 @@ const fallbackCaseStudy = (project) => ({
 const ProjectPageSkeleton = () => (
   <main className="space-y-8 pb-24 sm:space-y-10">
     <section className="section-shell panel-glow overflow-hidden p-6 sm:p-8 lg:p-10">
-        <div className="grid gap-8 lg:grid-cols-[1.18fr_0.82fr] lg:items-start">
-          <div className="space-y-5 animate-pulse">
-            <div className="h-4 w-28 rounded-full bg-white/10" />
-            <div className="space-y-3">
-              <div className="h-12 w-full max-w-3xl rounded-2xl bg-white/10 sm:h-14" />
-              <div className="h-12 w-4/5 max-w-2xl rounded-2xl bg-white/10 sm:h-14" />
-            </div>
+      <div className="grid gap-8 lg:grid-cols-[1.18fr_0.82fr] lg:items-start">
+        <div className="space-y-5">
+          <div className="h-4 w-28 rounded-full bg-white/10" />
+          <div className="space-y-3">
+            <div className="h-12 w-full max-w-3xl rounded-2xl bg-white/10 sm:h-14" />
+            <div className="h-12 w-4/5 max-w-2xl rounded-2xl bg-white/10 sm:h-14" />
+          </div>
           <div className="h-6 w-full max-w-3xl rounded-xl bg-white/10" />
           <div className="h-11 w-36 rounded-full bg-white/10" />
         </div>
 
-        <div className="h-[12rem] max-w-[20rem] animate-pulse rounded-[1.8rem] border border-white/8 bg-white/[0.05] sm:h-[15rem] lg:h-[18rem] lg:w-full lg:max-w-none" />
+        <div className="flex h-[12rem] max-w-[20rem] items-center justify-center rounded-[1.8rem] border border-white/8 bg-white/[0.05] sm:h-[15rem] lg:h-[18rem] lg:w-full lg:max-w-none">
+          <BrandBounceLoader size="lg" label="Loading project" />
+        </div>
       </div>
     </section>
 
     <section className="section-shell panel-glow p-6 sm:p-8">
-      <div className="space-y-5 animate-pulse">
+      <div className="space-y-5">
         <div className="h-4 w-32 rounded-full bg-white/10" />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={`project-screenshot-skeleton-${index}`}
-              className="h-56 rounded-[1.4rem] border border-white/8 bg-white/[0.05]"
-            />
+              className="flex h-56 items-center justify-center rounded-[1.4rem] border border-white/8 bg-white/[0.05]"
+            >
+              <BrandBounceLoader size="md" label="Loading screenshots" />
+            </div>
           ))}
         </div>
       </div>
     </section>
 
     <section className="section-shell panel-glow p-6 sm:p-8 lg:p-10">
-      <div className="space-y-8 animate-pulse">
+      <div className="space-y-8">
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="space-y-4">
             <div className="h-4 w-36 rounded-full bg-white/10" />
@@ -152,8 +157,10 @@ const ProjectScreenshotBand = ({ project, loading = false }) => {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={`loading-project-screenshot-${index}`}
-              className="h-56 animate-pulse rounded-[1.35rem] border border-white/8 bg-white/[0.05]"
-            />
+              className="flex h-56 items-center justify-center rounded-[1.35rem] border border-white/8 bg-white/[0.05]"
+            >
+              <BrandBounceLoader size="md" label="Loading screenshots" />
+            </div>
           ))}
         </div>
       </section>
@@ -419,8 +426,8 @@ const ProjectPage = () => {
   if (error && !project && !notFound) {
     return (
       <main className="py-24">
-        <div className="section-shell mx-auto max-w-3xl p-10 text-center">
-          <h1 className="font-display text-4xl font-semibold text-white">Unable to load project</h1>
+        <div className="section-shell mx-auto max-w-3xl p-6 text-center sm:p-10">
+          <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">Unable to load project</h1>
           <p className="mt-3 text-sm leading-7 text-muted">{error}</p>
           <Link to="/projects" className="theme-link mt-6 inline-flex text-sm" data-cursor="link">
             Return to showcase
@@ -433,8 +440,8 @@ const ProjectPage = () => {
   if (notFound || !project) {
     return (
       <main className="py-24">
-        <div className="section-shell mx-auto max-w-3xl p-10 text-center">
-          <h1 className="font-display text-4xl font-semibold text-white">Project not found</h1>
+        <div className="section-shell mx-auto max-w-3xl p-6 text-center sm:p-10">
+          <h1 className="font-display text-3xl font-semibold text-white sm:text-4xl">Project not found</h1>
           <p className="mt-3 text-sm leading-7 text-muted">
             This project does not exist or is not published yet.
           </p>
@@ -463,11 +470,11 @@ const ProjectPage = () => {
       <section className="section-shell panel-glow overflow-hidden p-6 sm:p-8 lg:p-10">
         <div className="grid gap-8 lg:grid-cols-[1.18fr_0.82fr] lg:items-start">
           <div className="space-y-5">
-            <h1 className="font-display text-4xl font-semibold leading-[0.95] tracking-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl">
+            <h1 className="font-display text-[clamp(2.1rem,9vw,4.7rem)] font-semibold leading-[0.96] tracking-tight text-white xl:text-7xl">
               {project.title}
             </h1>
             {summary ? (
-              <p className="max-w-3xl text-lg leading-8 text-white/85 sm:text-xl sm:leading-9 lg:text-2xl">
+              <p className="max-w-3xl text-base leading-8 text-white/85 sm:text-xl sm:leading-9 lg:text-2xl">
                 {summary}
               </p>
             ) : null}
@@ -476,14 +483,14 @@ const ProjectPage = () => {
               <button
                 type="button"
                 onClick={() => setEditingProject(project)}
-                className="theme-button-primary rounded-full px-5 py-3 text-sm font-semibold"
+                className="theme-button-primary w-full rounded-full px-5 py-3 text-sm font-semibold sm:w-auto"
               >
                 Edit full details
               </button>
             ) : null}
           </div>
 
-          <div className="overflow-hidden rounded-[1.8rem] border border-white/8 bg-black h-[12rem] max-w-[20rem] self-start justify-self-end sm:h-[15rem] lg:h-[18rem] lg:w-full">
+          <div className="h-[11.5rem] w-full overflow-hidden rounded-[1.8rem] border border-white/8 bg-black sm:h-[15rem] lg:h-[18rem] lg:max-w-[20rem] lg:self-start lg:justify-self-end">
             <MediaImage
               src={topShowcaseImage}
               alt={`${project.title} showcase`}
@@ -528,7 +535,7 @@ const ProjectPage = () => {
                   technologies.map((tech) => (
                     <span
                       key={tech}
-                      className="theme-chip rounded-full px-4 py-3 text-base font-medium text-white"
+                      className="theme-chip rounded-full px-4 py-2 text-sm font-medium text-white sm:text-base"
                     >
                       {tech}
                     </span>
@@ -566,24 +573,33 @@ const ProjectPage = () => {
                   2. Key Features &amp; Solutions
                 </h3>
                 <div className="mt-6 overflow-hidden rounded-[1.25rem] border border-white/8">
-                  <div className="grid grid-cols-1 border-b border-white/8 bg-white/[0.03] sm:grid-cols-2">
-                    <div className="px-5 py-4 text-sm font-semibold uppercase tracking-[0.2em] text-accentSoft/80">
+                  <div className="border-b border-white/8 bg-elevated/85 px-4 py-3 text-sm font-semibold tracking-[0.03em] text-textPrimary sm:hidden">
+                    Feature and Strategic Implementation
+                  </div>
+                  <div className="hidden border-b border-white/8 bg-elevated/85 sm:grid sm:grid-cols-2">
+                    <div className="px-5 py-4 text-sm font-semibold tracking-[0.03em] text-textPrimary">
                       Feature
                     </div>
-                    <div className="border-t border-white/8 px-5 py-4 text-sm font-semibold uppercase tracking-[0.2em] text-accentSoft/80 sm:border-l sm:border-t-0">
-                      Strategic implementation
+                    <div className="border-l border-white/8 px-5 py-4 text-sm font-semibold tracking-[0.03em] text-textPrimary">
+                      Strategic Implementation
                     </div>
                   </div>
 
                   {caseStudy.solutions.map((item, index) => (
                     <div
                       key={`${index}-${item.title}`}
-                      className="grid grid-cols-1 border-b border-white/8 last:border-b-0 sm:grid-cols-2"
+                      className="grid grid-cols-1 border-b border-white/8 bg-surface/55 last:border-b-0 sm:grid-cols-2"
                     >
-                      <div className="px-5 py-5 text-lg font-medium text-white/90">
+                      <div className="px-4 py-4 text-base font-semibold text-textPrimary sm:px-5 sm:py-5 sm:text-lg">
+                        <p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-accentSoft/80 sm:hidden">
+                          Feature
+                        </p>
                         {item.title}
                       </div>
-                      <div className="border-t border-white/8 px-5 py-5 text-base leading-8 text-muted sm:border-l sm:border-t-0">
+                      <div className="border-t border-white/8 px-4 py-4 text-sm leading-7 text-muted sm:border-l sm:border-t-0 sm:px-5 sm:py-5 sm:text-base sm:leading-8">
+                        <p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-accentSoft/80 sm:hidden">
+                          Strategic Implementation
+                        </p>
                         {item.summary}
                       </div>
                     </div>

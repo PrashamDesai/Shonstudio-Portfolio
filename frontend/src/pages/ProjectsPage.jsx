@@ -110,7 +110,6 @@ const ProjectsPage = () => {
               key={project.slug || project._id || index}
               delay={Math.min(index, 5) * 0.04}
               amount={0.08}
-              immediate={index < 6}
             >
               <ProjectCard
                 project={project}

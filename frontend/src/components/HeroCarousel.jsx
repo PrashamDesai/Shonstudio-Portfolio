@@ -102,7 +102,7 @@ const HeroCarousel = ({ categories = [] }) => {
 
   return (
     <div
-      className="section-shell panel-glow relative h-full min-h-[16rem] overflow-hidden rounded-[1.95rem] border border-white/10 bg-white/[0.03]"
+      className="section-shell panel-glow relative h-full min-h-[14.5rem] overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.03] max-[480px]:min-h-[14rem] sm:min-h-[16rem] sm:rounded-[1.95rem]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -136,25 +136,24 @@ const HeroCarousel = ({ categories = [] }) => {
         />
       </AnimatePresence>
 
-      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/82 via-black/34 to-black/8" />
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-24 bg-gradient-to-b from-black/35 to-transparent" />
-
       <AnimatePresence mode="wait">
         <motion.div
           key={`${cardKey}-text`}
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-30 bg-black/50 backdrop-blur-md p-5 sm:p-6"
+          className="theme-image-caption pointer-events-none absolute -inset-x-px -bottom-px z-30 min-h-[5.6rem] overflow-hidden p-3 backdrop-blur-md max-[480px]:min-h-[5.2rem] sm:min-h-[7rem] sm:overflow-visible sm:p-6"
           initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: -20 }}
           transition={{ duration: prefersReducedMotion ? 0.2 : 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
-          <p className="text-[11px] uppercase tracking-[0.30em] text-white/78">{activeCategory.label}</p>
-          <h3 className="mt-2 font-display text-2xl font-semibold leading-tight text-white sm:text-3xl">
-            {activeItem.title}
-          </h3>
-          <p className="mt-2 max-w-[100ch] text-sm leading-6 text-white/82 sm:text-[0.95rem]">
-            {activeItem.shortDescription}
-          </p>
+          <div className="flex h-full flex-col justify-end">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-white/78 sm:text-[11px] sm:tracking-[0.30em]">{activeCategory.label}</p>
+            <h3 className="mt-1 truncate font-display text-base font-semibold leading-tight text-white sm:mt-2 sm:whitespace-normal sm:text-3xl">
+              {activeItem.title}
+            </h3>
+            <p className="mt-2 hidden max-w-[100ch] text-[13px] leading-6 text-white/82 sm:block sm:text-[0.95rem]">
+              {activeItem.shortDescription}
+            </p>
+          </div>
         </motion.div>
       </AnimatePresence>
 

@@ -23,14 +23,14 @@ const PinnedStorySequence = ({
 
   return (
     <section className={`relative ${className}`}>
-      <div className="section-shell panel-glow relative overflow-hidden px-6 py-10 sm:px-8 lg:px-12 lg:py-14">
+      <div className="section-shell panel-glow relative overflow-hidden px-5 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-14">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.14),transparent_35%),radial-gradient(circle_at_80%_20%,rgba(139,92,246,0.12),transparent_32%)]" />
 
         <div className="relative z-10 grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
           <div className="space-y-8">
             <p className="eyebrow">{eyebrow}</p>
 
-            <div className="min-h-[20rem]">
+            <div className="min-h-[16.5rem] sm:min-h-[20rem]">
               <AnimatePresence mode="wait">
                 <motion.article
                   key={activeScene.title}
@@ -51,7 +51,7 @@ const PinnedStorySequence = ({
                   <p className="text-xs uppercase tracking-[0.34em] text-accentSoft/80">
                     {activeScene.kicker || `Scene ${String(activeIndex + 1).padStart(2, "0")}`}
                   </p>
-                  <h2 className="mt-5 font-display text-4xl font-semibold leading-[0.96] tracking-tight text-white sm:text-5xl xl:text-[4rem]">
+                  <h2 className="mt-5 font-display text-[clamp(1.9rem,7vw,4rem)] font-semibold leading-[0.96] tracking-tight text-white sm:text-5xl xl:text-[4rem]">
                     {activeScene.title}
                   </h2>
                   <p className="mt-6 text-sm leading-7 text-muted sm:text-base">

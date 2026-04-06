@@ -104,12 +104,12 @@ const ToolsPage = () => {
               >
                 <Link
                   to={`/tools/category/${category.slug}`}
-                  className="flex flex-col sm:flex-row h-full sm:h-80"
+                  className="flex h-full flex-col sm:h-80 sm:flex-row"
                   data-cursor="link"
                   data-cursor-label="Open"
                   aria-label={`Open ${category.title}`}
                 >
-                  <div className="overflow-hidden border-b border-white/8 sm:w-1/3 sm:border-b-0 sm:border-r">
+                  <div className="h-52 overflow-hidden border-b border-white/8 sm:h-auto sm:w-1/3 sm:border-b-0 sm:border-r">
                     <img
                       src={resolveMedia(category.featuredImage)}
                       alt={category.title}
@@ -118,14 +118,14 @@ const ToolsPage = () => {
                     />
                   </div>
 
-                  <div className="p-6 sm:w-2/3 flex flex-col justify-center gap-4">
-                    <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col justify-center gap-4 p-5 sm:w-2/3 sm:p-6">
+                    <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
                       <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">Category</p>
                       <span className="theme-chip rounded-full px-3 py-1 text-xs">
                         {category.count} items
                       </span>
                     </div>
-                    <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
+                    <h3 className="font-display text-xl font-semibold tracking-tight text-white sm:text-2xl">
                       {category.title}
                     </h3>
                     <p className="text-sm leading-7 text-muted">{category.description}</p>

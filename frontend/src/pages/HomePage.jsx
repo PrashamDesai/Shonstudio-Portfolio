@@ -15,6 +15,7 @@ import AdminEntityActions from "../components/AdminEntityActions";
 import AdminEntityModal from "../components/AdminEntityModal";
 import AdminQuickEditModal from "../components/AdminQuickEditModal";
 import { PageDataEmpty } from "../components/ApiState";
+import BrandBounceLoader from "../components/BrandBounceLoader";
 import MediaImage from "../components/MediaImage";
 import WhatWeDoModal from "../components/WhatWeDoModal";
 import HeroCarousel from "../components/HeroCarousel";
@@ -236,10 +237,10 @@ const HomePage = () => {
       initial="initial"
       animate="enter"
       exit="exit"
-      className="space-y-8 pb-24"
+      className="space-y-6 pb-24 sm:space-y-8"
     >
       <section
-        className="relative min-h-[36rem] overflow-hidden rounded-[2.35rem] border border-white/10 bg-surface/75 px-6 py-12 shadow-soft sm:px-10 sm:py-14 lg:min-h-[42rem] lg:px-16 lg:py-16"
+        className="relative min-h-[30rem] overflow-hidden rounded-[2rem] border border-white/10 bg-surface/75 px-5 py-8 shadow-soft max-[480px]:min-h-[26rem] max-[480px]:rounded-[1.45rem] max-[480px]:px-4 max-[480px]:py-6 sm:min-h-[36rem] sm:px-10 sm:py-14 xl:min-h-[42rem] xl:rounded-[2.35rem] xl:px-16 xl:py-16"
         onMouseMove={handleHeroMove}
         onMouseLeave={resetHeroMove}
       >
@@ -256,32 +257,37 @@ const HomePage = () => {
           transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
         />
 
+        <p className="eyebrow pointer-events-none absolute left-4 top-4 z-20 max-[480px]:left-3 max-[480px]:top-3 sm:left-8 sm:top-8 lg:left-10 lg:top-10">
+          ShonStudio
+        </p>
+
         <motion.div
           style={{ y: heroContentY }}
-          className="relative z-10 grid h-full items-stretch gap-8 lg:min-h-[34rem] lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-10"
+          className="relative z-10 grid h-full items-stretch gap-6 pt-12 max-[480px]:gap-5 max-[480px]:pt-16 sm:pt-14 xl:min-h-[34rem] xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] xl:gap-10 xl:pt-0"
         >
-          <div className="flex h-full flex-col justify-center gap-8 lg:pr-2">
-            <p className="eyebrow">ShonStudio</p>
-            <h1 className="font-display text-5xl font-semibold leading-[0.92] tracking-tight text-white sm:text-6xl lg:text-[5.2rem]">
-              Crafting Worlds Beyond Screens
+          <div className="flex h-full min-w-0 flex-col justify-center gap-6 max-[480px]:gap-5 sm:gap-8 xl:max-w-[34rem] xl:pr-2">
+            <h1 className="text-balance font-display text-[clamp(2.15rem,8.4vw,4.8rem)] font-semibold leading-[0.95] tracking-tight text-white max-[480px]:text-[clamp(2rem,11vw,2.55rem)]">
+              Where ideas become experiences.
             </h1>
-            <p className="max-w-2xl text-base text-muted sm:text-lg">
-              Game development, XR products, and immersive systems for ambitious teams.
+            <p className="mt-2 max-w-2xl text-base text-muted max-[480px]:mt-1.5 max-[480px]:text-[0.95rem] sm:mt-3 sm:text-lg">
+              Execution defines everything, turning ideas into experiences that hold attention and deliver real impact.
             </p>
-            <div className="pt-4 sm:pt-6 lg:pt-12">
+            <div className="pt-2 max-[480px]:pt-1 sm:pt-6 xl:pt-12">
               <MagneticButton
                 to="/projects"
                 cursorLabel="View"
-                className="theme-button-primary inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-semibold uppercase tracking-[0.2em]"
+                className="theme-button-primary inline-flex w-full items-center justify-center rounded-full px-7 py-3 text-sm font-semibold uppercase tracking-[0.2em] sm:w-auto"
               >
                 View Projects
               </MagneticButton>
             </div>
           </div>
 
-          <div className="relative h-[21rem] min-h-[20rem] sm:h-[24rem] lg:h-full lg:min-h-[34rem]">
+          <div className="relative h-[18rem] min-h-[16rem] min-w-0 max-[480px]:h-[16rem] max-[480px]:min-h-[14rem] sm:h-[24rem] xl:h-full xl:min-h-[34rem]">
             {isLoadingHeroContent ? (
-              <div className="section-shell panel-glow h-full animate-pulse rounded-[1.95rem] border border-white/10 bg-white/[0.03]" />
+              <div className="section-shell panel-glow flex h-full items-center justify-center rounded-[1.95rem] border border-white/10 bg-white/[0.03]">
+                <BrandBounceLoader size="lg" label="Loading hero content" showLabel />
+              </div>
             ) : heroCarouselCategories.length ? (
               <HeroCarousel categories={heroCarouselCategories} />
             ) : (
@@ -308,13 +314,13 @@ const HomePage = () => {
         </div>
       ) : null}
 
-      <section className="section-shell panel-glow relative overflow-hidden rounded-[2rem] border border-white/10 bg-surface/70 px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
+      <section className="section-shell panel-glow relative overflow-hidden rounded-[2rem] border border-white/10 bg-surface/70 px-6 py-8 max-[480px]:px-4 max-[480px]:py-6 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_10%_10%,rgba(0,212,255,0.12),transparent_26%),radial-gradient(circle_at_84%_16%,rgba(122,92,255,0.12),transparent_24%)]" />
         <div className="relative z-10 space-y-6">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="eyebrow">What We Do</p>
-              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white max-[480px]:text-[1.75rem] sm:text-4xl">
                 Focused capabilities for real outcomes.
               </h2>
             </div>
@@ -322,7 +328,7 @@ const HomePage = () => {
               <button
                 type="button"
                 onClick={() => setWhatWeDoModal({})}
-                className="theme-button-secondary rounded-full px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em]"
+                className="theme-button-secondary w-full rounded-full px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] sm:w-auto"
               >
                 Add Capability
               </button>
@@ -330,25 +336,13 @@ const HomePage = () => {
           </div>
 
           {isServicesLoading ? (
-            /* Skeleton mirrors the actual service card grid exactly */
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="animate-pulse rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-xl"
+                  className="flex min-h-[14.5rem] items-center justify-center rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-5 backdrop-blur-xl"
                 >
-                  {/* Category eyebrow */}
-                  <div className="h-3 w-20 rounded-full bg-white/10" />
-                  {/* Title */}
-                  <div className="mt-3 space-y-2">
-                    <div className="h-6 w-3/4 rounded-lg bg-white/10" />
-                    <div className="h-6 w-1/2 rounded-lg bg-white/10" />
-                  </div>
-                  {/* Highlight pills */}
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <div className="h-6 w-20 rounded-full bg-white/10" />
-                    <div className="h-6 w-16 rounded-full bg-white/10" />
-                  </div>
+                  <BrandBounceLoader size="md" label="Loading services" />
                 </div>
               ))}
             </div>
@@ -381,7 +375,7 @@ const HomePage = () => {
                     <p className="text-xs uppercase tracking-[0.24em] text-accentSoft/80">
                       {service.category || "Capability"}
                     </p>
-                    <h3 className="mt-3 font-display text-2xl font-semibold leading-tight tracking-tight text-white">
+                    <h3 className="mt-3 break-words font-display text-2xl font-semibold leading-tight tracking-tight text-white">
                       {service.title || "Untitled service"}
                     </h3>
                     <div className="mt-4 flex flex-wrap gap-2">
@@ -404,13 +398,13 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="section-shell panel-glow relative overflow-hidden rounded-[2rem] border border-white/10 bg-surface/70 px-6 py-8 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
+      <section className="section-shell panel-glow relative overflow-hidden rounded-[2rem] border border-white/10 bg-surface/70 px-6 py-8 max-[480px]:px-4 max-[480px]:py-6 sm:px-8 sm:py-10 lg:px-10 lg:py-12">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_10%,rgba(0,212,255,0.10),transparent_24%),radial-gradient(circle_at_84%_22%,rgba(122,92,255,0.12),transparent_24%)]" />
         <div className="relative z-10 space-y-7">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="eyebrow">Featured Projects</p>
-              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              <h2 className="mt-4 font-display text-3xl font-semibold tracking-tight text-white max-[480px]:text-[1.75rem] sm:text-4xl">
                 Visual-first projects, built to launch.
               </h2>
             </div>
@@ -423,7 +417,7 @@ const HomePage = () => {
                     entityType: "projects",
                   })
                 }
-                className="theme-button-secondary rounded-full px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em]"
+                className="theme-button-secondary w-full rounded-full px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] sm:w-auto"
               >
                 Add Project
               </button>
@@ -435,16 +429,13 @@ const HomePage = () => {
               {Array.from({ length: 3 }).map((_, i) => (
                 <div
                   key={i}
-                  className="animate-pulse overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.04] backdrop-blur-xl"
+                  className="overflow-hidden rounded-[1.6rem] border border-white/10 bg-white/[0.04] backdrop-blur-xl"
                 >
-                  {/* Image area */}
-                  <div className="aspect-video w-full bg-white/10" />
-                  {/* Text area */}
-                  <div className="space-y-3 px-5 py-5">
-                    <div className="h-3 w-16 rounded-full bg-white/10" />
-                    <div className="h-6 w-3/4 rounded-lg bg-white/10" />
-                    <div className="h-4 w-full rounded-lg bg-white/10" />
-                    <div className="h-4 w-2/3 rounded-lg bg-white/10" />
+                  <div className="flex aspect-video items-center justify-center border-b border-white/10">
+                    <BrandBounceLoader size="md" label="Loading projects" />
+                  </div>
+                  <div className="px-5 py-5">
+                    <span className="text-[10px] uppercase tracking-[0.22em] text-mutedDeep">Loading project</span>
                   </div>
                 </div>
               ))}
@@ -486,11 +477,11 @@ const HomePage = () => {
                         fetchPriority={index === 0 ? "high" : "low"}
                         transitionDurationMs={240}
                         sizes="(min-width: 1024px) 33vw, 100vw"
-                        wrapperClassName="aspect-video w-full bg-black/20"
+                        wrapperClassName="theme-media-frame aspect-video w-full"
                         imgClassName="h-full w-full object-cover group-hover:scale-[1.07] group-hover:-translate-y-1"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-base/70 via-transparent to-transparent opacity-70" />
-                      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-full border-t border-white/10 bg-black/72 px-4 py-3 transition duration-300 group-hover:translate-y-0">
+                      <div className="theme-image-scrim absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100 group-focus-within:opacity-100 group-active:opacity-100" />
+                      <div className="theme-image-hover-ribbon pointer-events-none absolute inset-x-0 bottom-0 z-10 translate-y-full px-4 py-3 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 group-active:translate-y-0 group-active:opacity-100">
                         <p className="text-center text-[11px] font-semibold uppercase tracking-[0.28em] text-white/85">
                           View Case Study
                         </p>
@@ -500,7 +491,7 @@ const HomePage = () => {
                       <p className="text-[11px] uppercase tracking-[0.3em] text-accentSoft/80">
                         Featured
                       </p>
-                      <h3 className="font-display text-2xl font-semibold tracking-tight text-white">
+                      <h3 className="break-words font-display text-2xl font-semibold tracking-tight text-white">
                         {project.title}
                       </h3>
                       <p className="text-sm leading-7 text-muted">
@@ -517,20 +508,20 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="section-shell panel-glow relative overflow-hidden rounded-[2rem] border border-white/10 bg-surface/72 px-6 py-12 text-center sm:px-8 lg:px-12 lg:py-16">
+      <section className="section-shell panel-glow relative overflow-hidden rounded-[2rem] border border-white/10 bg-surface/72 px-5 py-10 text-center max-[480px]:px-4 max-[480px]:py-8 sm:px-8 sm:py-12 lg:px-12 lg:py-16">
         <motion.div
           className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,212,255,0.14),transparent_34%),radial-gradient(circle_at_72%_18%,rgba(122,92,255,0.14),transparent_30%)]"
           style={{ y: ctaGlowY }}
         />
         <div className="relative z-10 mx-auto max-w-3xl space-y-6">
-          <h2 className="font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+          <h2 className="font-display text-3xl font-semibold tracking-tight text-white max-[480px]:text-[1.8rem] sm:text-4xl lg:text-5xl">
             Let&apos;s build your next digital flagship.
           </h2>
           <div>
             <MagneticButton
               to="/counselling"
               cursorLabel="Open"
-              className="theme-button-primary inline-flex items-center justify-center rounded-full px-8 py-3 text-sm font-semibold uppercase tracking-[0.2em]"
+              className="theme-button-primary inline-flex w-full items-center justify-center rounded-full px-8 py-3 text-sm font-semibold uppercase tracking-[0.2em] sm:w-auto"
             >
               Get in Touch
             </MagneticButton>

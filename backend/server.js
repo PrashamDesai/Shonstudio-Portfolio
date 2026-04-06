@@ -169,6 +169,46 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", service: "shonstudio-api" });
 });
 
+app.get("/api/dev/loaders", (req, res) => {
+  if (process.env.NODE_ENV === "production") {
+    res.status(404).json({ message: "Not found" });
+    return;
+  }
+
+  res.json({
+    status: "ok",
+    temporary: true,
+    environment: process.env.NODE_ENV || "development",
+    generatedAt: new Date().toISOString(),
+    loaders: [
+      {
+        id: "initial-loading-screen",
+        name: "LoadingScreen",
+        type: "full-screen",
+        demoMode: "embedded-loop",
+      },
+      {
+        id: "tab-page-loader",
+        name: "TabPageLoader",
+        type: "page",
+        demoMode: "always-running",
+      },
+      {
+        id: "brand-bounce-loader",
+        name: "BrandBounceLoader",
+        type: "component",
+        demoMode: "always-running",
+      },
+      {
+        id: "media-image-loader",
+        name: "MediaImage (skeleton)",
+        type: "component-image",
+        demoMode: "forced-loading",
+      },
+    ],
+  });
+});
+
 app.use("/api/shonstudio-admin-secured", adminRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/services", serviceRoutes);

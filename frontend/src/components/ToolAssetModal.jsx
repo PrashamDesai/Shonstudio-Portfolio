@@ -14,13 +14,13 @@ const ToolAssetModal = ({ tool, onClose }) => {
     <Modal open={Boolean(tool)} onClose={onClose} maxWidthClass="max-w-5xl" panelClassName="admin-modal-panel">
       {tool ? (
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex items-center justify-between border-b border-white/8 px-6 py-5 sm:px-8">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/8 px-5 py-5 sm:flex-nowrap sm:px-8">
             <div className="space-y-2">
               <p className="text-xs uppercase tracking-[0.28em] text-accentSoft">{tool.category || "Tool"}</p>
               <h2 className="font-display text-2xl font-semibold text-white sm:text-3xl">{tool.title}</h2>
               <p className="text-sm text-mutedDeep">{tool.publisher || "ShonStudio"}</p>
             </div>
-            <button type="button" onClick={onClose} className="admin-secondary-button text-xs">
+            <button type="button" onClick={onClose} className="admin-secondary-button w-full text-xs sm:w-auto">
               Close
             </button>
           </div>
@@ -113,16 +113,16 @@ const ToolAssetModal = ({ tool, onClose }) => {
           </div>
 
           <div className="border-t border-white/8 px-6 py-5 sm:px-8">
-            <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex flex-col items-stretch justify-between gap-4 sm:flex-row sm:items-center">
               <div className="rounded-[1rem] border border-white/20 bg-black/45 px-5 py-3 shadow-[0_12px_35px_rgba(0,0,0,0.5)]">
                 <p className="text-[0.62rem] uppercase tracking-[0.28em] text-white/70">Price</p>
-                <p className="mt-1 text-4xl font-black leading-none text-white sm:text-5xl">
+                <p className="mt-1 text-3xl font-black leading-none text-white sm:text-5xl">
                   {tool.price || "FREE"}
                 </p>
               </div>
               <a
                 href={tool.ctaUrl || "#"}
-                className="theme-button-primary inline-flex items-center justify-center rounded-full px-8 py-4 text-base font-semibold"
+                className="theme-button-primary inline-flex w-full items-center justify-center rounded-full px-8 py-4 text-base font-semibold sm:w-auto"
                 target={tool.ctaUrl && tool.ctaUrl.startsWith("http") ? "_blank" : undefined}
                 rel={tool.ctaUrl && tool.ctaUrl.startsWith("http") ? "noreferrer" : undefined}
               >

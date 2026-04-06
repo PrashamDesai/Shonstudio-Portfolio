@@ -26,13 +26,13 @@ const TeamSection = ({
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-muted sm:text-base">{description}</p>
           </div>
-          <div className="theme-chip rounded-full px-4 py-2 text-xs uppercase tracking-[0.28em] text-mutedDeep">
+          <div className="theme-chip w-fit rounded-full px-4 py-2 text-xs uppercase tracking-[0.28em] text-mutedDeep">
             {members.length} members
           </div>
         </div>
       </Reveal>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {members.map((member, index) => (
           <Reveal key={member._id || member.name} delay={index * 0.05} className="h-full">
             <TeamCard

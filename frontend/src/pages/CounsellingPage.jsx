@@ -38,7 +38,7 @@ const CounsellingPage = () => (
     initial="initial"
     animate="enter"
     exit="exit"
-    className="space-y-12 pb-24"
+    className="space-y-10 pb-24 sm:space-y-12"
   >
     <SectionHeader
       eyebrow="Client counselling"
@@ -49,12 +49,12 @@ const CounsellingPage = () => (
     <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
       {counsellingSteps.map((item, index) => (
         <Reveal key={item.step} delay={index * 0.06}>
-          <article className="section-shell panel-glow h-full p-6 sm:p-8">
-            <p className="text-xs uppercase tracking-[0.32em] text-accentSoft">{item.step}</p>
-            <h3 className="mt-5 font-display text-3xl font-semibold tracking-tight text-white">
+          <article className="section-shell panel-glow h-full p-5 sm:p-8">
+            <p className="counselling-step-number text-sm uppercase tracking-[0.32em] sm:text-base">{item.step}</p>
+            <h3 className="mt-5 font-display text-3xl font-semibold tracking-tight text-white sm:text-4xl">
               {item.title}
             </h3>
-            <p className="mt-3 text-sm leading-7 text-muted">{item.description}</p>
+            <p className="mt-3 text-base leading-8 text-muted sm:text-lg">{item.description}</p>
           </article>
         </Reveal>
       ))}
@@ -64,7 +64,7 @@ const CounsellingPage = () => (
       <Reveal>
         <div className="section-shell panel-glow h-full p-6 sm:p-8">
           <p className="eyebrow">How it helps</p>
-          <div className="mt-6 space-y-5 text-sm leading-7 text-muted">
+          <div className="mt-6 space-y-5 text-base leading-8 text-muted sm:text-lg">
             <p>
               Counselling is built for teams that need a sharper direction before committing major
               production budget.

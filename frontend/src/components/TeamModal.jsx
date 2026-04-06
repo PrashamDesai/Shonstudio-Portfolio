@@ -60,11 +60,11 @@ const TeamModal = ({ member, onClose, isAdmin = false }) => {
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="flex h-full flex-col overflow-hidden"
           >
-            <div className="relative overflow-hidden border-b border-white/8 px-6 py-6 sm:px-8">
+            <div className="relative overflow-hidden border-b border-white/8 px-5 py-5 sm:px-8 sm:py-6">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(0,212,255,0.16),transparent_28%),radial-gradient(circle_at_80%_18%,rgba(122,92,255,0.14),transparent_24%),linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01))]" />
               <div className="relative z-10 flex flex-wrap items-start justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-4">
-                  <div className="h-20 w-20 overflow-hidden rounded-full border-2 border-white/16 bg-white/[0.04] shadow-soft">
+                  <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-white/16 bg-white/[0.04] shadow-soft sm:h-20 sm:w-20">
                     <img
                       src={resolveMedia(profile.profileImage)}
                       alt={profile.name}
@@ -75,7 +75,7 @@ const TeamModal = ({ member, onClose, isAdmin = false }) => {
                     <p className="text-xs uppercase tracking-[0.32em] text-accentSoft">
                       {profile.categoryLabel} team
                     </p>
-                    <h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-white">
+                    <h2 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                       {profile.name}
                     </h2>
                     <p className="mt-2 text-sm uppercase tracking-[0.24em] text-mutedDeep">
@@ -87,20 +87,20 @@ const TeamModal = ({ member, onClose, isAdmin = false }) => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
                   {isAdmin ? (
                     <button
                       type="button"
                       onClick={handleDownloadResume}
                       disabled={isDownloadingResume}
-                      className="theme-button-primary inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em]"
+                      className="theme-button-primary inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.14em] sm:w-auto sm:text-xs sm:tracking-[0.18em]"
                     >
                       <FiDownload className="text-sm" />
                       {isDownloadingResume ? "Preparing PDF" : "Download Resume PDF"}
                     </button>
                   ) : null}
 
-                  <button type="button" onClick={onClose} className="admin-secondary-button text-xs">
+                  <button type="button" onClick={onClose} className="admin-secondary-button w-full text-xs sm:w-auto">
                     Close
                   </button>
                 </div>
@@ -120,7 +120,7 @@ const TeamModal = ({ member, onClose, isAdmin = false }) => {
                     <img
                       src={resolveMedia(profile.profileImage)}
                       alt={profile.name}
-                      className="h-[20rem] w-full rounded-[1.4rem] border border-white/10 object-cover sm:h-[24rem]"
+                      className="h-[14rem] w-full rounded-[1.4rem] border border-white/10 object-cover sm:h-[24rem]"
                     />
                   </div>
 

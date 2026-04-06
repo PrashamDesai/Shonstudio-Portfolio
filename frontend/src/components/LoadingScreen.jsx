@@ -3,12 +3,20 @@ import { useEffect, useState } from "react";
 
 import brandMark from "../assets/brand-mark.svg";
 
-const LoadingScreen = () => {
-  const [progress, setProgress] = useState(8);
+const LoadingScreen = ({ loopProgress = false, embedded = false, className = "" }) => {
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
       setProgress((current) => {
+        if (loopProgress) {
+          if (current >= 100) {
+            return 0;
+          }
+
+          return Math.min(current + Math.floor(Math.random() * 18) + 6, 100);
+        }
+
         if (current >= 100) {
           window.clearInterval(interval);
           return 100;
@@ -19,11 +27,15 @@ const LoadingScreen = () => {
     }, 120);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [loopProgress]);
+
+  const shellClassName = embedded
+    ? "relative inset-auto z-[1] min-h-[28rem] overflow-hidden rounded-[2rem] border border-white/10 bg-base"
+    : "fixed inset-0 z-[120] flex items-center justify-center bg-base";
 
   return (
     <motion.div
-      className="fixed inset-0 z-[120] flex items-center justify-center bg-base"
+      className={`${shellClassName} ${className}`}
       initial={{ opacity: 1 }}
       exit={{ opacity: 0, transition: { duration: 0.5, ease: [0.65, 0, 0.35, 1] } }}
     >
@@ -62,7 +74,7 @@ const LoadingScreen = () => {
                 />
               </motion.div>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-white sm:text-4xl">
-                Designing and developing next-gen game experiences.
+                Designing and developing <br /> next-gen game experiences.
               </h2>
             </div>
           </div>
@@ -91,12 +103,16 @@ const LoadingScreen = () => {
                 transition={{ ease: "easeOut", duration: 0.3 }}
               />
             </div>
+
+            <span className="block whitespace-nowrap text-center text-xs uppercase tracking-[0.28em] text-muted">
+              {progress}%
+            </span>
           </div>
 
-          <div className="grid gap-4 text-xs uppercase tracking-[0.3em] text-mutedDeep sm:grid-cols-3">
-            <span>Initializing</span>
-            <span className="text-center text-muted">{progress}%</span>
-            <span className="text-right">Entering World</span>
+          <div className="flex justify-center text-mutedDeep sm:pt-1">
+            <span className="whitespace-nowrap text-center text-[1.08rem] font-semibold tracking-[0.06em] text-white sm:text-[1.18rem]">
+              Entering Studio
+            </span>
           </div>
         </motion.div>
       </div>
